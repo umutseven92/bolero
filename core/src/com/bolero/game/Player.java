@@ -3,14 +3,16 @@ package com.bolero.game;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.*;
+import com.badlogic.gdx.utils.Disposable;
 
-public class Player {
+public class Player implements Disposable {
 
+    private final float MAX_VELOCITY = 5;
+    private final float SPEED = 0.5f;
     private final float width;
     private final float height;
-    private final float speed;
 
     private Vector2 position;
 
@@ -18,87 +20,121 @@ public class Player {
         return position;
     }
 
-    public void setPosition(Vector2 position) {
+    public void respawn(Vector2 position) {
         this.position = position;
+        this.body.setLinearVelocity(0, 0);
+        this.body.setTransform(position, this.body.getAngle());
         this.sprite.setPosition(position.x, position.y);
-        this.collisionRectangle.setPosition(position);
     }
 
-    public void setPositionX(float x) {
-        this.position.x = x;
-    }
-
-    public void setPositionY(float y) {
-        this.position.y = y;
+    public void setPosition() {
+        this.position = this.body.getPosition();
+        this.sprite.setPosition(this.position.x - this.width / 2, this.position.y - this.height / 2);
     }
 
     private final Sprite sprite;
+    private CircleShape circle;
 
-    public Rectangle collisionRectangle;
+    public Body body;
 
-    public float getWidth() {
-        return width;
-    }
-
-    public float getHeight() {
-        return height;
-    }
-
-
-    public Player(float width, float height, Vector2 position, float speed, Texture texture) {
+    public Player(float width, float height, Vector2 position, Texture texture, World box2DWorld) {
         this.width = width;
         this.height = height;
         this.position = position;
-        this.speed = speed;
 
         this.sprite = new Sprite(texture);
         sprite.setSize(width, height);
-        collisionRectangle = new Rectangle(position.x, position.y, width, height);
-        setSpritePos();
+        body = createPlayerBody(box2DWorld);
     }
 
-    public void moveLeft(float deltaTime) {
-        if (!sprite.isFlipX()) {
-            sprite.flip(true, false);
-        }
+    private Body createPlayerBody(World world) {
+        BodyDef bodyDef = new BodyDef();
+        bodyDef.type = BodyDef.BodyType.DynamicBody;
+        bodyDef.position.set(position.x + width / 2, position.y + height / 2);
 
-        this.position.x -= deltaTime * this.speed;
-        setPositions();
+        Body body = world.createBody(bodyDef);
+
+        circle = new CircleShape();
+        circle.setRadius(1);
+
+        FixtureDef fixtureDef = new FixtureDef();
+        fixtureDef.shape = circle;
+        fixtureDef.density = 0.5f;
+        fixtureDef.friction = 0.81f;
+        fixtureDef.restitution = 0.3f;
+
+        body.createFixture(fixtureDef);
+
+        return body;
     }
 
-    public void moveRight(float deltaTime) {
+    public void applyRightMovement() {
         if (sprite.isFlipX()) {
             sprite.flip(true, false);
         }
 
-        this.position.x += deltaTime * this.speed;
-        setPositions();
+        Vector2 vel = body.getLinearVelocity();
+
+        if (vel.x > MAX_VELOCITY) {
+            return;
+        }
+
+        applyMovement(SPEED, 0);
     }
 
-    public void moveUp(float deltaTime) {
-        this.position.y += deltaTime * this.speed;
-        setPositions();
+    public void applyLeftMovement() {
+        if (!sprite.isFlipX()) {
+            sprite.flip(true, false);
+        }
+
+        Vector2 vel = body.getLinearVelocity();
+        if (vel.x < -MAX_VELOCITY) {
+            return;
+        }
+
+        applyMovement(-SPEED, 0);
     }
 
-    public void moveDown(float deltaTime) {
-        this.position.y -= deltaTime * this.speed;
-        setPositions();
+    public void applyUpMovement() {
+        Vector2 vel = body.getLinearVelocity();
+
+        if (vel.y > MAX_VELOCITY) {
+            return;
+        }
+        applyMovement(0, SPEED);
     }
 
-    private void setPositions() {
-        setSpritePos();
-        setCollisionRectanglePos();
+    public void applyDownMovement() {
+        Vector2 vel = body.getLinearVelocity();
+
+        if (vel.y < -MAX_VELOCITY) {
+            return;
+        }
+
+        applyMovement(0, -SPEED);
     }
 
-    private void setSpritePos() {
-        sprite.setPosition(this.position.x, this.position.y);
+    public void stopXMovement() {
+        body.setLinearVelocity(0, body.getLinearVelocity().y);
     }
 
-    private void setCollisionRectanglePos() {
-        collisionRectangle.setPosition(this.position);
+
+    public void stopYMovement() {
+        body.setLinearVelocity(body.getLinearVelocity().x, 0);
+    }
+
+    private void applyMovement(float impulseX, float impulseY) {
+        Vector2 pos = body.getPosition();
+
+        body.applyLinearImpulse(impulseX, impulseY, pos.x, pos.y, true);
     }
 
     public void draw(SpriteBatch batch) {
         sprite.draw(batch);
+    }
+
+    @Override
+    public void dispose() {
+        circle.dispose();
     }
 }
