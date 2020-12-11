@@ -10,8 +10,9 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
-import com.bolero.game.InteractionRectangle;
+import com.bolero.game.NPC;
 import com.bolero.game.Player;
+import com.bolero.game.interactions.InteractionRectangle;
 
 import java.util.ArrayList;
 
@@ -42,7 +43,7 @@ public class DebugDrawer implements Disposable {
     }
 
 
-    public void drawInteractionZones(ArrayList<InteractionRectangle> interactions) {
+    public void drawInteractionZones(ArrayList<InteractionRectangle> interactions, ArrayList<NPC> npcs) {
         Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
         debugRenderer.setProjectionMatrix(camera.combined);
@@ -53,8 +54,12 @@ public class DebugDrawer implements Disposable {
         for (InteractionRectangle intRectangle : interactions) {
             Rectangle rectangle = intRectangle.getRectangle();
             debugRenderer.rect(rectangle.x / unit, rectangle.y / unit, rectangle.width / unit, rectangle.height / unit);
-
         }
+
+        for (NPC npc : npcs) {
+            debugRenderer.circle(npc.talkCircle.x, npc.talkCircle.y, npc.talkCircle.radius);
+        }
+
         debugRenderer.end();
         Gdx.gl.glDisable(GL20.GL_BLEND);
     }

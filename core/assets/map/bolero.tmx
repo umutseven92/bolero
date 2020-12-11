@@ -304,10 +304,10 @@
   <object id="51" name="pillar" type="inspect" x="459" y="1046" width="42" height="37"/>
  </objectgroup>
  <objectgroup color="#0000ff" id="6" name="Spawn">
-  <object id="34" name="initial" x="808" y="784">
+  <object id="34" name="initial" type="player" x="808" y="784">
    <point/>
   </object>
-  <object id="40" name="house1" x="976" y="730">
+  <object id="40" name="house1" type="player" x="976" y="730">
    <point/>
   </object>
  </objectgroup>

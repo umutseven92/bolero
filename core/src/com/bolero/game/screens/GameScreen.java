@@ -13,14 +13,16 @@ import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
-import com.bolero.game.BoleroGame;
-import com.bolero.game.InteractionRectangle;
-import com.bolero.game.MapValues;
-import com.bolero.game.Player;
+import com.bolero.game.*;
 import com.bolero.game.drawers.DebugDrawer;
 import com.bolero.game.icons.ButtonIcon;
+import com.bolero.game.interactions.InspectRectangle;
+import com.bolero.game.interactions.InteractionRectangle;
+import com.bolero.game.interactions.SpawnRectangle;
 import com.bolero.game.mappers.CollisionMapper;
 import com.bolero.game.mappers.InteractionMapper;
+
+import java.util.ArrayList;
 
 public abstract class GameScreen implements Screen {
     private final BoleroGame game;
@@ -46,6 +48,8 @@ public abstract class GameScreen implements Screen {
     private final DebugDrawer debugDrawer;
     private Vector2 playerSpawnPosition;
     private float accumulator = 0;
+
+    private final NPCController npcController;
 
 
     public GameScreen(BoleroGame game, String mapPath, int[] backgroundLayers, int[] foregroundLayers) {
@@ -79,6 +83,9 @@ public abstract class GameScreen implements Screen {
         interactionMapper.createInteractionMap(game.INT_LAYER, game.SPAWN_INITIAL_OBJ);
 
         debugDrawer = new DebugDrawer(UNIT, camera);
+
+        npcController = new NPCController(map);
+        npcController.spawnNPCs(game.SPAWN_LAYER, UNIT, world);
     }
 
 
@@ -96,25 +103,28 @@ public abstract class GameScreen implements Screen {
         Gdx.gl.glClearColor(0, 0, 0f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        InteractionRectangle rectangle = checkIfInInteractionTriangle();
+        SpawnRectangle spawnRectangle = checkIfInInteractionTriangle();
+        InspectRectangle inspectRectangle = checkIfInInspectTriangle();
+        NPC npc = checkIfNearNPC();
 
-        handleInput(rectangle);
+        handleInput(spawnRectangle, inspectRectangle, npc);
         player.setPosition();
+        npcController.setPositions();
         handleCamera();
 
         mapRenderer.setView(camera);
         mapRenderer.render(backgroundLayers);
 
         if (game.debugMode) {
-            debugDrawer.drawInteractionZones(interactionMapper.getInteractions());
+            debugDrawer.drawInteractionZones(interactionMapper.getAllRectangles(), npcController.getNpcs());
         }
-
 
         game.batch.setProjectionMatrix(camera.combined);
         game.batch.begin();
         player.draw(game.batch);
+        npcController.drawNPCs(game.batch);
 
-        if (rectangle != null) {
+        if (spawnRectangle != null || inspectRectangle != null || npc != null) {
             eButtonIcon.draw(game.batch);
         }
 
@@ -167,7 +177,7 @@ public abstract class GameScreen implements Screen {
         camera.update();
     }
 
-    private void handleInput(InteractionRectangle rectangle) {
+    private void handleInput(SpawnRectangle spawnRectangle, InspectRectangle inspectRectangle, NPC npc) {
         if (Gdx.input.isKeyJustPressed(Input.Keys.H)) {
             game.debugMode = !game.debugMode;
         }
@@ -210,27 +220,42 @@ public abstract class GameScreen implements Screen {
         }
 
 
-        if (Gdx.input.isKeyJustPressed(Input.Keys.E) && rectangle != null) {
-            handleInteraction(rectangle);
+        if (Gdx.input.isKeyJustPressed(Input.Keys.E) && spawnRectangle != null) {
+            handleInteraction(spawnRectangle);
+        } else if (Gdx.input.isKeyJustPressed(Input.Keys.E) && npc != null) {
+            talkToNPC(npc);
         }
 
     }
 
-    private void handleInteraction(InteractionRectangle rectangle) {
-        switch (rectangle.getType()) {
-            case spawn:
-                game.loadRoute(rectangle.getName(), rectangle.getSpawnName());
-                break;
-            case inspect:
-                break;
-            default:
-                throw new IllegalStateException("Unexpected value: " + rectangle.getType());
-        }
+    private void handleInteraction(SpawnRectangle rectangle) {
+        game.loadRoute(rectangle.getName(), rectangle.getSpawnName());
     }
 
-    private InteractionRectangle checkIfInInteractionTriangle() {
+    private void talkToNPC(NPC npc) {
+
+    }
+
+    private SpawnRectangle checkIfInInteractionTriangle() {
+        return checkIfInTriangle(interactionMapper.getSpawnRectangles());
+//        Vector2 playerPosPixels = new Vector2(player.getPosition().x * UNIT, player.getPosition().y * UNIT);
+//        for (SpawnRectangle intRectangle : interactionMapper.getSpawnRectangles()) {
+//
+//            if (intRectangle.getRectangle().contains(playerPosPixels)) {
+//                return intRectangle;
+//            }
+//        }
+//
+//        return null;
+    }
+
+    private InspectRectangle checkIfInInspectTriangle() {
+        return checkIfInTriangle(interactionMapper.getInspectRectangles());
+    }
+
+    private <E extends InteractionRectangle> E checkIfInTriangle(ArrayList<E> rectangles) {
         Vector2 playerPosPixels = new Vector2(player.getPosition().x * UNIT, player.getPosition().y * UNIT);
-        for (InteractionRectangle intRectangle : interactionMapper.getInteractions()) {
+        for (E intRectangle : rectangles) {
 
             if (intRectangle.getRectangle().contains(playerPosPixels)) {
                 return intRectangle;
@@ -238,6 +263,19 @@ public abstract class GameScreen implements Screen {
         }
 
         return null;
+    }
+
+    private NPC checkIfNearNPC() {
+        Vector2 playerPosPixels = new Vector2(player.getPosition().x, player.getPosition().y);
+        for (NPC npc : npcController.getNpcs()) {
+
+            if (npc.getTalkCircle().contains(playerPosPixels)) {
+                return npc;
+            }
+        }
+
+        return null;
+
     }
 
     private void respawnPlayer() {
@@ -279,5 +317,6 @@ public abstract class GameScreen implements Screen {
         debugDrawer.dispose();
         mapRenderer.dispose();
         eButtonIcon.dispose();
+        npcController.dispose();
     }
 }

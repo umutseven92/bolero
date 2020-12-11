@@ -1,4 +1,4 @@
-package com.bolero.game;
+package com.bolero.game.enums;
 
 public enum InteractionType {
     spawn,
