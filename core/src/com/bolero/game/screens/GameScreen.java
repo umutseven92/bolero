@@ -5,56 +5,48 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapObject;
-import com.badlogic.gdx.maps.MapObjects;
 import com.badlogic.gdx.maps.MapProperties;
-import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
 import com.bolero.game.BoleroGame;
-import com.bolero.game.CollisionMap;
+import com.bolero.game.InteractionRectangle;
 import com.bolero.game.MapValues;
 import com.bolero.game.Player;
-
-import java.util.ArrayList;
+import com.bolero.game.drawers.DebugDrawer;
+import com.bolero.game.icons.ButtonIcon;
+import com.bolero.game.mappers.CollisionMapper;
+import com.bolero.game.mappers.InteractionMapper;
 
 public abstract class GameScreen implements Screen {
-    final private BoleroGame game;
+    private final BoleroGame game;
 
-    final private World world;
-    final private OrthographicCamera camera;
+    private final World world;
+    private final OrthographicCamera camera;
 
-    final private Texture timTexture;
-    final private TiledMap map;
-    final private int[] backgroundLayers;
-    final private int[] foregroundLayers;
+    private final TiledMap map;
+    private final int[] backgroundLayers;
+    private final int[] foregroundLayers;
 
-    final private Player player;
+    private final Player player;
+    private final ButtonIcon eButtonIcon;
 
-    final private float UNIT = 16f;
-    final float TIME_STEP = 1 / 16f;
+    private final float UNIT = 16f;
     private final MapValues mapValues;
-    private final Vector2 playerSpawnPosition;
 
     private final OrthogonalTiledMapRenderer mapRenderer;
-    private final CollisionMap collisionMap;
-    private final Box2DDebugRenderer box2DDebugRenderer;
-    private final ShapeRenderer debugRenderer;
 
-    private Boolean debugMode = false;
+    private final CollisionMapper collisionMapper;
+    private final InteractionMapper interactionMapper;
 
+    private final DebugDrawer debugDrawer;
+    private Vector2 playerSpawnPosition;
     private float accumulator = 0;
 
-    private final ArrayList<Rectangle> interactions;
 
     public GameScreen(BoleroGame game, String mapPath, int[] backgroundLayers, int[] foregroundLayers) {
         this.game = game;
@@ -65,10 +57,7 @@ public abstract class GameScreen implements Screen {
 
         mapRenderer = new OrthogonalTiledMapRenderer(map, 1 / UNIT);
 
-
-        playerSpawnPosition = getPlayerSpawnPoint();
-        box2DDebugRenderer = new Box2DDebugRenderer();
-        debugRenderer = new ShapeRenderer();
+        setPlayerSpawnPoint(game.SPAWN_INITIAL_OBJ);
 
         camera = new OrthographicCamera();
 
@@ -76,72 +65,67 @@ public abstract class GameScreen implements Screen {
 
         camera.update();
 
-        timTexture = new Texture(Gdx.files.internal("tim.png"));
         world = new World(Vector2.Zero, true);
 
-        player = new Player(2, 2, playerSpawnPosition, timTexture, world);
+        player = new Player(playerSpawnPosition, world);
+        eButtonIcon = new ButtonIcon(player);
+
         handleCamera();
 
-        collisionMap = new CollisionMap(world, map);
-        collisionMap.createCollisions(UNIT, mapValues);
+        collisionMapper = new CollisionMapper(world, map);
+        collisionMapper.createCollisions(UNIT, mapValues, game.COL_LAYER);
 
-        interactions = createInteractionMap();
+        interactionMapper = new InteractionMapper(map);
+        interactionMapper.createInteractionMap(game.INT_LAYER, game.SPAWN_INITIAL_OBJ);
+
+        debugDrawer = new DebugDrawer(UNIT, camera);
     }
 
-    private ArrayList<Rectangle> createInteractionMap() {
-        ArrayList<Rectangle> rectangles = new ArrayList<>();
 
-        MapLayer layer = map.getLayers().get("Interaction");
-
-        if (layer == null) {
-            return rectangles;
-        }
-
-        MapObjects objects = layer.getObjects();
-        for (MapObject object : objects) {
-            Rectangle rectangle = ((RectangleMapObject) object).getRectangle();
-            rectangles.add(rectangle);
-        }
-
-        return rectangles;
-    }
-
-    private Vector2 getPlayerSpawnPoint() {
-        MapObject playerSpawnObject = map.getLayers().get("Spawn").getObjects().get("player");
+    public void setPlayerSpawnPoint(String name) {
+        MapObject playerSpawnObject = map.getLayers().get(game.SPAWN_LAYER).getObjects().get(name);
 
         final MapProperties props = playerSpawnObject.getProperties();
 
-        return new Vector2((float) props.get("x") / UNIT, (float) props.get("y") / UNIT);
+        playerSpawnPosition = new Vector2((float) props.get("x") / UNIT, (float) props.get("y") / UNIT);
     }
 
 
     @Override
     public void render(float delta) {
-        Gdx.gl.glClearColor(0, 0, 0.2f, 1);
+        Gdx.gl.glClearColor(0, 0, 0f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        handleInput();
+        InteractionRectangle rectangle = checkIfInInteractionTriangle();
+
+        handleInput(rectangle);
         player.setPosition();
         handleCamera();
 
         mapRenderer.setView(camera);
         mapRenderer.render(backgroundLayers);
 
-        if (debugMode) {
-            drawInteractionZones();
+        if (game.debugMode) {
+            debugDrawer.drawInteractionZones(interactionMapper.getInteractions());
         }
+
 
         game.batch.setProjectionMatrix(camera.combined);
         game.batch.begin();
         player.draw(game.batch);
+
+        if (rectangle != null) {
+            eButtonIcon.draw(game.batch);
+        }
+
         game.batch.end();
 
         mapRenderer.render(foregroundLayers);
 
         drawHUD();
 
-        if (debugMode) {
-            box2DDebugRenderer.render(world, camera.combined);
+        if (game.debugMode) {
+            debugDrawer.drawBox2DBodies(world);
         }
 
         doPhysicsStep(delta);
@@ -149,10 +133,11 @@ public abstract class GameScreen implements Screen {
 
 
     private void doPhysicsStep(float deltaTime) {
-        // fixed time step
-        // max frame time to avoid spiral of death (on slow devices)
+        // Fixed time step from https://gafferongames.com/post/fix_your_timestep/
+        // Max frame time to avoid spiral of death on slow devices
         float frameTime = Math.min(deltaTime, 0.25f);
         accumulator += frameTime;
+        float TIME_STEP = 1 / 16f;
         while (accumulator >= TIME_STEP) {
             world.step(TIME_STEP, 6, 2);
             accumulator -= TIME_STEP;
@@ -161,36 +146,12 @@ public abstract class GameScreen implements Screen {
 
     private void drawHUD() {
         game.hudBatch.begin();
-        if (debugMode) {
-            drawDebugInfo();
+        if (game.debugMode) {
+            debugDrawer.drawDebugInfo(game.font, game.hudBatch, player, game.currentScreen);
         }
         game.hudBatch.end();
     }
 
-    private void drawInteractionZones() {
-        Gdx.gl.glEnable(GL20.GL_BLEND);
-        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-        debugRenderer.setProjectionMatrix(camera.combined);
-
-        debugRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        debugRenderer.setColor(1, 0, 0, 0.5f);
-
-        for (Rectangle rectangle : interactions) {
-            debugRenderer.rect(rectangle.x / UNIT, rectangle.y / UNIT, rectangle.width / UNIT, rectangle.height / UNIT);
-
-        }
-        debugRenderer.end();
-        Gdx.gl.glDisable(GL20.GL_BLEND);
-    }
-
-    private void drawDebugInfo() {
-        float cameraX = Gdx.graphics.getWidth() - UNIT * 15;
-        float cameraY = Gdx.graphics.getHeight() - UNIT * 2;
-        float camera3Y = Gdx.graphics.getHeight() - UNIT * 3;
-
-        game.font.draw(game.hudBatch, "Player Pos: " + player.getPosition().x + ", " + player.getPosition().y, cameraX, cameraY);
-        game.font.draw(game.hudBatch, "Camera Pos: " + camera.position.x + ", " + camera.position.y, cameraX, camera3Y);
-    }
 
     private void handleCamera() {
 
@@ -206,12 +167,12 @@ public abstract class GameScreen implements Screen {
         camera.update();
     }
 
-    private void handleInput() {
+    private void handleInput(InteractionRectangle rectangle) {
         if (Gdx.input.isKeyJustPressed(Input.Keys.H)) {
-            debugMode = !debugMode;
+            game.debugMode = !game.debugMode;
         }
 
-        if (debugMode) {
+        if (game.debugMode) {
             if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
                 respawnPlayer();
             }
@@ -222,7 +183,6 @@ public abstract class GameScreen implements Screen {
             if (Gdx.input.isKeyJustPressed(Input.Keys.P)) {
                 camera.zoom -= 0.3f;
             }
-
         }
 
         if (Gdx.input.isKeyPressed(Input.Keys.A)) {
@@ -250,20 +210,34 @@ public abstract class GameScreen implements Screen {
         }
 
 
-        if (Gdx.input.isKeyPressed(Input.Keys.E)) {
-            handleInteraction();
+        if (Gdx.input.isKeyJustPressed(Input.Keys.E) && rectangle != null) {
+            handleInteraction(rectangle);
         }
 
     }
 
-    private void handleInteraction() {
-        Vector2 playerPosPixels = new Vector2(player.getPosition().x * UNIT, player.getPosition().y * UNIT);
-        for (Rectangle rectangle : interactions) {
+    private void handleInteraction(InteractionRectangle rectangle) {
+        switch (rectangle.getType()) {
+            case spawn:
+                game.loadRoute(rectangle.getName(), rectangle.getSpawnName());
+                break;
+            case inspect:
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + rectangle.getType());
+        }
+    }
 
-            if (rectangle.contains(playerPosPixels)) {
-                game.setScreen(game.houseScreen);
+    private InteractionRectangle checkIfInInteractionTriangle() {
+        Vector2 playerPosPixels = new Vector2(player.getPosition().x * UNIT, player.getPosition().y * UNIT);
+        for (InteractionRectangle intRectangle : interactionMapper.getInteractions()) {
+
+            if (intRectangle.getRectangle().contains(playerPosPixels)) {
+                return intRectangle;
             }
         }
+
+        return null;
     }
 
     private void respawnPlayer() {
@@ -298,12 +272,12 @@ public abstract class GameScreen implements Screen {
 
     @Override
     public void dispose() {
-        timTexture.dispose();
         map.dispose();
+        world.dispose();
         player.dispose();
-        collisionMap.dispose();
-        debugRenderer.dispose();
-        box2DDebugRenderer.dispose();
+        collisionMapper.dispose();
+        debugDrawer.dispose();
         mapRenderer.dispose();
+        eButtonIcon.dispose();
     }
 }

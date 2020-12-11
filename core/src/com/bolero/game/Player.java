@@ -1,5 +1,6 @@
 package com.bolero.game;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -9,15 +10,31 @@ import com.badlogic.gdx.utils.Disposable;
 
 public class Player implements Disposable {
 
-    private final float MAX_VELOCITY = 5;
-    private final float SPEED = 0.5f;
-    private final float width;
-    private final float height;
+    private final float MAX_VELOCITY = 5.5f;
+    private final float SPEED = 0.7f;
+
+    private final float width = 2.2f;
+    private final float height = 2;
+
+    private final Texture texture;
+    private final Sprite sprite;
+    private final Body body;
+
+    private CircleShape circle;
 
     private Vector2 position;
 
     public Vector2 getPosition() {
         return position;
+    }
+
+    public Player(Vector2 position, World box2DWorld) {
+        this.position = position;
+        this.texture = new Texture(Gdx.files.internal("tim.png"));
+
+        this.sprite = new Sprite(texture);
+        sprite.setSize(width, height);
+        body = createPlayerBody(box2DWorld);
     }
 
     public void respawn(Vector2 position) {
@@ -30,21 +47,6 @@ public class Player implements Disposable {
     public void setPosition() {
         this.position = this.body.getPosition();
         this.sprite.setPosition(this.position.x - this.width / 2, this.position.y - this.height / 2);
-    }
-
-    private final Sprite sprite;
-    private CircleShape circle;
-
-    public Body body;
-
-    public Player(float width, float height, Vector2 position, Texture texture, World box2DWorld) {
-        this.width = width;
-        this.height = height;
-        this.position = position;
-
-        this.sprite = new Sprite(texture);
-        sprite.setSize(width, height);
-        body = createPlayerBody(box2DWorld);
     }
 
     private Body createPlayerBody(World world) {
@@ -135,6 +137,7 @@ public class Player implements Disposable {
 
     @Override
     public void dispose() {
+        texture.dispose();
         circle.dispose();
     }
 }

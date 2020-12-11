@@ -1,5 +1,6 @@
-package com.bolero.game;
+package com.bolero.game.mappers;
 
+import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.MapObjects;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
@@ -8,16 +9,16 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Disposable;
+import com.bolero.game.MapValues;
 
 import java.util.ArrayList;
 
-public class CollisionMap implements Disposable {
-
+public class CollisionMapper implements Disposable {
     private final World world;
     private final TiledMap map;
     private final ArrayList<Shape> shapes = new ArrayList<>();
 
-    public CollisionMap(World world, TiledMap map) {
+    public CollisionMapper(World world, TiledMap map) {
         this.world = world;
         this.map = map;
     }
@@ -36,24 +37,27 @@ public class CollisionMap implements Disposable {
         return center.scl(1 / unit);
     }
 
-    public void createCollisions(float unit, MapValues mapValues) {
+    public void createCollisions(float unit, MapValues mapValues, String collisionLayer) {
         createWalls(unit, mapValues);
-        createCollisionsFromMap(unit);
+        createCollisionsFromMap(unit, collisionLayer);
     }
 
-    private void createCollisionsFromMap(float unit) {
-        MapObjects objects = map.getLayers().get("Collision").getObjects();
+    private void createCollisionsFromMap(float unit, String collisionLayer) {
+        MapLayer layer = map.getLayers().get(collisionLayer);
+
+        if (layer == null) {
+            return;
+        }
+
+        MapObjects objects = layer.getObjects();
         for (MapObject object : objects) {
             Rectangle rectangle = ((RectangleMapObject) object).getRectangle();
 
-            //create a dynamic within the world body (also can be KinematicBody or StaticBody
             BodyDef bodyDef = new BodyDef();
             Body body = world.createBody(bodyDef);
 
-            //create a fixture for each body from the shape
             body.createFixture(getShapeFromRectangle(rectangle, unit), 0.0f);
 
-            //setting the position of the body's origin. In this case with zero rotation
             body.setTransform(getTransformedCenterForRectangle(rectangle, unit), 0);
         }
     }
