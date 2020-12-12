@@ -120,6 +120,11 @@ abstract public class Character implements Disposable {
         applyMovement(0, -SPEED);
     }
 
+    public void stop() {
+        stopXMovement();
+        stopYMovement();
+    }
+
     public void stopXMovement() {
         body.setLinearVelocity(0, body.getLinearVelocity().y);
     }

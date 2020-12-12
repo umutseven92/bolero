@@ -301,10 +301,10 @@
  </objectgroup>
  <objectgroup color="#00ff00" id="7" name="Interaction">
   <object id="35" name="house1" type="spawn" x="960" y="664" width="32" height="32"/>
-  <object id="51" name="pillar" type="inspect" x="459" y="1046" width="42" height="37"/>
+  <object id="51" name="pillar" type="inspect" x="459" y="1034" width="42" height="37"/>
  </objectgroup>
  <objectgroup color="#0000ff" id="6" name="Spawn">
-  <object id="34" name="initial" type="player" x="808" y="784">
+  <object id="34" name="initial" type="player" x="480" y="1080">
    <point/>
   </object>
   <object id="40" name="house1" type="player" x="976" y="730">
