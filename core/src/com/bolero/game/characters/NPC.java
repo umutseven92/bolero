@@ -1,4 +1,4 @@
-package com.bolero.game;
+package com.bolero.game.characters;
 
 import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Vector2;

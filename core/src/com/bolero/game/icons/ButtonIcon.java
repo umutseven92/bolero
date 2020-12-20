@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Disposable;
-import com.bolero.game.Player;
+import com.bolero.game.characters.Player;
 
 public class ButtonIcon implements Disposable {
     private final Texture texture;

@@ -8,7 +8,7 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
-import com.bolero.game.NPC;
+import com.bolero.game.characters.NPC;
 import com.bolero.game.enums.SpawnType;
 import com.bolero.game.exceptions.MissingSpawnTypeException;
 

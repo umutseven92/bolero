@@ -1,14 +1,26 @@
-package com.bolero.game;
+package com.bolero.game.characters;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Disposable;
+import com.bolero.game.enums.CharacterState;
 
 abstract public class Character implements Disposable {
+    private CharacterState state = CharacterState.idle;
+    private Direction direction = Direction.right;
+
+    private static final int FRAME_COLS = 10, FRAME_ROWS = 10;
+
+    private Animation<TextureRegion> walkAnimation;
+    private Animation<TextureRegion> idleAnimation;
+
+    private final Texture spriteSheet;
 
     private final float MAX_VELOCITY;
     private final float SPEED;
@@ -16,9 +28,9 @@ abstract public class Character implements Disposable {
     private final float width;
     private final float height;
 
-    private final Texture texture;
     private final Sprite sprite;
     protected final Body body;
+    private float animationTime;
 
     private CircleShape circle;
 
@@ -28,17 +40,48 @@ abstract public class Character implements Disposable {
         return position;
     }
 
+    public CharacterState getState() {
+        return state;
+    }
+
+    public void setState(CharacterState state) {
+        this.stop();
+        this.state = state;
+    }
+
     public Character(Vector2 position, World box2DWorld, float width, float height, float maxVelocity, float speed, String texturePath, BodyDef.BodyType bodyType) {
         this.width = width;
         this.height = height;
         this.MAX_VELOCITY = maxVelocity;
         this.SPEED = speed;
         this.position = position;
-        this.texture = new Texture(Gdx.files.internal(texturePath));
+        this.spriteSheet = new Texture(Gdx.files.internal(texturePath));
+        loadAnimationsFromSpiteSheet();
 
-        this.sprite = new Sprite(texture);
+        this.sprite = new Sprite();
         sprite.setSize(width, height);
         body = createPlayerBody(box2DWorld, bodyType);
+    }
+
+    private void loadAnimationsFromSpiteSheet() {
+        TextureRegion[][] textureMatrix = TextureRegion.split(spriteSheet,
+                spriteSheet.getWidth() / FRAME_COLS,
+                spriteSheet.getHeight() / FRAME_ROWS);
+
+        TextureRegion[] walkFrames = new TextureRegion[FRAME_COLS];
+        TextureRegion[] idleFrames = new TextureRegion[FRAME_COLS];
+
+        int index = 0;
+        for (int j = 0; j < FRAME_COLS; j++) {
+            idleFrames[index] = textureMatrix[5][j];
+            walkFrames[index] = textureMatrix[7][j];
+            index++;
+        }
+
+        idleAnimation = new Animation<>(0.5f, idleFrames);
+        walkAnimation = new Animation<>(0.1f, walkFrames);
+
+        animationTime = 0f;
     }
 
     public void setPosition() {
@@ -75,9 +118,7 @@ abstract public class Character implements Disposable {
     }
 
     public void applyRightMovement() {
-        if (sprite.isFlipX()) {
-            sprite.flip(true, false);
-        }
+        this.direction = Direction.right;
 
         Vector2 vel = body.getLinearVelocity();
 
@@ -89,9 +130,7 @@ abstract public class Character implements Disposable {
     }
 
     public void applyLeftMovement() {
-        if (!sprite.isFlipX()) {
-            sprite.flip(true, false);
-        }
+        this.direction = Direction.left;
 
         Vector2 vel = body.getLinearVelocity();
         if (vel.x < -MAX_VELOCITY) {
@@ -125,28 +164,56 @@ abstract public class Character implements Disposable {
         stopYMovement();
     }
 
-    public void stopXMovement() {
-        body.setLinearVelocity(0, body.getLinearVelocity().y);
+    private void checkForIdle() {
+        if (body.getLinearVelocity().isZero()) {
+            this.state = CharacterState.idle;
+        }
     }
 
+    public void stopXMovement() {
+        body.setLinearVelocity(0, body.getLinearVelocity().y);
+        checkForIdle();
+    }
 
     public void stopYMovement() {
         body.setLinearVelocity(body.getLinearVelocity().x, 0);
+        checkForIdle();
     }
 
     private void applyMovement(float impulseX, float impulseY) {
+        this.state = CharacterState.walking;
         Vector2 pos = body.getPosition();
 
         body.applyLinearImpulse(impulseX, impulseY, pos.x, pos.y, true);
     }
 
     public void draw(SpriteBatch batch) {
+        animationTime += Gdx.graphics.getDeltaTime();
+
+        TextureRegion currentFrame;
+        if (this.state == CharacterState.walking) {
+            currentFrame = walkAnimation.getKeyFrame(animationTime, true);
+        } else {
+            currentFrame = idleAnimation.getKeyFrame(animationTime, true);
+        }
+
+        if (this.direction == Direction.left) {
+            if (!currentFrame.isFlipX()) {
+                currentFrame.flip(true, false);
+            }
+        } else {
+            if (currentFrame.isFlipX()) {
+                currentFrame.flip(true, false);
+            }
+        }
+
+        sprite.setRegion(currentFrame);
         sprite.draw(batch);
     }
 
     @Override
     public void dispose() {
-        texture.dispose();
+        spriteSheet.dispose();
         circle.dispose();
     }
 

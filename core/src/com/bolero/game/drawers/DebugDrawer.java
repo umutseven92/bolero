@@ -10,8 +10,8 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
-import com.bolero.game.NPC;
-import com.bolero.game.Player;
+import com.bolero.game.characters.NPC;
+import com.bolero.game.characters.Player;
 import com.bolero.game.interactions.InteractionRectangle;
 
 import java.util.ArrayList;

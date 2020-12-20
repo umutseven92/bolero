@@ -10,13 +10,17 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
-import com.bolero.game.*;
+import com.bolero.game.BoleroGame;
+import com.bolero.game.GameCamera;
+import com.bolero.game.MapValues;
+import com.bolero.game.characters.NPC;
+import com.bolero.game.characters.Player;
 import com.bolero.game.controllers.BundleController;
 import com.bolero.game.controllers.MapController;
 import com.bolero.game.controllers.NPCController;
 import com.bolero.game.drawers.DebugDrawer;
 import com.bolero.game.drawers.DialogDrawer;
-import com.bolero.game.enums.PlayerState;
+import com.bolero.game.enums.CharacterState;
 import com.bolero.game.exceptions.MissingInteractionTypeException;
 import com.bolero.game.exceptions.MissingSpawnTypeException;
 import com.bolero.game.exceptions.WrongInteractionTypeException;
@@ -104,7 +108,7 @@ public abstract class GameScreen implements Screen {
         InspectRectangle inspectRectangle = checkIfInInspectTriangle();
         NPC npc = checkIfNearNPC();
 
-        if (player.getState() == PlayerState.idle) {
+        if (player.getState() != CharacterState.inspecting) {
             handleMovementInput();
         }
 
@@ -124,7 +128,7 @@ public abstract class GameScreen implements Screen {
         player.draw(game.batch);
         npcController.drawNPCs(game.batch);
 
-        if ((spawnRectangle != null || inspectRectangle != null || npc != null) && player.getState() == PlayerState.idle) {
+        if ((spawnRectangle != null || inspectRectangle != null || npc != null) && player.getState() != CharacterState.inspecting) {
             eButtonIcon.draw(game.batch);
         }
 
@@ -133,7 +137,7 @@ public abstract class GameScreen implements Screen {
         mapController.drawForeground();
         drawHUD();
 
-        if (player.getState() == PlayerState.inspecting && inspectRectangle != null) {
+        if (player.getState() == CharacterState.inspecting && inspectRectangle != null) {
             drawInspection(inspectRectangle);
         }
 
@@ -227,12 +231,12 @@ public abstract class GameScreen implements Screen {
     }
 
     private void inspect() {
-        if (player.getState() == PlayerState.idle) {
+        if (player.getState() != CharacterState.inspecting) {
             gameCamera.zoomIn(0.2f);
-            player.setState(PlayerState.inspecting);
-        } else if (player.getState() == PlayerState.inspecting) {
+            player.setState(CharacterState.inspecting);
+        } else {
             gameCamera.zoomOut(0.2f);
-            player.setState(PlayerState.idle);
+            player.setState(CharacterState.idle);
         }
     }
 
@@ -244,7 +248,7 @@ public abstract class GameScreen implements Screen {
     }
 
     private void talkToNPC(NPC npc) {
-        player.setState(PlayerState.talking);
+        player.setState(CharacterState.talking);
     }
 
     private SpawnRectangle checkIfInInteractionTriangle() {

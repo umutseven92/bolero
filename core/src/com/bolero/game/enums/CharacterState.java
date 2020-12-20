@@ -1,6 +1,7 @@
 package com.bolero.game.enums;
 
-public enum PlayerState {
+public enum CharacterState {
+    walking,
     inspecting,
     talking,
     idle
