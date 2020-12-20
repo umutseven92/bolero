@@ -1,4 +1,4 @@
-package com.bolero.game;
+package com.bolero.game.controllers;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.MapObject;
@@ -8,6 +8,7 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
+import com.bolero.game.NPC;
 import com.bolero.game.enums.SpawnType;
 
 import java.util.ArrayList;

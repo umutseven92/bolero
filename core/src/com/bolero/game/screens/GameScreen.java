@@ -4,16 +4,16 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.MapProperties;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.bolero.game.*;
+import com.bolero.game.controllers.BundleController;
+import com.bolero.game.controllers.NPCController;
 import com.bolero.game.drawers.DebugDrawer;
 import com.bolero.game.drawers.DialogDrawer;
 import com.bolero.game.enums.PlayerState;
@@ -30,8 +30,8 @@ public abstract class GameScreen implements Screen {
     private final BoleroGame game;
 
     private final World world;
-    private final OrthographicCamera camera;
 
+    private final GameCamera gameCamera;
     private final TiledMap map;
     private final int[] backgroundLayers;
     private final int[] foregroundLayers;
@@ -53,7 +53,7 @@ public abstract class GameScreen implements Screen {
     private float accumulator = 0;
 
     private final NPCController npcController;
-
+    private final BundleController bundleController;
 
     public GameScreen(BoleroGame game, String mapPath, int[] backgroundLayers, int[] foregroundLayers) {
         this.game = game;
@@ -66,18 +66,13 @@ public abstract class GameScreen implements Screen {
 
         setPlayerSpawnPoint(game.SPAWN_INITIAL_OBJ);
 
-        camera = new OrthographicCamera();
-
-        camera.setToOrtho(false, 30, 20);
-
-        camera.update();
-
+        gameCamera = new GameCamera();
         world = new World(Vector2.Zero, true);
 
         player = new Player(playerSpawnPosition, world);
         eButtonIcon = new ButtonIcon(player);
 
-        handleCamera();
+        gameCamera.updatePosition(player.getPosition(), UNIT, mapValues);
 
         collisionMapper = new CollisionMapper(world, map);
         collisionMapper.createCollisions(UNIT, mapValues, game.COL_LAYER);
@@ -85,10 +80,11 @@ public abstract class GameScreen implements Screen {
         interactionMapper = new InteractionMapper(map);
         interactionMapper.createInteractionMap(game.INT_LAYER, game.SPAWN_INITIAL_OBJ);
 
-        debugDrawer = new DebugDrawer(UNIT, camera);
+        debugDrawer = new DebugDrawer(UNIT, gameCamera.getCamera());
         dialogDrawer = new DialogDrawer();
         npcController = new NPCController(map);
         npcController.spawnNPCs(game.SPAWN_LAYER, UNIT, world);
+        bundleController = new BundleController();
     }
 
 
@@ -116,16 +112,16 @@ public abstract class GameScreen implements Screen {
 
         player.setPosition();
         npcController.setPositions();
-        handleCamera();
+        gameCamera.update(player.getPosition(), UNIT, mapValues, delta);
 
-        mapRenderer.setView(camera);
+        mapRenderer.setView(gameCamera.getCamera());
         mapRenderer.render(backgroundLayers);
 
         if (game.debugMode) {
             debugDrawer.drawInteractionZones(interactionMapper.getAllRectangles(), npcController.getNpcs());
         }
 
-        game.batch.setProjectionMatrix(camera.combined);
+        game.batch.setProjectionMatrix(gameCamera.getCamera().combined);
         game.batch.begin();
         player.draw(game.batch);
         npcController.drawNPCs(game.batch);
@@ -141,7 +137,7 @@ public abstract class GameScreen implements Screen {
         drawHUD();
 
         if (player.getState() == PlayerState.inspecting) {
-            drawInspection();
+            drawInspection(inspectRectangle);
         }
 
         handleInteractionInput(spawnRectangle, inspectRectangle, npc);
@@ -174,20 +170,6 @@ public abstract class GameScreen implements Screen {
     }
 
 
-    private void handleCamera() {
-
-        camera.position.x = player.getPosition().x;
-        camera.position.y = player.getPosition().y;
-
-        float centerX = camera.viewportWidth / 2;
-        float centerY = camera.viewportHeight / 2;
-
-        camera.position.x = MathUtils.clamp(camera.position.x, centerX, mapValues.mapWidthPixels / UNIT - centerX);
-        camera.position.y = MathUtils.clamp(camera.position.y, centerY, mapValues.mapHeightPixels / UNIT - centerY);
-
-        camera.update();
-    }
-
     private void handleMovementInput() {
         if (Gdx.input.isKeyJustPressed(Input.Keys.H)) {
             game.debugMode = !game.debugMode;
@@ -199,10 +181,10 @@ public abstract class GameScreen implements Screen {
             }
 
             if (Gdx.input.isKeyJustPressed(Input.Keys.O)) {
-                camera.zoom += 0.3f;
+                gameCamera.zoomOutInstant(0.3f);
             }
             if (Gdx.input.isKeyJustPressed(Input.Keys.P)) {
-                camera.zoom -= 0.3f;
+                gameCamera.zoomInInstant(0.3f);
             }
         }
 
@@ -237,7 +219,7 @@ public abstract class GameScreen implements Screen {
         if (Gdx.input.isKeyJustPressed(Input.Keys.E) && spawnRectangle != null) {
             handleInteraction(spawnRectangle);
         } else if (Gdx.input.isKeyJustPressed(Input.Keys.E) && inspectRectangle != null) {
-            inspect(inspectRectangle);
+            inspect();
         } else if (Gdx.input.isKeyJustPressed(Input.Keys.E) && npc != null) {
             talkToNPC(npc);
         }
@@ -247,19 +229,20 @@ public abstract class GameScreen implements Screen {
         game.loadRoute(rectangle.getName(), rectangle.getSpawnName());
     }
 
-    private void inspect(InspectRectangle rectangle) {
+    private void inspect() {
         if (player.getState() == PlayerState.idle) {
-            camera.zoom -= 0.5f;
+            gameCamera.zoomIn(0.2f);
             player.setState(PlayerState.inspecting);
         } else if (player.getState() == PlayerState.inspecting) {
-            camera.zoom += 0.5f;
+            gameCamera.zoomOut(0.2f);
             player.setState(PlayerState.idle);
         }
     }
 
-    private void drawInspection() {
+    private void drawInspection(InspectRectangle rectangle) {
+        String text = bundleController.getBundle().get(rectangle.getStringID());
         game.hudBatch.begin();
-        dialogDrawer.draw(game.hudBatch);
+        dialogDrawer.draw(game.hudBatch, text);
         game.hudBatch.end();
     }
 

@@ -96,7 +96,11 @@
  </objectgroup>
  <objectgroup color="#00ff00" id="6" name="Interaction">
   <object id="24" name="bolero:house1" type="spawn" x="313" y="360" width="48" height="53"/>
-  <object id="36" name="locked" type="inspect" x="481" y="241" width="31" height="40"/>
+  <object id="36" name="locked" type="inspect" x="481" y="241" width="31" height="40">
+   <properties>
+    <property name="string_id" value="locked"/>
+   </properties>
+  </object>
  </objectgroup>
  <objectgroup color="#0000ff" id="5" name="Spawn">
   <object id="15" name="initial" type="player" x="336" y="334">

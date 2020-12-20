@@ -68,7 +68,9 @@ public class InteractionMapper {
     }
 
     private void generateInspectRectangle(Rectangle rectangle, MapObject object) {
-        inspectRectangles.add(new InspectRectangle(rectangle));
+        String stringID = object.getProperties().get("string_id", String.class);
+
+        inspectRectangles.add(new InspectRectangle(rectangle, stringID));
     }
 
     public ArrayList<InteractionRectangle> getAllRectangles() {
