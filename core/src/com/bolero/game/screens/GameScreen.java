@@ -165,7 +165,7 @@ public abstract class GameScreen implements Screen {
     private void drawHUD() {
         game.hudBatch.begin();
         if (game.debugMode) {
-            debugDrawer.drawDebugInfo(game.font, game.hudBatch, player, game.currentScreen);
+            debugDrawer.drawDebugInfo(game.font, game.hudBatch, player, game.currentScreen, gameCamera.getCamera().zoom);
         }
         game.hudBatch.end();
     }
