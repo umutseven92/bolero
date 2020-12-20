@@ -10,6 +10,7 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
 import com.bolero.game.NPC;
 import com.bolero.game.enums.SpawnType;
+import com.bolero.game.exceptions.MissingSpawnTypeException;
 
 import java.util.ArrayList;
 
@@ -23,11 +24,16 @@ public class NPCController implements Disposable {
         npcs = new ArrayList<>();
     }
 
-    public void spawnNPCs(String spawnLayer, float unit, World world) {
+    public void spawnNPCs(String spawnLayer, float unit, World world) throws MissingSpawnTypeException {
         MapObjects spawnObjects = map.getLayers().get(spawnLayer).getObjects();
         for (MapObject spawn : spawnObjects) {
             MapProperties props = spawn.getProperties();
-            String type = (String) props.get("type");
+            String type = props.get("type", String.class);
+
+            if (type == null) {
+                throw new MissingSpawnTypeException();
+            }
+
             if (SpawnType.valueOf(type) == SpawnType.npc) {
                 Vector2 spawnPosition = new Vector2((float) props.get("x") / unit, (float) props.get("y") / unit);
                 NPC npc = new NPC(spawnPosition, world, 2.5f, 2.3f, 5f, 0.5f, "npc.png");

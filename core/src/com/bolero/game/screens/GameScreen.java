@@ -17,6 +17,9 @@ import com.bolero.game.controllers.NPCController;
 import com.bolero.game.drawers.DebugDrawer;
 import com.bolero.game.drawers.DialogDrawer;
 import com.bolero.game.enums.PlayerState;
+import com.bolero.game.exceptions.MissingInteractionTypeException;
+import com.bolero.game.exceptions.MissingSpawnTypeException;
+import com.bolero.game.exceptions.WrongInteractionTypeException;
 import com.bolero.game.icons.ButtonIcon;
 import com.bolero.game.interactions.InspectRectangle;
 import com.bolero.game.interactions.InteractionRectangle;
@@ -52,7 +55,7 @@ public abstract class GameScreen implements Screen {
     private final BundleController bundleController;
     private final MapController mapController;
 
-    public GameScreen(BoleroGame game, String mapPath) {
+    public GameScreen(BoleroGame game, String mapPath) throws WrongInteractionTypeException, MissingInteractionTypeException, MissingSpawnTypeException {
         this.game = game;
 
         map = new TmxMapLoader().load(mapPath);

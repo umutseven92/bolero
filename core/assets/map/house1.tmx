@@ -4,6 +4,9 @@
  <tileset firstgid="1025" source="interiors.tsx"/>
  <tileset firstgid="2049" source="furniture.tsx"/>
  <layer id="1" name="Ground" width="20" height="15">
+  <properties>
+   <property name="foreground" type="bool" value="false"/>
+  </properties>
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -23,6 +26,9 @@
 </data>
  </layer>
  <layer id="2" name="Background" width="20" height="15">
+  <properties>
+   <property name="foreground" type="bool" value="false"/>
+  </properties>
   <data encoding="csv">
 1026,1027,1028,1029,1030,1027,1028,1027,1028,1029,1027,1028,1029,1027,1030,1027,1028,1027,1028,1035,
 1058,1059,1060,1061,1062,1059,1060,1059,1060,1061,1059,1060,1061,1059,1062,1059,1060,1059,1060,1067,
@@ -42,6 +48,9 @@
 </data>
  </layer>
  <layer id="7" name="Objects" width="20" height="15">
+  <properties>
+   <property name="foreground" type="bool" value="false"/>
+  </properties>
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,1045,0,0,0,0,0,0,
 0,0,0,0,1325,0,2242,2114,2178,0,2074,0,0,1077,1325,0,2120,2178,0,0,
@@ -61,6 +70,9 @@
 </data>
  </layer>
  <layer id="3" name="Foreground" width="20" height="15">
+  <properties>
+   <property name="foreground" type="bool" value="true"/>
+  </properties>
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -95,7 +107,12 @@
   <object id="35" x="196" y="45" width="87" height="8"/>
  </objectgroup>
  <objectgroup color="#00ff00" id="6" name="Interaction">
-  <object id="24" name="bolero:house1" type="spawn" x="313" y="360" width="48" height="53"/>
+  <object id="24" name="outside" type="transition" x="313" y="360" width="48" height="53">
+   <properties>
+    <property name="map_id" value="bolero"/>
+    <property name="spawn_id" value="house1"/>
+   </properties>
+  </object>
   <object id="36" name="locked" type="inspect" x="481" y="241" width="31" height="40">
    <properties>
     <property name="string_id" value="locked"/>

@@ -3,6 +3,9 @@ package com.bolero.game;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.bolero.game.exceptions.MissingInteractionTypeException;
+import com.bolero.game.exceptions.MissingSpawnTypeException;
+import com.bolero.game.exceptions.WrongInteractionTypeException;
 import com.bolero.game.screens.BoleroScreen;
 import com.bolero.game.screens.GameScreen;
 import com.bolero.game.screens.HouseScreen;
@@ -31,8 +34,15 @@ public class BoleroGame extends Game {
         hudBatch = new SpriteBatch();
         font = new BitmapFont();
 
-        BoleroScreen boleroScreen = new BoleroScreen(this);
-        HouseScreen houseScreen = new HouseScreen(this);
+        BoleroScreen boleroScreen = null;
+        HouseScreen houseScreen = null;
+        try {
+            boleroScreen = new BoleroScreen(this);
+            houseScreen = new HouseScreen(this);
+        } catch (MissingInteractionTypeException | WrongInteractionTypeException | MissingSpawnTypeException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
 
         screens = new HashMap<>();
 

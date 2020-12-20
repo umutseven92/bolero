@@ -7,6 +7,8 @@ import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.math.Rectangle;
 import com.bolero.game.enums.InteractionType;
+import com.bolero.game.exceptions.MissingInteractionTypeException;
+import com.bolero.game.exceptions.WrongInteractionTypeException;
 import com.bolero.game.interactions.InspectRectangle;
 import com.bolero.game.interactions.InteractionRectangle;
 import com.bolero.game.interactions.SpawnRectangle;
@@ -24,7 +26,7 @@ public class InteractionMapper {
         inspectRectangles = new ArrayList<>();
     }
 
-    public void createInteractionMap(String intLayer, String fallbackSpawn) {
+    public void createInteractionMap(String intLayer, String fallbackSpawn) throws MissingInteractionTypeException, WrongInteractionTypeException {
 
         MapLayer layer = map.getLayers().get(intLayer);
 
@@ -33,17 +35,27 @@ public class InteractionMapper {
             for (MapObject object : objects) {
                 Rectangle rectangle = ((RectangleMapObject) object).getRectangle();
                 String type = object.getProperties().get("type", String.class);
-                InteractionType interactionType = InteractionType.valueOf(type);
+
+                if (type == null) {
+                    throw new MissingInteractionTypeException();
+                }
+
+                InteractionType interactionType;
+                try {
+                    interactionType = InteractionType.valueOf(type);
+                } catch (IllegalArgumentException e) {
+                    throw new WrongInteractionTypeException(type);
+                }
 
                 switch (interactionType) {
-                    case spawn:
-                        generateSpawnRectangle(rectangle, object, fallbackSpawn);
+                    case transition:
+                        generateTransitionRectangle(rectangle, object, fallbackSpawn);
                         break;
                     case inspect:
                         generateInspectRectangle(rectangle, object);
                         break;
                     default:
-                        throw new IllegalStateException("Unexpected value: " + interactionType);
+                        throw new WrongInteractionTypeException(type);
                 }
 
 
@@ -51,19 +63,10 @@ public class InteractionMapper {
         }
     }
 
-    private void generateSpawnRectangle(Rectangle rectangle, MapObject object, String fallbackSpawn) {
-        String spawnName;
-        String mapName;
-        String fullName = object.getName();
-        if (!fullName.contains(":")) {
-            mapName = fullName;
-            spawnName = fallbackSpawn;
-        } else {
-            String[] split = fullName.split(":");
-            mapName = split[0];
-            spawnName = split[1];
-        }
-
+    private void generateTransitionRectangle(Rectangle rectangle, MapObject object, String fallbackSpawn) {
+        String mapName = object.getProperties().get("map_id", String.class);
+        String spawnProperty = object.getProperties().get("spawn_id", String.class);
+        String spawnName = spawnProperty == null ? fallbackSpawn : spawnProperty;
         spawnRectangles.add(new SpawnRectangle(mapName, spawnName, rectangle));
     }
 

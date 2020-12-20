@@ -5,7 +5,6 @@
  <layer id="1" name="Grass" width="50" height="50">
   <properties>
    <property name="foreground" type="bool" value="false"/>
-   <property name="render_order" type="int" value="0"/>
   </properties>
   <data encoding="csv">
 536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,
@@ -63,7 +62,6 @@
  <layer id="2" name="Background" width="50" height="50">
   <properties>
    <property name="foreground" type="bool" value="false"/>
-   <property name="render_order" type="int" value="1"/>
   </properties>
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,538,539,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,570,571,0,0,0,
@@ -121,7 +119,6 @@
  <layer id="8" name="Objects" width="50" height="50">
   <properties>
    <property name="foreground" type="bool" value="false"/>
-   <property name="render_order" type="int" value="2"/>
   </properties>
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -179,7 +176,6 @@
  <layer id="3" name="Houses" width="50" height="50">
   <properties>
    <property name="foreground" type="bool" value="false"/>
-   <property name="render_order" type="int" value="3"/>
   </properties>
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -237,7 +233,6 @@
  <layer id="4" name="Foreground" width="50" height="50" tintcolor="#b4ffffff">
   <properties>
    <property name="foreground" type="bool" value="true"/>
-   <property name="render_order" type="int" value="4"/>
   </properties>
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -320,7 +315,11 @@
   <object id="54" x="642" y="672" width="30" height="34"/>
  </objectgroup>
  <objectgroup color="#00ff00" id="7" name="Interaction">
-  <object id="35" name="house1" type="spawn" x="960" y="664" width="32" height="32"/>
+  <object id="35" name="house1" type="transition" x="960" y="664" width="32" height="32">
+   <properties>
+    <property name="map_id" value="house1"/>
+   </properties>
+  </object>
   <object id="51" name="pillar" type="inspect" x="459" y="1034" width="42" height="37">
    <properties>
     <property name="string_id" value="pillar"/>
