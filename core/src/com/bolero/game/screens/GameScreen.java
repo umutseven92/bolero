@@ -8,11 +8,11 @@ import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.MapProperties;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
-import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.bolero.game.*;
 import com.bolero.game.controllers.BundleController;
+import com.bolero.game.controllers.MapController;
 import com.bolero.game.controllers.NPCController;
 import com.bolero.game.drawers.DebugDrawer;
 import com.bolero.game.drawers.DialogDrawer;
@@ -33,16 +33,12 @@ public abstract class GameScreen implements Screen {
 
     private final GameCamera gameCamera;
     private final TiledMap map;
-    private final int[] backgroundLayers;
-    private final int[] foregroundLayers;
 
     private final Player player;
     private final ButtonIcon eButtonIcon;
 
     private final float UNIT = 16f;
     private final MapValues mapValues;
-
-    private final OrthogonalTiledMapRenderer mapRenderer;
 
     private final CollisionMapper collisionMapper;
     private final InteractionMapper interactionMapper;
@@ -54,16 +50,15 @@ public abstract class GameScreen implements Screen {
 
     private final NPCController npcController;
     private final BundleController bundleController;
+    private final MapController mapController;
 
-    public GameScreen(BoleroGame game, String mapPath, int[] backgroundLayers, int[] foregroundLayers) {
+    public GameScreen(BoleroGame game, String mapPath) {
         this.game = game;
-        this.foregroundLayers = foregroundLayers;
-        this.backgroundLayers = backgroundLayers;
+
         map = new TmxMapLoader().load(mapPath);
         mapValues = new MapValues(map);
 
-        mapRenderer = new OrthogonalTiledMapRenderer(map, 1 / UNIT);
-
+        mapController = new MapController(map, UNIT);
         setPlayerSpawnPoint(game.SPAWN_INITIAL_OBJ);
 
         gameCamera = new GameCamera();
@@ -114,8 +109,8 @@ public abstract class GameScreen implements Screen {
         npcController.setPositions();
         gameCamera.update(player.getPosition(), UNIT, mapValues, delta);
 
-        mapRenderer.setView(gameCamera.getCamera());
-        mapRenderer.render(backgroundLayers);
+        mapController.setView(gameCamera.getCamera());
+        mapController.drawBackground();
 
         if (game.debugMode) {
             debugDrawer.drawInteractionZones(interactionMapper.getAllRectangles(), npcController.getNpcs());
@@ -132,11 +127,10 @@ public abstract class GameScreen implements Screen {
 
         game.batch.end();
 
-        mapRenderer.render(foregroundLayers);
-
+        mapController.drawForeground();
         drawHUD();
 
-        if (player.getState() == PlayerState.inspecting) {
+        if (player.getState() == PlayerState.inspecting && inspectRectangle != null) {
             drawInspection(inspectRectangle);
         }
 
@@ -319,8 +313,8 @@ public abstract class GameScreen implements Screen {
         world.dispose();
         player.dispose();
         collisionMapper.dispose();
+        mapController.dispose();
         debugDrawer.dispose();
-        mapRenderer.dispose();
         eButtonIcon.dispose();
         npcController.dispose();
         dialogDrawer.dispose();

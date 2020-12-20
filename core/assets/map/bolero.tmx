@@ -3,6 +3,10 @@
  <tileset firstgid="1" source="walls,ground,decorative.tsx"/>
  <tileset firstgid="1025" source="houses.tsx"/>
  <layer id="1" name="Grass" width="50" height="50">
+  <properties>
+   <property name="foreground" type="bool" value="false"/>
+   <property name="render_order" type="int" value="0"/>
+  </properties>
   <data encoding="csv">
 536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,
 536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,536,
@@ -57,6 +61,10 @@
 </data>
  </layer>
  <layer id="2" name="Background" width="50" height="50">
+  <properties>
+   <property name="foreground" type="bool" value="false"/>
+   <property name="render_order" type="int" value="1"/>
+  </properties>
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,538,539,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,570,571,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,570,571,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,538,539,0,0,0,
@@ -111,6 +119,10 @@
 </data>
  </layer>
  <layer id="8" name="Objects" width="50" height="50">
+  <properties>
+   <property name="foreground" type="bool" value="false"/>
+   <property name="render_order" type="int" value="2"/>
+  </properties>
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -165,6 +177,10 @@
 </data>
  </layer>
  <layer id="3" name="Houses" width="50" height="50">
+  <properties>
+   <property name="foreground" type="bool" value="false"/>
+   <property name="render_order" type="int" value="3"/>
+  </properties>
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -219,6 +235,10 @@
 </data>
  </layer>
  <layer id="4" name="Foreground" width="50" height="50" tintcolor="#b4ffffff">
+  <properties>
+   <property name="foreground" type="bool" value="true"/>
+   <property name="render_order" type="int" value="4"/>
+  </properties>
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
