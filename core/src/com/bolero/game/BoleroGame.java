@@ -49,8 +49,9 @@ public class BoleroGame extends Game {
         screens.put("bolero", boleroScreen);
         screens.put("house1", houseScreen);
 
-        currentScreen = "bolero";
-        this.setScreen(boleroScreen);
+        // TODO: set back to bolero
+        currentScreen = "house1";
+        this.setScreen(houseScreen);
     }
 
     public void loadRoute(String screenName, String spawnName) {

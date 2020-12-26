@@ -9,24 +9,21 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Disposable;
+import com.bolero.game.data.CharacterValues;
+import com.bolero.game.data.SpriteSheetValues;
 import com.bolero.game.enums.CharacterState;
 
 abstract public class Character implements Disposable {
     private CharacterState state = CharacterState.idle;
     private Direction direction = Direction.right;
 
-    private static final int FRAME_COLS = 10, FRAME_ROWS = 10;
+    private final SpriteSheetValues ssValues;
 
     private Animation<TextureRegion> walkAnimation;
     private Animation<TextureRegion> idleAnimation;
 
     private final Texture spriteSheet;
-
-    private final float MAX_VELOCITY;
-    private final float SPEED;
-
-    private final float width;
-    private final float height;
+    private final CharacterValues characterValues;
 
     private final Sprite sprite;
     protected final Body body;
@@ -49,36 +46,36 @@ abstract public class Character implements Disposable {
         this.state = state;
     }
 
-    public Character(Vector2 position, World box2DWorld, float width, float height, float maxVelocity, float speed, String texturePath, BodyDef.BodyType bodyType) {
-        this.width = width;
-        this.height = height;
-        this.MAX_VELOCITY = maxVelocity;
-        this.SPEED = speed;
+    public Character(Vector2 position, World box2DWorld, CharacterValues characterValues,
+                     String texturePath, SpriteSheetValues ssValues, BodyDef.BodyType bodyType) {
+        this.characterValues = characterValues;
         this.position = position;
         this.spriteSheet = new Texture(Gdx.files.internal(texturePath));
+        this.ssValues = ssValues;
+
         loadAnimationsFromSpiteSheet();
 
         this.sprite = new Sprite();
-        sprite.setSize(width, height);
+        sprite.setSize(characterValues.width, characterValues.height);
         body = createPlayerBody(box2DWorld, bodyType);
     }
 
     private void loadAnimationsFromSpiteSheet() {
         TextureRegion[][] textureMatrix = TextureRegion.split(spriteSheet,
-                spriteSheet.getWidth() / FRAME_COLS,
-                spriteSheet.getHeight() / FRAME_ROWS);
+                spriteSheet.getWidth() / ssValues.cols,
+                spriteSheet.getHeight() / ssValues.rows);
 
-        TextureRegion[] walkFrames = new TextureRegion[FRAME_COLS];
-        TextureRegion[] idleFrames = new TextureRegion[FRAME_COLS];
+        TextureRegion[] walkFrames = new TextureRegion[ssValues.cols];
+        TextureRegion[] idleFrames = new TextureRegion[ssValues.cols];
 
         int index = 0;
-        for (int j = 0; j < FRAME_COLS; j++) {
-            idleFrames[index] = textureMatrix[5][j];
-            walkFrames[index] = textureMatrix[7][j];
+        for (int j = 0; j < ssValues.cols; j++) {
+            idleFrames[index] = textureMatrix[ssValues.idleRow][j];
+            walkFrames[index] = textureMatrix[ssValues.walkRow][j];
             index++;
         }
 
-        idleAnimation = new Animation<>(0.5f, idleFrames);
+        idleAnimation = new Animation<>(0.3f, idleFrames);
         walkAnimation = new Animation<>(0.1f, walkFrames);
 
         animationTime = 0f;
@@ -86,13 +83,13 @@ abstract public class Character implements Disposable {
 
     public void setPosition() {
         this.position = this.body.getPosition();
-        this.sprite.setPosition(this.position.x - this.width / 2, this.position.y - this.height / 2);
+        this.sprite.setPosition(this.position.x - this.characterValues.width / 2, this.position.y - this.characterValues.height / 2);
     }
 
     private Body createPlayerBody(World world, BodyDef.BodyType bodyType) {
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = bodyType;
-        bodyDef.position.set(position.x + width / 2, position.y + height / 2);
+        bodyDef.position.set(position.x + characterValues.width / 2, position.y + characterValues.height / 2);
 
         Body body = world.createBody(bodyDef);
 
@@ -122,41 +119,41 @@ abstract public class Character implements Disposable {
 
         Vector2 vel = body.getLinearVelocity();
 
-        if (vel.x > MAX_VELOCITY) {
+        if (vel.x > characterValues.maxVelocity) {
             return;
         }
 
-        applyMovement(SPEED, 0);
+        applyMovement(characterValues.speed, 0);
     }
 
     public void applyLeftMovement() {
         this.direction = Direction.left;
 
         Vector2 vel = body.getLinearVelocity();
-        if (vel.x < -MAX_VELOCITY) {
+        if (vel.x < -characterValues.maxVelocity) {
             return;
         }
 
-        applyMovement(-SPEED, 0);
+        applyMovement(-characterValues.speed, 0);
     }
 
     public void applyUpMovement() {
         Vector2 vel = body.getLinearVelocity();
 
-        if (vel.y > MAX_VELOCITY) {
+        if (vel.y > characterValues.maxVelocity) {
             return;
         }
-        applyMovement(0, SPEED);
+        applyMovement(0, characterValues.speed);
     }
 
     public void applyDownMovement() {
         Vector2 vel = body.getLinearVelocity();
 
-        if (vel.y < -MAX_VELOCITY) {
+        if (vel.y < -characterValues.maxVelocity) {
             return;
         }
 
-        applyMovement(0, -SPEED);
+        applyMovement(0, -characterValues.speed);
     }
 
     public void stop() {

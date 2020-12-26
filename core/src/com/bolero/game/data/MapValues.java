@@ -1,4 +1,4 @@
-package com.bolero.game;
+package com.bolero.game.data;
 
 import com.badlogic.gdx.maps.MapProperties;
 import com.badlogic.gdx.maps.tiled.TiledMap;

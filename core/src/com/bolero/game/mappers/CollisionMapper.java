@@ -9,7 +9,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Disposable;
-import com.bolero.game.MapValues;
+import com.bolero.game.data.MapValues;
 
 import java.util.ArrayList;
 

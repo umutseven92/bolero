@@ -332,7 +332,7 @@
   </object>
  </objectgroup>
  <objectgroup color="#0000ff" id="6" name="Spawn">
-  <object id="34" name="initial" type="player" x="480" y="1080">
+  <object id="34" name="initial" type="player" x="798" y="772">
    <point/>
   </object>
   <object id="40" name="house1" type="player" x="976" y="730">

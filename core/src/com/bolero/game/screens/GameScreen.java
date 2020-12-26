@@ -12,14 +12,15 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.bolero.game.BoleroGame;
 import com.bolero.game.GameCamera;
-import com.bolero.game.MapValues;
 import com.bolero.game.characters.NPC;
 import com.bolero.game.characters.Player;
 import com.bolero.game.controllers.BundleController;
 import com.bolero.game.controllers.MapController;
 import com.bolero.game.controllers.NPCController;
+import com.bolero.game.data.MapValues;
 import com.bolero.game.drawers.DebugDrawer;
 import com.bolero.game.drawers.DialogDrawer;
+import com.bolero.game.drawers.InspectDrawer;
 import com.bolero.game.enums.CharacterState;
 import com.bolero.game.exceptions.MissingInteractionTypeException;
 import com.bolero.game.exceptions.MissingSpawnTypeException;
@@ -52,6 +53,7 @@ public abstract class GameScreen implements Screen {
 
     private final DebugDrawer debugDrawer;
     private final DialogDrawer dialogDrawer;
+    private final InspectDrawer inspectDrawer;
     private Vector2 playerSpawnPosition;
     private float accumulator = 0;
 
@@ -83,6 +85,7 @@ public abstract class GameScreen implements Screen {
         interactionMapper.createInteractionMap(game.INT_LAYER, game.SPAWN_INITIAL_OBJ);
 
         debugDrawer = new DebugDrawer(UNIT, gameCamera.getCamera());
+        inspectDrawer = new InspectDrawer();
         dialogDrawer = new DialogDrawer();
         npcController = new NPCController(map);
         npcController.spawnNPCs(game.SPAWN_LAYER, UNIT, world);
@@ -108,8 +111,12 @@ public abstract class GameScreen implements Screen {
         InspectRectangle inspectRectangle = checkIfInInspectTriangle();
         NPC npc = checkIfNearNPC();
 
-        if (player.getState() != CharacterState.inspecting) {
+        if (player.getState() != CharacterState.inspecting && player.getState() != CharacterState.talking) {
             handleMovementInput();
+        }
+
+        if (player.getState() == CharacterState.talking) {
+            dialogDrawer.checkForInput();
         }
 
         player.setPosition();
@@ -128,7 +135,9 @@ public abstract class GameScreen implements Screen {
         player.draw(game.batch);
         npcController.drawNPCs(game.batch);
 
-        if ((spawnRectangle != null || inspectRectangle != null || npc != null) && player.getState() != CharacterState.inspecting) {
+        if ((spawnRectangle != null || inspectRectangle != null || npc != null) &&
+                player.getState() != CharacterState.inspecting &&
+                player.getState() != CharacterState.talking) {
             eButtonIcon.draw(game.batch);
         }
 
@@ -139,6 +148,8 @@ public abstract class GameScreen implements Screen {
 
         if (player.getState() == CharacterState.inspecting && inspectRectangle != null) {
             drawInspection(inspectRectangle);
+        } else if (player.getState() == CharacterState.talking) {
+            drawDialog();
         }
 
         handleInteractionInput(spawnRectangle, inspectRectangle, npc);
@@ -218,7 +229,7 @@ public abstract class GameScreen implements Screen {
 
     private void handleInteractionInput(SpawnRectangle spawnRectangle, InspectRectangle inspectRectangle, NPC npc) {
         if (Gdx.input.isKeyJustPressed(Input.Keys.E) && spawnRectangle != null) {
-            handleInteraction(spawnRectangle);
+            handleTransition(spawnRectangle);
         } else if (Gdx.input.isKeyJustPressed(Input.Keys.E) && inspectRectangle != null) {
             inspect();
         } else if (Gdx.input.isKeyJustPressed(Input.Keys.E) && npc != null) {
@@ -226,7 +237,7 @@ public abstract class GameScreen implements Screen {
         }
     }
 
-    private void handleInteraction(SpawnRectangle rectangle) {
+    private void handleTransition(SpawnRectangle rectangle) {
         game.loadRoute(rectangle.getName(), rectangle.getSpawnName());
     }
 
@@ -243,12 +254,31 @@ public abstract class GameScreen implements Screen {
     private void drawInspection(InspectRectangle rectangle) {
         String text = bundleController.getBundle().get(rectangle.getStringID());
         game.hudBatch.begin();
-        dialogDrawer.draw(game.hudBatch, text);
+        inspectDrawer.draw(game.hudBatch, text);
         game.hudBatch.end();
     }
 
     private void talkToNPC(NPC npc) {
-        player.setState(CharacterState.talking);
+        if (dialogDrawer.isActivated()) {
+            return;
+        }
+
+        if (player.getState() != CharacterState.talking) {
+            dialogDrawer.activate(npc);
+            gameCamera.zoomIn(0.2f);
+            player.setState(CharacterState.talking);
+            npc.setState(CharacterState.talking);
+        } else {
+            gameCamera.zoomOut(0.2f);
+            player.setState(CharacterState.idle);
+            npc.setState(CharacterState.idle);
+        }
+    }
+
+    private void drawDialog() {
+        game.hudBatch.begin();
+        dialogDrawer.draw(game.hudBatch);
+        game.hudBatch.end();
     }
 
     private SpawnRectangle checkIfInInteractionTriangle() {
@@ -324,6 +354,6 @@ public abstract class GameScreen implements Screen {
         debugDrawer.dispose();
         eButtonIcon.dispose();
         npcController.dispose();
-        dialogDrawer.dispose();
+        inspectDrawer.dispose();
     }
 }
