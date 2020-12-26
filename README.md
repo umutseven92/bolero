@@ -12,6 +12,7 @@
     * ~~Interaction layer~~
 * NPCs
     * ~~NPC spawn points~~
-    * Talk to NPCs
+    * ~~Talk to NPCs~~
     * NPC AI
 * ~~Spritesheet animation~~
+* ~~2D Lighting~~

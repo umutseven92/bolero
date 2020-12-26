@@ -37,7 +37,7 @@ public class CollisionMapper implements Disposable {
         return center.scl(1 / unit);
     }
 
-    public void createCollisions(float unit, MapValues mapValues, String collisionLayer) {
+    public void map(float unit, MapValues mapValues, String collisionLayer) {
         createWalls(unit, mapValues);
         createCollisionsFromMap(unit, collisionLayer);
     }

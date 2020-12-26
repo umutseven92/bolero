@@ -1,5 +1,6 @@
 package com.bolero.game.screens;
 
+import box2dLight.RayHandler;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
@@ -22,15 +23,14 @@ import com.bolero.game.drawers.DebugDrawer;
 import com.bolero.game.drawers.DialogDrawer;
 import com.bolero.game.drawers.InspectDrawer;
 import com.bolero.game.enums.CharacterState;
-import com.bolero.game.exceptions.MissingInteractionTypeException;
-import com.bolero.game.exceptions.MissingSpawnTypeException;
-import com.bolero.game.exceptions.WrongInteractionTypeException;
+import com.bolero.game.exceptions.MapperException;
 import com.bolero.game.icons.ButtonIcon;
 import com.bolero.game.interactions.InspectRectangle;
 import com.bolero.game.interactions.InteractionRectangle;
 import com.bolero.game.interactions.SpawnRectangle;
 import com.bolero.game.mappers.CollisionMapper;
 import com.bolero.game.mappers.InteractionMapper;
+import com.bolero.game.mappers.LightMapper;
 
 import java.util.ArrayList;
 
@@ -50,6 +50,7 @@ public abstract class GameScreen implements Screen {
 
     private final CollisionMapper collisionMapper;
     private final InteractionMapper interactionMapper;
+    private final LightMapper lightMapper;
 
     private final DebugDrawer debugDrawer;
     private final DialogDrawer dialogDrawer;
@@ -60,8 +61,9 @@ public abstract class GameScreen implements Screen {
     private final NPCController npcController;
     private final BundleController bundleController;
     private final MapController mapController;
+    private final RayHandler rayHandler;
 
-    public GameScreen(BoleroGame game, String mapPath) throws WrongInteractionTypeException, MissingInteractionTypeException, MissingSpawnTypeException {
+    public GameScreen(BoleroGame game, String mapPath) throws MapperException {
         this.game = game;
 
         map = new TmxMapLoader().load(mapPath);
@@ -79,10 +81,18 @@ public abstract class GameScreen implements Screen {
         gameCamera.updatePosition(player.getPosition(), UNIT, mapValues);
 
         collisionMapper = new CollisionMapper(world, map);
-        collisionMapper.createCollisions(UNIT, mapValues, game.COL_LAYER);
+        collisionMapper.map(UNIT, mapValues, game.COL_LAYER);
 
         interactionMapper = new InteractionMapper(map);
-        interactionMapper.createInteractionMap(game.INT_LAYER, game.SPAWN_INITIAL_OBJ);
+        interactionMapper.map(game.INT_LAYER, game.SPAWN_INITIAL_OBJ);
+
+        rayHandler = new RayHandler(world);
+
+        rayHandler.setAmbientLight(0f, 0f, 0f, 0.5f);
+        rayHandler.setBlurNum(3);
+
+        lightMapper = new LightMapper(map, rayHandler);
+        lightMapper.map(game.LIGHT_LAYER, UNIT);
 
         debugDrawer = new DebugDrawer(UNIT, gameCamera.getCamera());
         inspectDrawer = new InspectDrawer();
@@ -158,6 +168,9 @@ public abstract class GameScreen implements Screen {
         }
 
         doPhysicsStep(delta);
+
+        rayHandler.setCombinedMatrix(gameCamera.getCamera());
+        rayHandler.updateAndRender();
     }
 
 
@@ -355,5 +368,7 @@ public abstract class GameScreen implements Screen {
         eButtonIcon.dispose();
         npcController.dispose();
         inspectDrawer.dispose();
+        lightMapper.dispose();
+        rayHandler.dispose();
     }
 }
