@@ -3,22 +3,28 @@ package com.bolero.game;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.bolero.game.controllers.BundleController;
 import com.bolero.game.exceptions.MapperException;
 import com.bolero.game.screens.BoleroScreen;
 import com.bolero.game.screens.GameScreen;
 import com.bolero.game.screens.HouseScreen;
 
-import java.io.Console;
 import java.util.HashMap;
 
 public class BoleroGame extends Game {
     private HashMap<String, GameScreen> screens;
+    private BundleController bundleController;
 
-    public final String COL_LAYER = "Collision";
-    public final String SPAWN_LAYER = "Spawn";
-    public final String INT_LAYER = "Interaction";
-    public final String LIGHT_LAYER = "Lights";
-    public final String SPAWN_INITIAL_OBJ = "initial";
+    public final static String COL_LAYER = "Collision";
+    public final static String SPAWN_LAYER = "Spawn";
+    public final static String INT_LAYER = "Interaction";
+    public final static String LIGHT_LAYER = "Lights";
+    public final static String SPAWN_INITIAL_OBJ = "initial";
+    public final static int DAWN_START = 6;
+   public final static int DAWN_END = 8;
+
+    public final static int DUSK_START = 18;
+    public final static int DUSK_END = 20;
 
     public SpriteBatch batch;
     public SpriteBatch hudBatch;
@@ -28,12 +34,21 @@ public class BoleroGame extends Game {
 
     public String currentScreen;
 
+    public Clock clock;
+
+    public BundleController getBundleController() {
+        return bundleController;
+    }
+
     @Override
     public void create() {
+        bundleController = new BundleController();
+
         batch = new SpriteBatch();
         hudBatch = new SpriteBatch();
         font = new BitmapFont();
 
+        clock = new Clock(bundleController);
         BoleroScreen boleroScreen = null;
         HouseScreen houseScreen = null;
         try {

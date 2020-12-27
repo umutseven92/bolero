@@ -13,9 +13,9 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.bolero.game.BoleroGame;
 import com.bolero.game.GameCamera;
+import com.bolero.game.Sun;
 import com.bolero.game.characters.NPC;
 import com.bolero.game.characters.Player;
-import com.bolero.game.controllers.BundleController;
 import com.bolero.game.controllers.MapController;
 import com.bolero.game.controllers.NPCController;
 import com.bolero.game.data.MapValues;
@@ -59,9 +59,10 @@ public abstract class GameScreen implements Screen {
     private float accumulator = 0;
 
     private final NPCController npcController;
-    private final BundleController bundleController;
     private final MapController mapController;
     private final RayHandler rayHandler;
+
+    private final Sun sun;
 
     public GameScreen(BoleroGame game, String mapPath) throws MapperException {
         this.game = game;
@@ -88,20 +89,21 @@ public abstract class GameScreen implements Screen {
 
         rayHandler = new RayHandler(world);
 
-        rayHandler.setAmbientLight(0f, 0f, 0f, 0.5f);
         rayHandler.setBlurNum(3);
 
-        lightMapper = new LightMapper(map, rayHandler);
+        sun = new Sun(rayHandler, game.clock);
+        sun.update();
+
+        lightMapper = new LightMapper(map, rayHandler, game.clock);
         lightMapper.map(game.LIGHT_LAYER, UNIT);
 
+        lightMapper.update();
         debugDrawer = new DebugDrawer(UNIT, gameCamera.getCamera());
         inspectDrawer = new InspectDrawer();
         dialogDrawer = new DialogDrawer();
         npcController = new NPCController(map);
         npcController.spawnNPCs(game.SPAWN_LAYER, UNIT, world);
-        bundleController = new BundleController();
     }
-
 
     public void setPlayerSpawnPoint(String name) {
         MapObject playerSpawnObject = map.getLayers().get(game.SPAWN_LAYER).getObjects().get(name);
@@ -110,7 +112,6 @@ public abstract class GameScreen implements Screen {
 
         playerSpawnPosition = new Vector2((float) props.get("x") / UNIT, (float) props.get("y") / UNIT);
     }
-
 
     @Override
     public void render(float delta) {
@@ -182,6 +183,9 @@ public abstract class GameScreen implements Screen {
         float TIME_STEP = 1 / 16f;
         while (accumulator >= TIME_STEP) {
             world.step(TIME_STEP, 6, 2);
+            game.clock.increment();
+            sun.update();
+            lightMapper.update();
             accumulator -= TIME_STEP;
         }
     }
@@ -189,7 +193,7 @@ public abstract class GameScreen implements Screen {
     private void drawHUD() {
         game.hudBatch.begin();
         if (game.debugMode) {
-            debugDrawer.drawDebugInfo(game.font, game.hudBatch, player, game.currentScreen, gameCamera.getCamera().zoom);
+            debugDrawer.drawDebugInfo(game.font, game.hudBatch, player, game.currentScreen, gameCamera.getCamera().zoom, game.clock.getCurrentHour(), game.clock.getCurrentDay());
         }
         game.hudBatch.end();
     }
@@ -265,7 +269,7 @@ public abstract class GameScreen implements Screen {
     }
 
     private void drawInspection(InspectRectangle rectangle) {
-        String text = bundleController.getBundle().get(rectangle.getStringID());
+        String text = game.getBundleController().getString(rectangle.getStringID());
         game.hudBatch.begin();
         inspectDrawer.draw(game.hudBatch, text);
         game.hudBatch.end();
@@ -324,7 +328,6 @@ public abstract class GameScreen implements Screen {
         }
 
         return null;
-
     }
 
     private void respawnPlayer() {
@@ -335,7 +338,6 @@ public abstract class GameScreen implements Screen {
     public void show() {
 
     }
-
 
     @Override
     public void resize(int width, int height) {

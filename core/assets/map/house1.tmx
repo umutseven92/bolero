@@ -125,6 +125,7 @@
     <property name="color" type="color" value="#ffffbb1c"/>
     <property name="distance" type="float" value="10"/>
     <property name="rays" type="int" value="100"/>
+    <property name="time" value="night"/>
    </properties>
    <point/>
   </object>
@@ -133,16 +134,18 @@
     <property name="color" type="color" value="#ffffbb1c"/>
     <property name="distance" type="float" value="5"/>
     <property name="rays" type="int" value="100"/>
+    <property name="time" value="night"/>
    </properties>
    <point/>
   </object>
   <object id="42" name="window1" type="cone" x="144" y="56">
    <properties>
     <property name="color" type="color" value="#ffffbb1c"/>
-    <property name="cone_degree" type="float" value="90"/>
-    <property name="direction_degree" type="float" value="270"/>
+    <property name="cone_degree" type="float" value="30"/>
+    <property name="direction_degree" type="float" value="-90"/>
     <property name="distance" type="float" value="5"/>
     <property name="rays" type="int" value="100"/>
+    <property name="time" value="day"/>
    </properties>
    <point/>
   </object>

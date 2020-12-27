@@ -11,7 +11,7 @@ public class BundleController {
         bundle = I18NBundle.createBundle(Gdx.files.internal("locale/strings"));
     }
 
-    public I18NBundle getBundle() {
-        return bundle;
+    public String getString(String key) {
+        return this.bundle.get(key);
     }
 }

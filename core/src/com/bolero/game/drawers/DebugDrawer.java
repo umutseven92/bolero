@@ -31,7 +31,7 @@ public class DebugDrawer implements Disposable {
         box2DDebugRenderer = new Box2DDebugRenderer();
     }
 
-    public void drawDebugInfo(BitmapFont font, SpriteBatch batch, Player player, String mapName, float zoomLevel) {
+    public void drawDebugInfo(BitmapFont font, SpriteBatch batch, Player player, String mapName, float zoomLevel, int hour, String day) {
         float cameraRight = Gdx.graphics.getWidth() - unit * 15;
         float cameraLeft = unit * 2;
         float cameraY = Gdx.graphics.getHeight() - unit * 2;
@@ -41,6 +41,7 @@ public class DebugDrawer implements Disposable {
 
         font.draw(batch, "Map: " + mapName, cameraLeft, cameraY);
         font.draw(batch, "Player State: " + player.getState(), cameraLeft, camera3Y);
+        font.draw(batch, String.format("Time: %d, %s", hour, day), cameraLeft, camera4Y);
         font.draw(batch, "Player Pos: " + player.getPosition().x + ", " + player.getPosition().y, cameraRight, cameraY);
         font.draw(batch, "Camera Pos: " + camera.position.x + ", " + camera.position.y, cameraRight, camera3Y);
         font.draw(batch, "Zoom Level: " + zoomLevel, cameraRight, camera4Y);
