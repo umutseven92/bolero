@@ -2,11 +2,11 @@ package com.bolero.game.interactions;
 
 import com.badlogic.gdx.math.Rectangle;
 
-public class SpawnRectangle extends InteractionRectangle {
+public class TransitionRectangle extends InteractionRectangle {
     private final String mapName;
     private final String spawnName;
 
-    public SpawnRectangle(String mapName, String spawnName, Rectangle rectangle) {
+    public TransitionRectangle(String mapName, String spawnName, Rectangle rectangle) {
         super(rectangle);
         this.mapName = mapName;
         this.spawnName = spawnName;

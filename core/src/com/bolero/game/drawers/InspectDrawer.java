@@ -5,18 +5,16 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Disposable;
 
-public class InspectDrawer implements Disposable {
+public class InspectDrawer extends UIDrawer implements Disposable {
     private final Table table;
-    private final Skin uiSkin;
     private final Texture buttonTexture;
     private final Label textLabel;
 
     public InspectDrawer() {
-        uiSkin = new Skin(Gdx.files.internal("ui/uiskin.json"));
+        super();
         buttonTexture = new Texture(Gdx.files.internal("buttons/green-E.png"));
         Image buttonImage = new Image(buttonTexture);
 
@@ -42,7 +40,7 @@ public class InspectDrawer implements Disposable {
 
     @Override
     public void dispose() {
+        super.dispose();
         buttonTexture.dispose();
-        uiSkin.dispose();
     }
 }

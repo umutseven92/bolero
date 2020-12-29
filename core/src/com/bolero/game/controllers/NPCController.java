@@ -8,6 +8,7 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
+import com.bolero.game.BoleroGame;
 import com.bolero.game.characters.NPC;
 import com.bolero.game.data.CharacterValues;
 import com.bolero.game.enums.SpawnType;
@@ -25,8 +26,8 @@ public class NPCController implements Disposable {
         npcs = new ArrayList<>();
     }
 
-    public void spawnNPCs(String spawnLayer, float unit, World world) throws MissingSpawnTypeException {
-        MapObjects spawnObjects = map.getLayers().get(spawnLayer).getObjects();
+    public void spawnNPCs(float unit, World world) throws MissingSpawnTypeException {
+        MapObjects spawnObjects = map.getLayers().get(BoleroGame.SPAWN_LAYER).getObjects();
         for (MapObject spawn : spawnObjects) {
             MapProperties props = spawn.getProperties();
             String type = props.get("type", String.class);
@@ -57,6 +58,17 @@ public class NPCController implements Disposable {
         for (NPC npc : npcs) {
             npc.draw(batch);
         }
+    }
+
+    public NPC checkIfNearNPC(Vector2 playerPos) {
+        for (NPC npc : this.npcs) {
+
+            if (npc.getTalkCircle().contains(playerPos)) {
+                return npc;
+            }
+        }
+
+        return null;
     }
 
     @Override

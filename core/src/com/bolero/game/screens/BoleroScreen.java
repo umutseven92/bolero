@@ -5,7 +5,7 @@ import com.bolero.game.exceptions.MapperException;
 
 public class BoleroScreen extends GameScreen {
 
-    public BoleroScreen(BoleroGame game) throws MapperException {
-        super(game, "map/bolero.tmx");
+    public BoleroScreen(BoleroGame game, String spawnPos) throws MapperException {
+        super(game, "bolero", "map/bolero.tmx", spawnPos);
     }
 }

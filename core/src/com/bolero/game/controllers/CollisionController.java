@@ -1,4 +1,4 @@
-package com.bolero.game.mappers;
+package com.bolero.game.controllers;
 
 import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapObject;
@@ -9,16 +9,17 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Disposable;
+import com.bolero.game.BoleroGame;
 import com.bolero.game.data.MapValues;
 
 import java.util.ArrayList;
 
-public class CollisionMapper implements Disposable {
+public class CollisionController implements Disposable {
     private final World world;
     private final TiledMap map;
     private final ArrayList<Shape> shapes = new ArrayList<>();
 
-    public CollisionMapper(World world, TiledMap map) {
+    public CollisionController(World world, TiledMap map) {
         this.world = world;
         this.map = map;
     }
@@ -37,13 +38,13 @@ public class CollisionMapper implements Disposable {
         return center.scl(1 / unit);
     }
 
-    public void map(float unit, MapValues mapValues, String collisionLayer) {
+    public void map(float unit, MapValues mapValues) {
         createWalls(unit, mapValues);
-        createCollisionsFromMap(unit, collisionLayer);
+        createCollisionsFromMap(unit);
     }
 
-    private void createCollisionsFromMap(float unit, String collisionLayer) {
-        MapLayer layer = map.getLayers().get(collisionLayer);
+    private void createCollisionsFromMap(float unit) {
+        MapLayer layer = map.getLayers().get(BoleroGame.COL_LAYER);
 
         if (layer == null) {
             return;

@@ -4,15 +4,17 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.bolero.game.controllers.BundleController;
-import com.bolero.game.exceptions.MapperException;
 import com.bolero.game.screens.BoleroScreen;
 import com.bolero.game.screens.GameScreen;
 import com.bolero.game.screens.HouseScreen;
 
+import java.lang.reflect.Constructor;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class BoleroGame extends Game {
-    private HashMap<String, GameScreen> screens;
+    private ArrayList<GameScreen> screenPool;
+    private HashMap<String, Class> screens;
     private BundleController bundleController;
 
     public final static String COL_LAYER = "Collision";
@@ -21,7 +23,7 @@ public class BoleroGame extends Game {
     public final static String LIGHT_LAYER = "Lights";
     public final static String SPAWN_INITIAL_OBJ = "initial";
     public final static int DAWN_START = 6;
-   public final static int DAWN_END = 8;
+    public final static int DAWN_END = 8;
 
     public final static int DUSK_START = 18;
     public final static int DUSK_END = 20;
@@ -32,7 +34,7 @@ public class BoleroGame extends Game {
 
     public Boolean debugMode = false;
 
-    public String currentScreen;
+    public GameScreen currentScreen;
 
     public Clock clock;
 
@@ -49,31 +51,34 @@ public class BoleroGame extends Game {
         font = new BitmapFont();
 
         clock = new Clock(bundleController);
-        BoleroScreen boleroScreen = null;
-        HouseScreen houseScreen = null;
+
+        screens = new HashMap<>();
+        screenPool = new ArrayList<>();
+
+        screens.put("bolero", BoleroScreen.class);
+        screens.put("house1", HouseScreen.class);
+
+        loadRoute("bolero", "initial");
+    }
+
+
+    public void loadRoute(String screenName, String spawnName) {
+        GameScreen toLoad = null;
+
         try {
-            boleroScreen = new BoleroScreen(this);
-            houseScreen = new HouseScreen(this);
-        } catch (MapperException e) {
+            Class<GameScreen> clazz = screens.get(screenName);
+
+            Constructor<GameScreen> c = clazz.getDeclaredConstructor(BoleroGame.class, String.class);
+            toLoad = c.newInstance(this, spawnName);
+        } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);
         }
 
-        screens = new HashMap<>();
-
-        screens.put("bolero", boleroScreen);
-        screens.put("house1", houseScreen);
-
-        currentScreen = "bolero";
-        this.setScreen(boleroScreen);
-    }
-
-    public void loadRoute(String screenName, String spawnName) {
-        GameScreen toLoad = screens.get(screenName);
-
-        toLoad.setPlayerSpawnPoint(spawnName);
-        currentScreen = screenName;
+        screenPool.add(toLoad);
         this.setScreen(toLoad);
+
+        currentScreen = toLoad;
     }
 
     @Override
@@ -87,7 +92,7 @@ public class BoleroGame extends Game {
         hudBatch.dispose();
         font.dispose();
 
-        for (GameScreen screen : screens.values()) {
+        for (GameScreen screen : screenPool) {
             screen.dispose();
         }
     }

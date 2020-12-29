@@ -1,4 +1,4 @@
-package com.bolero.game.mappers;
+package com.bolero.game.controllers;
 
 import box2dLight.ConeLight;
 import box2dLight.PointLight;
@@ -25,7 +25,7 @@ import com.bolero.game.exceptions.WrongLightTypeException;
 
 import java.util.ArrayList;
 
-public class LightMapper implements Disposable {
+public class LightController implements Disposable {
     private final TiledMap map;
     private final RayHandler rayHandler;
 
@@ -34,15 +34,15 @@ public class LightMapper implements Disposable {
 
     private boolean previousNight;
 
-    public LightMapper(TiledMap map, RayHandler rayHandler, Clock clock) {
+    public LightController(TiledMap map, RayHandler rayHandler, Clock clock) {
         this.map = map;
         this.rayHandler = rayHandler;
         this.clock = clock;
         lights = new ArrayList<>();
     }
 
-    public void map(String lightLayer, float unit) throws MissingLightTypeException, WrongLightTypeException, MissingPropertyException, WrongLightTimeException {
-        MapLayer layer = map.getLayers().get(lightLayer);
+    public void map(float unit) throws MissingLightTypeException, WrongLightTypeException, MissingPropertyException, WrongLightTimeException {
+        MapLayer layer = map.getLayers().get(BoleroGame.LIGHT_LAYER);
 
         if (layer == null) {
             return;

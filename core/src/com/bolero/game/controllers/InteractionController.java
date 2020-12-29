@@ -1,4 +1,4 @@
-package com.bolero.game.mappers;
+package com.bolero.game.controllers;
 
 import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapObject;
@@ -7,30 +7,32 @@ import com.badlogic.gdx.maps.MapProperties;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
+import com.bolero.game.BoleroGame;
 import com.bolero.game.enums.InteractionType;
 import com.bolero.game.exceptions.MissingInteractionTypeException;
 import com.bolero.game.exceptions.MissingPropertyException;
 import com.bolero.game.exceptions.WrongInteractionTypeException;
 import com.bolero.game.interactions.InspectRectangle;
 import com.bolero.game.interactions.InteractionRectangle;
-import com.bolero.game.interactions.SpawnRectangle;
+import com.bolero.game.interactions.TransitionRectangle;
 
 import java.util.ArrayList;
 
-public class InteractionMapper {
+public class InteractionController {
     private final TiledMap map;
-    private final ArrayList<SpawnRectangle> spawnRectangles;
+    private final ArrayList<TransitionRectangle> transitionRectangles;
     private final ArrayList<InspectRectangle> inspectRectangles;
 
-    public InteractionMapper(TiledMap map) {
+    public InteractionController(TiledMap map) {
         this.map = map;
-        spawnRectangles = new ArrayList<>();
+        transitionRectangles = new ArrayList<>();
         inspectRectangles = new ArrayList<>();
     }
 
-    public void map(String intLayer, String fallbackSpawn) throws MissingInteractionTypeException, WrongInteractionTypeException, MissingPropertyException {
+    public void map() throws MissingInteractionTypeException, WrongInteractionTypeException, MissingPropertyException {
 
-        MapLayer layer = map.getLayers().get(intLayer);
+        MapLayer layer = map.getLayers().get(BoleroGame.INT_LAYER);
 
         if (layer == null) {
             return;
@@ -56,7 +58,7 @@ public class InteractionMapper {
 
             switch (interactionType) {
                 case transition:
-                    generateTransitionRectangle(rectangle, props, fallbackSpawn);
+                    generateTransitionRectangle(rectangle, props);
                     break;
                 case inspect:
                     generateInspectRectangle(rectangle, props);
@@ -67,7 +69,7 @@ public class InteractionMapper {
         }
     }
 
-    private void generateTransitionRectangle(Rectangle rectangle, MapProperties props, String fallbackSpawn) throws MissingPropertyException {
+    private void generateTransitionRectangle(Rectangle rectangle, MapProperties props) throws MissingPropertyException {
         if (!props.containsKey("map_id")) {
             throw new MissingPropertyException("map_id");
         }
@@ -75,8 +77,8 @@ public class InteractionMapper {
         String mapName = props.get("map_id", String.class);
 
         String spawnProperty = props.get("spawn_id", String.class);
-        String spawnName = spawnProperty == null ? fallbackSpawn : spawnProperty;
-        spawnRectangles.add(new SpawnRectangle(mapName, spawnName, rectangle));
+        String spawnName = spawnProperty == null ? BoleroGame.SPAWN_INITIAL_OBJ : spawnProperty;
+        transitionRectangles.add(new TransitionRectangle(mapName, spawnName, rectangle));
     }
 
     private void generateInspectRectangle(Rectangle rectangle, MapProperties props) throws MissingPropertyException {
@@ -90,17 +92,28 @@ public class InteractionMapper {
     }
 
     public ArrayList<InteractionRectangle> getAllRectangles() {
-        ArrayList<InteractionRectangle> allRectangles = new ArrayList<InteractionRectangle>(spawnRectangles);
+        ArrayList<InteractionRectangle> allRectangles = new ArrayList<InteractionRectangle>(transitionRectangles);
         allRectangles.addAll(inspectRectangles);
 
         return allRectangles;
     }
 
-    public ArrayList<SpawnRectangle> getSpawnRectangles() {
-        return spawnRectangles;
+    public TransitionRectangle checkIfInInteractionRectangle(Vector2 playerPosPixels) {
+        return checkIfInTriangle(playerPosPixels, transitionRectangles);
     }
 
-    public ArrayList<InspectRectangle> getInspectRectangles() {
-        return inspectRectangles;
+    public InspectRectangle checkIfInInspectRectangle(Vector2 playerPosPixels) {
+        return checkIfInTriangle(playerPosPixels, inspectRectangles);
+    }
+
+    private <E extends InteractionRectangle> E checkIfInTriangle(Vector2 playerPosPixels, ArrayList<E> rectangles) {
+        for (E intRectangle : rectangles) {
+
+            if (intRectangle.getRectangle().contains(playerPosPixels)) {
+                return intRectangle;
+            }
+        }
+
+        return null;
     }
 }

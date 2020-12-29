@@ -8,13 +8,11 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.utils.Disposable;
 import com.bolero.game.characters.NPC;
-import com.bolero.game.characters.Player;
 import com.bolero.game.dialog.Choice;
 import com.bolero.game.dialog.Dialog;
 
-public class DialogDrawer implements Disposable {
+public class DialogDrawer extends UIDrawer implements Disposable {
     private final Table table;
-    private final Skin uiSkin;
     private final Texture buttonTexture;
     private final Label nameLabel;
     private final Label textLabel;
@@ -32,8 +30,8 @@ public class DialogDrawer implements Disposable {
     }
 
     public DialogDrawer() {
+        super();
         this.activated = false;
-        uiSkin = new Skin(Gdx.files.internal("ui/uiskin.json"));
         buttonTexture = new Texture(Gdx.files.internal("buttons/green-E.png"));
         Image buttonImage = new Image(buttonTexture);
 
@@ -125,8 +123,8 @@ public class DialogDrawer implements Disposable {
 
     @Override
     public void dispose() {
+        super.dispose();
         buttonTexture.dispose();
-        uiSkin.dispose();
     }
 
 }

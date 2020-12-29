@@ -16,8 +16,7 @@ import com.bolero.game.GameCamera;
 import com.bolero.game.Sun;
 import com.bolero.game.characters.NPC;
 import com.bolero.game.characters.Player;
-import com.bolero.game.controllers.MapController;
-import com.bolero.game.controllers.NPCController;
+import com.bolero.game.controllers.*;
 import com.bolero.game.data.MapValues;
 import com.bolero.game.drawers.DebugDrawer;
 import com.bolero.game.drawers.DialogDrawer;
@@ -26,17 +25,11 @@ import com.bolero.game.enums.CharacterState;
 import com.bolero.game.exceptions.MapperException;
 import com.bolero.game.icons.ButtonIcon;
 import com.bolero.game.interactions.InspectRectangle;
-import com.bolero.game.interactions.InteractionRectangle;
-import com.bolero.game.interactions.SpawnRectangle;
-import com.bolero.game.mappers.CollisionMapper;
-import com.bolero.game.mappers.InteractionMapper;
-import com.bolero.game.mappers.LightMapper;
-
-import java.util.ArrayList;
+import com.bolero.game.interactions.TransitionRectangle;
 
 public abstract class GameScreen implements Screen {
     private final BoleroGame game;
-
+    private final String name;
     private final World world;
 
     private final GameCamera gameCamera;
@@ -48,9 +41,9 @@ public abstract class GameScreen implements Screen {
     private final float UNIT = 16f;
     private final MapValues mapValues;
 
-    private final CollisionMapper collisionMapper;
-    private final InteractionMapper interactionMapper;
-    private final LightMapper lightMapper;
+    private final CollisionController collisionController;
+    private final InteractionController interactionController;
+    private final LightController lightController;
 
     private final DebugDrawer debugDrawer;
     private final DialogDrawer dialogDrawer;
@@ -64,14 +57,15 @@ public abstract class GameScreen implements Screen {
 
     private final Sun sun;
 
-    public GameScreen(BoleroGame game, String mapPath) throws MapperException {
+    public GameScreen(BoleroGame game, String name, String mapPath, String spawnPos) throws MapperException {
         this.game = game;
+        this.name = name;
 
         map = new TmxMapLoader().load(mapPath);
         mapValues = new MapValues(map);
 
         mapController = new MapController(map, UNIT);
-        setPlayerSpawnPoint(game.SPAWN_INITIAL_OBJ);
+        setPlayerSpawnPoint(spawnPos);
 
         gameCamera = new GameCamera();
         world = new World(Vector2.Zero, true);
@@ -81,11 +75,11 @@ public abstract class GameScreen implements Screen {
 
         gameCamera.updatePosition(player.getPosition(), UNIT, mapValues);
 
-        collisionMapper = new CollisionMapper(world, map);
-        collisionMapper.map(UNIT, mapValues, game.COL_LAYER);
+        collisionController = new CollisionController(world, map);
+        collisionController.map(UNIT, mapValues);
 
-        interactionMapper = new InteractionMapper(map);
-        interactionMapper.map(game.INT_LAYER, game.SPAWN_INITIAL_OBJ);
+        interactionController = new InteractionController(map);
+        interactionController.map();
 
         rayHandler = new RayHandler(world);
 
@@ -94,19 +88,19 @@ public abstract class GameScreen implements Screen {
         sun = new Sun(rayHandler, game.clock);
         sun.update();
 
-        lightMapper = new LightMapper(map, rayHandler, game.clock);
-        lightMapper.map(game.LIGHT_LAYER, UNIT);
+        lightController = new LightController(map, rayHandler, game.clock);
+        lightController.map(UNIT);
 
-        lightMapper.update();
+        lightController.update();
         debugDrawer = new DebugDrawer(UNIT, gameCamera.getCamera());
         inspectDrawer = new InspectDrawer();
         dialogDrawer = new DialogDrawer();
         npcController = new NPCController(map);
-        npcController.spawnNPCs(game.SPAWN_LAYER, UNIT, world);
+        npcController.spawnNPCs(UNIT, world);
     }
 
-    public void setPlayerSpawnPoint(String name) {
-        MapObject playerSpawnObject = map.getLayers().get(game.SPAWN_LAYER).getObjects().get(name);
+    private void setPlayerSpawnPoint(String name) {
+        MapObject playerSpawnObject = map.getLayers().get(BoleroGame.SPAWN_LAYER).getObjects().get(name);
 
         final MapProperties props = playerSpawnObject.getProperties();
 
@@ -118,9 +112,13 @@ public abstract class GameScreen implements Screen {
         Gdx.gl.glClearColor(0, 0, 0f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        SpawnRectangle spawnRectangle = checkIfInInteractionTriangle();
-        InspectRectangle inspectRectangle = checkIfInInspectTriangle();
-        NPC npc = checkIfNearNPC();
+        Vector2 playerPos = new Vector2(player.getPosition().x, player.getPosition().y);
+        Vector2 playerPosPixels = new Vector2(player.getPosition().x * UNIT, player.getPosition().y * UNIT);
+
+        TransitionRectangle transitionRectangle = interactionController.checkIfInInteractionRectangle(playerPosPixels);
+        InspectRectangle inspectRectangle = interactionController.checkIfInInspectRectangle(playerPosPixels);
+
+        NPC npc = npcController.checkIfNearNPC(playerPos);
 
         if (player.getState() != CharacterState.inspecting && player.getState() != CharacterState.talking) {
             handleMovementInput();
@@ -138,7 +136,7 @@ public abstract class GameScreen implements Screen {
         mapController.drawBackground();
 
         if (game.debugMode) {
-            debugDrawer.drawInteractionZones(interactionMapper.getAllRectangles(), npcController.getNpcs());
+            debugDrawer.drawInteractionZones(interactionController.getAllRectangles(), npcController.getNpcs());
         }
 
         game.batch.setProjectionMatrix(gameCamera.getCamera().combined);
@@ -146,7 +144,7 @@ public abstract class GameScreen implements Screen {
         player.draw(game.batch);
         npcController.drawNPCs(game.batch);
 
-        if ((spawnRectangle != null || inspectRectangle != null || npc != null) &&
+        if ((transitionRectangle != null || inspectRectangle != null || npc != null) &&
                 player.getState() != CharacterState.inspecting &&
                 player.getState() != CharacterState.talking) {
             eButtonIcon.draw(game.batch);
@@ -163,7 +161,7 @@ public abstract class GameScreen implements Screen {
             drawDialog();
         }
 
-        handleInteractionInput(spawnRectangle, inspectRectangle, npc);
+        handleInteractionInput(transitionRectangle, inspectRectangle, npc);
         if (game.debugMode) {
             debugDrawer.drawBox2DBodies(world);
         }
@@ -185,7 +183,7 @@ public abstract class GameScreen implements Screen {
             world.step(TIME_STEP, 6, 2);
             game.clock.increment();
             sun.update();
-            lightMapper.update();
+            lightController.update();
             accumulator -= TIME_STEP;
         }
     }
@@ -193,7 +191,7 @@ public abstract class GameScreen implements Screen {
     private void drawHUD() {
         game.hudBatch.begin();
         if (game.debugMode) {
-            debugDrawer.drawDebugInfo(game.font, game.hudBatch, player, game.currentScreen, gameCamera.getCamera().zoom, game.clock.getCurrentHour(), game.clock.getCurrentDay());
+            debugDrawer.drawDebugInfo(game.font, game.hudBatch, player, game.currentScreen.name, gameCamera.getCamera().zoom, game.clock.getCurrentHour(), game.clock.getCurrentDay());
         }
         game.hudBatch.end();
     }
@@ -241,12 +239,11 @@ public abstract class GameScreen implements Screen {
             this.player.stopYMovement();
         }
 
-
     }
 
-    private void handleInteractionInput(SpawnRectangle spawnRectangle, InspectRectangle inspectRectangle, NPC npc) {
-        if (Gdx.input.isKeyJustPressed(Input.Keys.E) && spawnRectangle != null) {
-            handleTransition(spawnRectangle);
+    private void handleInteractionInput(TransitionRectangle transitionRectangle, InspectRectangle inspectRectangle, NPC npc) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.E) && transitionRectangle != null) {
+            handleTransition(transitionRectangle);
         } else if (Gdx.input.isKeyJustPressed(Input.Keys.E) && inspectRectangle != null) {
             inspect();
         } else if (Gdx.input.isKeyJustPressed(Input.Keys.E) && npc != null) {
@@ -254,7 +251,7 @@ public abstract class GameScreen implements Screen {
         }
     }
 
-    private void handleTransition(SpawnRectangle rectangle) {
+    private void handleTransition(TransitionRectangle rectangle) {
         game.loadRoute(rectangle.getName(), rectangle.getSpawnName());
     }
 
@@ -298,37 +295,6 @@ public abstract class GameScreen implements Screen {
         game.hudBatch.end();
     }
 
-    private SpawnRectangle checkIfInInteractionTriangle() {
-        return checkIfInTriangle(interactionMapper.getSpawnRectangles());
-    }
-
-    private InspectRectangle checkIfInInspectTriangle() {
-        return checkIfInTriangle(interactionMapper.getInspectRectangles());
-    }
-
-    private <E extends InteractionRectangle> E checkIfInTriangle(ArrayList<E> rectangles) {
-        Vector2 playerPosPixels = new Vector2(player.getPosition().x * UNIT, player.getPosition().y * UNIT);
-        for (E intRectangle : rectangles) {
-
-            if (intRectangle.getRectangle().contains(playerPosPixels)) {
-                return intRectangle;
-            }
-        }
-
-        return null;
-    }
-
-    private NPC checkIfNearNPC() {
-        Vector2 playerPosPixels = new Vector2(player.getPosition().x, player.getPosition().y);
-        for (NPC npc : npcController.getNpcs()) {
-
-            if (npc.getTalkCircle().contains(playerPosPixels)) {
-                return npc;
-            }
-        }
-
-        return null;
-    }
 
     private void respawnPlayer() {
         player.respawn(playerSpawnPosition);
@@ -364,13 +330,13 @@ public abstract class GameScreen implements Screen {
         map.dispose();
         world.dispose();
         player.dispose();
-        collisionMapper.dispose();
+        collisionController.dispose();
         mapController.dispose();
         debugDrawer.dispose();
         eButtonIcon.dispose();
         npcController.dispose();
         inspectDrawer.dispose();
-        lightMapper.dispose();
+        lightController.dispose();
         rayHandler.dispose();
     }
 }
