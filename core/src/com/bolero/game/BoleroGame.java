@@ -58,7 +58,7 @@ public class BoleroGame extends Game {
         screens.put("bolero", BoleroScreen.class);
         screens.put("house1", HouseScreen.class);
 
-        loadRoute("bolero", "initial");
+        loadRoute("house1", "initial");
     }
 
 

@@ -26,6 +26,8 @@ abstract public class Character implements Disposable {
     private final CharacterValues characterValues;
 
     private final Sprite sprite;
+    private final Sprite dialogSprite;
+
     protected final Body body;
     private float animationTime;
 
@@ -39,6 +41,10 @@ abstract public class Character implements Disposable {
 
     public CharacterState getState() {
         return state;
+    }
+
+    public Sprite getDialogSprite() {
+        return dialogSprite;
     }
 
     public void setState(CharacterState state) {
@@ -56,7 +62,9 @@ abstract public class Character implements Disposable {
         loadAnimationsFromSpiteSheet();
 
         this.sprite = new Sprite();
+        this.dialogSprite = new Sprite();
         sprite.setSize(characterValues.width, characterValues.height);
+        dialogSprite.setSize(characterValues.width * 5, characterValues.height * 5);
         body = createPlayerBody(box2DWorld, bodyType);
     }
 
@@ -205,6 +213,7 @@ abstract public class Character implements Disposable {
         }
 
         sprite.setRegion(currentFrame);
+        dialogSprite.setRegion(currentFrame);
         sprite.draw(batch);
     }
 

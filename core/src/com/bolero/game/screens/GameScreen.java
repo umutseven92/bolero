@@ -56,6 +56,7 @@ public abstract class GameScreen implements Screen {
     private final RayHandler rayHandler;
 
     private final Sun sun;
+    private float darkenAmount;
 
     public GameScreen(BoleroGame game, String name, String mapPath, String spawnPos) throws MapperException {
         this.game = game;
@@ -85,8 +86,9 @@ public abstract class GameScreen implements Screen {
 
         rayHandler.setBlurNum(3);
 
+        darkenAmount = 0f;
         sun = new Sun(rayHandler, game.clock);
-        sun.update();
+        sun.update(darkenAmount);
 
         lightController = new LightController(map, rayHandler, game.clock);
         lightController.map(UNIT);
@@ -94,7 +96,7 @@ public abstract class GameScreen implements Screen {
         lightController.update();
         debugDrawer = new DebugDrawer(UNIT, gameCamera.getCamera());
         inspectDrawer = new InspectDrawer();
-        dialogDrawer = new DialogDrawer();
+        dialogDrawer = new DialogDrawer(player, UNIT);
         npcController = new NPCController(map);
         npcController.spawnNPCs(UNIT, world);
     }
@@ -153,6 +155,10 @@ public abstract class GameScreen implements Screen {
         game.batch.end();
 
         mapController.drawForeground();
+
+        rayHandler.setCombinedMatrix(gameCamera.getCamera());
+        rayHandler.updateAndRender();
+
         drawHUD();
 
         if (player.getState() == CharacterState.inspecting && inspectRectangle != null) {
@@ -168,8 +174,6 @@ public abstract class GameScreen implements Screen {
 
         doPhysicsStep(delta);
 
-        rayHandler.setCombinedMatrix(gameCamera.getCamera());
-        rayHandler.updateAndRender();
     }
 
 
@@ -182,7 +186,7 @@ public abstract class GameScreen implements Screen {
         while (accumulator >= TIME_STEP) {
             world.step(TIME_STEP, 6, 2);
             game.clock.increment();
-            sun.update();
+            sun.update(darkenAmount);
             lightController.update();
             accumulator -= TIME_STEP;
         }
@@ -278,23 +282,29 @@ public abstract class GameScreen implements Screen {
         }
 
         if (player.getState() != CharacterState.talking) {
+            darkenAmount = 0.2f;
             dialogDrawer.activate(npc);
             gameCamera.zoomIn(0.2f);
             player.setState(CharacterState.talking);
             npc.setState(CharacterState.talking);
         } else {
+            darkenAmount = 0f;
             gameCamera.zoomOut(0.2f);
             player.setState(CharacterState.idle);
             npc.setState(CharacterState.idle);
         }
     }
 
+
     private void drawDialog() {
+        game.batch.begin();
+        dialogDrawer.drawCharacters(game.batch);
+        game.batch.end();
+
         game.hudBatch.begin();
         dialogDrawer.draw(game.hudBatch);
         game.hudBatch.end();
     }
-
 
     private void respawnPlayer() {
         player.respawn(playerSpawnPosition);

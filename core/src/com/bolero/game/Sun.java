@@ -16,8 +16,7 @@ public class Sun {
         this.clock = clock;
     }
 
-    public void update() {
-
+    public void update(float darkenAmount) {
         long timestamp = this.clock.getTimestamp();
         int ratio = Clock.RATIO;
 
@@ -41,6 +40,8 @@ public class Sun {
             float c = (BoleroGame.DUSK_START * ratio) - (m * DAY);
             alpha = (timestamp - c) / m;
         }
+
+        alpha -= darkenAmount;
 
         // To prevent unnecessary updates
         if (alpha != previousAlpha) {
