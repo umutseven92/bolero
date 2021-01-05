@@ -6,7 +6,11 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.utils.Disposable;
 import com.bolero.game.characters.NPC;
 import com.bolero.game.characters.Player;
@@ -15,6 +19,7 @@ import com.bolero.game.dialog.Dialog;
 
 public class DialogDrawer extends UIDrawer implements Disposable {
     private static final float SLIDE_SPEED = 0.3f;
+    private static final String CHOICE_PREFIX = "-> ";
 
     private final Table table;
     private final Texture buttonTexture;
@@ -74,6 +79,7 @@ public class DialogDrawer extends UIDrawer implements Disposable {
 
         choiceGroup = new VerticalGroup();
         choiceGroup.left();
+        choiceGroup.columnLeft();
 
         table.add(choiceGroup).width(Gdx.graphics.getWidth() / 1.2f);
 
@@ -147,16 +153,33 @@ public class DialogDrawer extends UIDrawer implements Disposable {
 
     private void setActiveIndex(int index) {
         activeIndex = index;
-        choiceGroup.getChildren().forEach(b -> ((TextButton) b).setChecked(false));
-        ((TextButton) choiceGroup.getChildren().get(activeIndex)).setChecked(true);
+        choiceGroup.getChildren().forEach(this::clearChoice);
+
+        choose(index);
+    }
+
+    private void clearChoice(Actor choice) {
+        Label label = (Label) choice;
+        String text = label.getText().toString();
+        if (text.startsWith(CHOICE_PREFIX)) {
+            label.setText(text.substring(CHOICE_PREFIX.length()));
+        }
+        choice.setColor(Color.WHITE);
+    }
+
+    private void choose(int index) {
+        Label chosen = (Label) choiceGroup.getChildren().get(index);
+        chosen.setColor(Color.YELLOW);
+        String text = chosen.getText().toString();
+
+        chosen.setText(CHOICE_PREFIX + text);
     }
 
     private void resetButtons() {
         choiceGroup.clear();
 
         for (Choice choice : currentDialog.getChoices()) {
-            TextButton button = new TextButton(choice.getText(), uiSkin);
-            button.getStyle().checkedFontColor = Color.YELLOW;
+            Label button = new Label(choice.getText(), uiSkin);
             choiceGroup.addActor(button);
         }
 

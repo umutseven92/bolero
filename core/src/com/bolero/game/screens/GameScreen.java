@@ -27,6 +27,8 @@ import com.bolero.game.icons.ButtonIcon;
 import com.bolero.game.interactions.InspectRectangle;
 import com.bolero.game.interactions.TransitionRectangle;
 
+import java.io.FileNotFoundException;
+
 public abstract class GameScreen implements Screen {
     private final BoleroGame game;
     private final String name;
@@ -58,7 +60,7 @@ public abstract class GameScreen implements Screen {
     private final Sun sun;
     private float darkenAmount;
 
-    public GameScreen(BoleroGame game, String name, String mapPath, String spawnPos) throws MapperException {
+    public GameScreen(BoleroGame game, String name, String mapPath, String spawnPos) throws MapperException, FileNotFoundException {
         this.game = game;
         this.name = name;
 
@@ -97,7 +99,7 @@ public abstract class GameScreen implements Screen {
         debugDrawer = new DebugDrawer(UNIT, gameCamera.getCamera());
         inspectDrawer = new InspectDrawer();
         dialogDrawer = new DialogDrawer(player, UNIT);
-        npcController = new NPCController(map);
+        npcController = new NPCController(map, game.getBundleController());
         npcController.spawnNPCs(UNIT, world);
     }
 

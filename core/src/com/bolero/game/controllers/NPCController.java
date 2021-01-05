@@ -12,21 +12,25 @@ import com.bolero.game.BoleroGame;
 import com.bolero.game.characters.NPC;
 import com.bolero.game.data.CharacterValues;
 import com.bolero.game.enums.SpawnType;
+import com.bolero.game.exceptions.MissingPropertyException;
 import com.bolero.game.exceptions.MissingSpawnTypeException;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
 public class NPCController implements Disposable {
     private final TiledMap map;
 
     private final ArrayList<NPC> npcs;
+    private final BundleController bundleController;
 
-    public NPCController(TiledMap map) {
+    public NPCController(TiledMap map, BundleController bundleController) {
         this.map = map;
+        this.bundleController = bundleController;
         npcs = new ArrayList<>();
     }
 
-    public void spawnNPCs(float unit, World world) throws MissingSpawnTypeException {
+    public void spawnNPCs(float unit, World world) throws MissingSpawnTypeException, FileNotFoundException, MissingPropertyException {
         MapObjects spawnObjects = map.getLayers().get(BoleroGame.SPAWN_LAYER).getObjects();
         for (MapObject spawn : spawnObjects) {
             MapProperties props = spawn.getProperties();
@@ -37,8 +41,14 @@ public class NPCController implements Disposable {
             }
 
             if (SpawnType.valueOf(type) == SpawnType.npc) {
+                String name = props.get("name", String.class);
+
+                if (name == null) {
+                    throw new MissingPropertyException("name");
+                }
+
                 Vector2 spawnPosition = new Vector2((float) props.get("x") / unit, (float) props.get("y") / unit);
-                NPC npc = new NPC("Wizard", spawnPosition, world, new CharacterValues(2.7f, 2.5f, 5f, 0.5f), "npc.png");
+                NPC npc = new NPC(name, spawnPosition, world, new CharacterValues(2.7f, 2.5f, 5f, 0.5f), "npc.png", bundleController);
                 npcs.add(npc);
             }
         }
