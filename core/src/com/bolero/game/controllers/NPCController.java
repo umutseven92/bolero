@@ -48,7 +48,7 @@ public class NPCController implements Disposable {
                 }
 
                 Vector2 spawnPosition = new Vector2((float) props.get("x") / unit, (float) props.get("y") / unit);
-                NPC npc = new NPC(name, spawnPosition, world, new CharacterValues(2.7f, 2.5f, 5f, 0.5f), "npc.png", bundleController);
+                NPC npc = new NPC(name, spawnPosition, world, new CharacterValues(2.7f, 2.5f, 5f, 0.5f), "npc.png", bundleController, unit);
                 npcs.add(npc);
             }
         }

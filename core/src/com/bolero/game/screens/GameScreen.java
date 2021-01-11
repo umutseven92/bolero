@@ -73,7 +73,7 @@ public abstract class GameScreen implements Screen {
         gameCamera = new GameCamera();
         world = new World(Vector2.Zero, true);
 
-        player = new Player(playerSpawnPosition, world);
+        player = new Player(playerSpawnPosition, world, UNIT);
         eButtonIcon = new ButtonIcon(player);
 
         gameCamera.updatePosition(player.getPosition(), UNIT, mapValues);
@@ -98,7 +98,7 @@ public abstract class GameScreen implements Screen {
         lightController.update();
         debugDrawer = new DebugDrawer(UNIT, gameCamera.getCamera());
         inspectDrawer = new InspectDrawer();
-        dialogDrawer = new DialogDrawer(player, UNIT);
+        dialogDrawer = new DialogDrawer(player, gameCamera.getCamera());
         npcController = new NPCController(map, game.getBundleController());
         npcController.spawnNPCs(UNIT, world);
     }
@@ -299,9 +299,7 @@ public abstract class GameScreen implements Screen {
 
 
     private void drawDialog() {
-        game.batch.begin();
-        dialogDrawer.drawCharacters(game.batch);
-        game.batch.end();
+        dialogDrawer.drawCharacters();
 
         game.hudBatch.begin();
         dialogDrawer.draw(game.hudBatch);

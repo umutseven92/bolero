@@ -21,8 +21,8 @@ public class NPC extends Character {
     private final DialogTree dialogTree;
     private final BundleController bundleController;
 
-    public NPC(String name, Vector2 position, World box2DWorld, CharacterValues characterValues, String texturePath, BundleController bundleController) throws FileNotFoundException {
-        super(position, box2DWorld, characterValues, texturePath, new SpriteSheetValues(10, 10, 5, 7), BodyDef.BodyType.StaticBody);
+    public NPC(String name, Vector2 position, World box2DWorld, CharacterValues characterValues, String texturePath, BundleController bundleController, float unit) throws FileNotFoundException {
+        super(position, box2DWorld, characterValues, texturePath, new SpriteSheetValues(10, 10, 5, 7), BodyDef.BodyType.StaticBody, unit);
         this.bundleController = bundleController;
         super.setState(CharacterState.idle);
         talkCircle = new Circle(position, 4f);

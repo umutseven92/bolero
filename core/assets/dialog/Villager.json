@@ -1,0 +1,16 @@
+{
+  "dialogs": [
+    {
+      "id": "villager1",
+      "text": "dialog4"
+    }
+  ],
+  "choices": [
+    {
+      "under": [
+        "villager1"
+      ],
+      "text": "choice3"
+    }
+  ]
+}

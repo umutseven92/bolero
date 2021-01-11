@@ -3,6 +3,7 @@ package com.bolero.game.drawers;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -18,9 +19,10 @@ import com.bolero.game.dialog.Choice;
 import com.bolero.game.dialog.Dialog;
 
 public class DialogDrawer extends UIDrawer implements Disposable {
-    private static final float SLIDE_SPEED = 0.3f;
+    private static final float SLIDE_SPEED = 5f;
     private static final String CHOICE_PREFIX = "-> ";
 
+    private final SpriteBatch batch;
     private final Table table;
     private final Texture buttonTexture;
     private final Label nameLabel;
@@ -28,9 +30,9 @@ public class DialogDrawer extends UIDrawer implements Disposable {
     private final VerticalGroup choiceGroup;
     private final Sprite playerSprite;
 
-    private final float unit;
     private final float npcPosXGoal;
     private final float playerPosXGoal;
+    private final float spriteY;
 
     private float npcPosX;
     private float playerPosX;
@@ -47,17 +49,19 @@ public class DialogDrawer extends UIDrawer implements Disposable {
         return activated;
     }
 
-    public DialogDrawer(Player player, float unit) {
+    public DialogDrawer(Player player, OrthographicCamera camera) {
         super();
-        this.unit = unit;
+        this.batch = new SpriteBatch();
         this.activated = false;
         this.playerSprite = player.getDialogSprite();
+        this.spriteY = Gdx.graphics.getHeight() / 5f;
 
-        this.playerPosXGoal = (Gdx.graphics.getWidth() / (unit)) - unit * 2.2f;
-        this.npcPosXGoal = Gdx.graphics.getWidth() / (12 * unit);
+        this.npcPosXGoal = camera.viewportWidth / 2f;
 
-        this.playerPosX = Gdx.graphics.getWidth() / (unit * 2.5f);
-        this.playerSprite.setPosition(playerPosX, Gdx.graphics.getHeight() / (5 * unit));
+        this.playerPosXGoal = Gdx.graphics.getWidth() - this.playerSprite.getWidth();
+        this.playerPosX = playerPosXGoal + 10f;
+
+        this.playerSprite.setPosition(playerPosX, spriteY);
 
         buttonTexture = new Texture(Gdx.files.internal("buttons/green-E.png"));
         Image buttonImage = new Image(buttonTexture);
@@ -91,9 +95,9 @@ public class DialogDrawer extends UIDrawer implements Disposable {
         this.activated = true;
 
         this.npcSprite = npc.getDialogSprite();
-        this.npcPosX = 0;
-        this.npcSprite.setPosition(npcPosX, Gdx.graphics.getHeight() / (5 * unit));
-        this.playerPosX = Gdx.graphics.getWidth() / (unit * 2.5f);
+        this.npcPosX = npcPosXGoal - 100f;
+        this.npcSprite.setPosition(npcPosX, spriteY);
+        this.playerPosX = playerPosXGoal + 100f;
 
         this.npc = npc;
         this.currentDialog = npc.getDialogTree().getInitialDialog();
@@ -101,7 +105,7 @@ public class DialogDrawer extends UIDrawer implements Disposable {
         resetButtons();
     }
 
-    public void drawCharacters(SpriteBatch batch) {
+    public void drawCharacters() {
         if (npcPosX <= npcPosXGoal) {
             npcPosX += SLIDE_SPEED;
             this.npcSprite.setX(npcPosX);
@@ -112,8 +116,10 @@ public class DialogDrawer extends UIDrawer implements Disposable {
             this.playerSprite.setX(playerPosX);
         }
 
+        this.batch.begin();
         this.npcSprite.draw(batch);
         this.playerSprite.draw(batch);
+        this.batch.end();
     }
 
     public void draw(SpriteBatch hudBatch) {

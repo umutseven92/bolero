@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.4" tiledversion="1.4.3" orientation="orthogonal" renderorder="right-down" width="50" height="50" tilewidth="32" tileheight="32" infinite="0" nextlayerid="10" nextobjectid="67">
+<map version="1.4" tiledversion="1.4.3" orientation="orthogonal" renderorder="right-down" width="50" height="50" tilewidth="32" tileheight="32" infinite="0" nextlayerid="10" nextobjectid="69">
  <tileset firstgid="1" source="walls,ground,decorative.tsx"/>
  <tileset firstgid="1025" source="houses.tsx"/>
  <layer id="1" name="Grass" width="50" height="50">
@@ -390,6 +390,18 @@
    <point/>
   </object>
   <object id="40" name="house1" type="player" x="976" y="730">
+   <point/>
+  </object>
+  <object id="67" name="villager1" type="npc" x="670" y="770">
+   <properties>
+    <property name="name" value="Villager"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="68" name="villager2" type="npc" x="795" y="516">
+   <properties>
+    <property name="name" value="Villager"/>
+   </properties>
    <point/>
   </object>
  </objectgroup>

@@ -14,6 +14,7 @@ import com.bolero.game.data.SpriteSheetValues;
 import com.bolero.game.enums.CharacterState;
 
 abstract public class Character implements Disposable {
+    private final static float DIALOG_SPRITE_SIZE_MULTIPLIER = 10f;
     private CharacterState state = CharacterState.idle;
     private Direction direction = Direction.right;
 
@@ -53,7 +54,7 @@ abstract public class Character implements Disposable {
     }
 
     public Character(Vector2 position, World box2DWorld, CharacterValues characterValues,
-                     String texturePath, SpriteSheetValues ssValues, BodyDef.BodyType bodyType) {
+                     String texturePath, SpriteSheetValues ssValues, BodyDef.BodyType bodyType, float unit) {
         this.characterValues = characterValues;
         this.position = position;
         this.spriteSheet = new Texture(Gdx.files.internal(texturePath));
@@ -64,7 +65,7 @@ abstract public class Character implements Disposable {
         this.sprite = new Sprite();
         this.dialogSprite = new Sprite();
         sprite.setSize(characterValues.width, characterValues.height);
-        dialogSprite.setSize(characterValues.width * 5, characterValues.height * 5);
+        dialogSprite.setSize(characterValues.width * DIALOG_SPRITE_SIZE_MULTIPLIER * unit, characterValues.height * DIALOG_SPRITE_SIZE_MULTIPLIER * unit);
         body = createPlayerBody(box2DWorld, bodyType);
     }
 
