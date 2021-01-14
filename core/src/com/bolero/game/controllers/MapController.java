@@ -6,6 +6,7 @@ import com.badlogic.gdx.maps.MapLayers;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.utils.Disposable;
+import com.bolero.game.BoleroGame;
 
 import java.util.ArrayList;
 
@@ -14,12 +15,10 @@ public class MapController implements Disposable {
     private int[] backgroundLayers;
     private int[] foregroundLayers;
 
-    public MapController(TiledMap map, float unit) {
-        mapRenderer = new OrthogonalTiledMapRenderer(map, 1 / unit);
-
+    public MapController(TiledMap map) {
+        mapRenderer = new OrthogonalTiledMapRenderer(map, 1 / BoleroGame.UNIT);
         setLayers(map);
     }
-
 
     private void setLayers(TiledMap map) {
         ArrayList<Integer> bg = new ArrayList<>();
@@ -57,6 +56,5 @@ public class MapController implements Disposable {
     @Override
     public void dispose() {
         mapRenderer.dispose();
-
     }
 }

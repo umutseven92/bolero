@@ -4,7 +4,6 @@ import box2dLight.ConeLight;
 import box2dLight.PointLight;
 import box2dLight.RayHandler;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.MapObjects;
 import com.badlogic.gdx.maps.MapProperties;
@@ -18,15 +17,13 @@ import com.bolero.game.data.ConeLightValues;
 import com.bolero.game.data.PointLightValues;
 import com.bolero.game.enums.LightTime;
 import com.bolero.game.enums.LightType;
-import com.bolero.game.exceptions.MissingLightTypeException;
 import com.bolero.game.exceptions.MissingPropertyException;
-import com.bolero.game.exceptions.WrongLightTimeException;
-import com.bolero.game.exceptions.WrongLightTypeException;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 
-public class LightController implements Disposable {
-    private final TiledMap map;
+public class LightController extends BaseMapper implements Disposable {
     private final RayHandler rayHandler;
 
     private final Clock clock;
@@ -35,46 +32,33 @@ public class LightController implements Disposable {
     private boolean previousNight;
 
     public LightController(TiledMap map, RayHandler rayHandler, Clock clock) {
-        this.map = map;
+        super(map);
         this.rayHandler = rayHandler;
         this.clock = clock;
         lights = new ArrayList<>();
     }
 
-    public void map(float unit) throws MissingLightTypeException, WrongLightTypeException, MissingPropertyException, WrongLightTimeException {
-        MapLayer layer = map.getLayers().get(BoleroGame.LIGHT_LAYER);
+    public void map() throws MissingPropertyException {
 
-        if (layer == null) {
-            return;
-        }
+        MapObjects objects = super.getLayer(BoleroGame.LIGHT_LAYER);
 
-        MapObjects objects = layer.getObjects();
         for (MapObject object : objects) {
 
             final MapProperties props = object.getProperties();
 
+            super.checkMissingProperties(props, Collections.singletonList("type"));
+
             String type = props.get("type", String.class);
 
-            if (type == null) {
-                throw new MissingLightTypeException();
-            }
-
-            LightType lightType;
-            try {
-                lightType = LightType.valueOf(type);
-            } catch (IllegalArgumentException e) {
-                throw new WrongLightTypeException(type);
-            }
+            LightType lightType = LightType.valueOf(type);
 
             switch (lightType) {
                 case point:
-                    generatePointLight(props, unit);
+                    generatePointLight(props);
                     break;
                 case cone:
-                    generateConeLight(props, unit);
+                    generateConeLight(props);
                     break;
-                default:
-                    throw new WrongLightTypeException(type);
             }
         }
     }
@@ -120,33 +104,27 @@ public class LightController implements Disposable {
         }
     }
 
-    private void generatePointLight(MapProperties props, float unit) throws MissingPropertyException, WrongLightTimeException {
+    private void generatePointLight(MapProperties props) throws MissingPropertyException {
         PointLightValues lightValues = getPointLightValues(props);
-        Vector2 pos = getPosition(props, unit);
+        Vector2 pos = getPosition(props);
 
         PointLight light = new PointLight(rayHandler, lightValues.getRays(), lightValues.getColor(), lightValues.getDistance(), pos.x, pos.y);
 
         lights.add(new LightContainer(lightValues.getTime(), light));
     }
 
-    private void generateConeLight(MapProperties props, float unit) throws MissingPropertyException, WrongLightTimeException {
+    private void generateConeLight(MapProperties props) throws MissingPropertyException {
         ConeLightValues lightValues = getConeLightValues(props);
-        Vector2 pos = getPosition(props, unit);
+        Vector2 pos = getPosition(props);
 
         ConeLight light = new ConeLight(rayHandler, lightValues.getRays(), lightValues.getColor(), lightValues.getDistance(), pos.x, pos.y, lightValues.getDirectionDegree(), lightValues.getConeDegree());
 
         lights.add(new LightContainer(lightValues.getTime(), light));
     }
 
-    private ConeLightValues getConeLightValues(MapProperties props) throws MissingPropertyException, WrongLightTimeException {
+    private ConeLightValues getConeLightValues(MapProperties props) throws MissingPropertyException {
         checkProps(props);
-        if (!props.containsKey("direction_degree")) {
-            throw new MissingPropertyException("direction_degree");
-        }
-
-        if (!props.containsKey("cone_degree")) {
-            throw new MissingPropertyException("cone_degree");
-        }
+        super.checkMissingProperties(props, Arrays.asList("direction_degree", "cone_degree"));
 
         float distance = props.get("distance", float.class);
         Color color = props.get("color", Color.class);
@@ -159,7 +137,7 @@ public class LightController implements Disposable {
 
     }
 
-    private PointLightValues getPointLightValues(MapProperties props) throws MissingPropertyException, WrongLightTimeException {
+    private PointLightValues getPointLightValues(MapProperties props) throws MissingPropertyException {
         checkProps(props);
         float distance = props.get("distance", float.class);
         Color color = props.get("color", Color.class);
@@ -169,39 +147,22 @@ public class LightController implements Disposable {
     }
 
     private void checkProps(MapProperties props) throws MissingPropertyException {
-        if (!props.containsKey("distance")) {
-            throw new MissingPropertyException("distance");
-        }
-
-        if (!props.containsKey("color")) {
-            throw new MissingPropertyException("color");
-        }
-
-        if (!props.containsKey("rays")) {
-            throw new MissingPropertyException("rays");
-        }
+        super.checkMissingProperties(props, Arrays.asList("distance", "color", "rays"));
     }
 
-    private LightTime getLightTime(MapProperties props) throws WrongLightTimeException {
+    private LightTime getLightTime(MapProperties props) {
         String time = props.get("time", String.class);
 
         if (time == null) {
             return LightTime.both;
         }
 
-        LightTime lightTime;
-        try {
-            lightTime = LightTime.valueOf(time);
-        } catch (IllegalArgumentException e) {
-            throw new WrongLightTimeException(time);
-        }
-
-        return lightTime;
+        return LightTime.valueOf(time);
     }
 
-    private Vector2 getPosition(MapProperties props, float unit) {
-        float x = props.get("x", float.class) / unit;
-        float y = props.get("y", float.class) / unit;
+    private Vector2 getPosition(MapProperties props) {
+        float x = props.get("x", float.class) / BoleroGame.UNIT;
+        float y = props.get("y", float.class) / BoleroGame.UNIT;
 
         return new Vector2(x, y);
     }

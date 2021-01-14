@@ -17,8 +17,10 @@ public class BoleroGame extends Game {
     private HashMap<String, Class> screens;
     private BundleController bundleController;
 
+    public final static float UNIT = 16f;
     public final static String COL_LAYER = "Collision";
     public final static String SPAWN_LAYER = "Spawn";
+    public final static String SCHEDULE_LAYER = "Schedule";
     public final static String INT_LAYER = "Interaction";
     public final static String LIGHT_LAYER = "Lights";
     public final static String SPAWN_INITIAL_OBJ = "initial";

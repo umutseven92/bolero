@@ -1,17 +1,22 @@
 package com.bolero.game.characters;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Disposable;
+import com.bolero.game.BoleroGame;
 import com.bolero.game.data.CharacterValues;
 import com.bolero.game.data.SpriteSheetValues;
 import com.bolero.game.enums.CharacterState;
+
+import java.io.FileNotFoundException;
 
 abstract public class Character implements Disposable {
     private final static float DIALOG_SPRITE_SIZE_MULTIPLIER = 10f;
@@ -34,6 +39,7 @@ abstract public class Character implements Disposable {
 
     private CircleShape circle;
 
+    private Vector2 goal;
     private Vector2 position;
 
     public Vector2 getPosition() {
@@ -54,10 +60,17 @@ abstract public class Character implements Disposable {
     }
 
     public Character(Vector2 position, World box2DWorld, CharacterValues characterValues,
-                     String texturePath, SpriteSheetValues ssValues, BodyDef.BodyType bodyType, float unit) {
+                     String texturePath, SpriteSheetValues ssValues, BodyDef.BodyType bodyType) throws FileNotFoundException {
         this.characterValues = characterValues;
         this.position = position;
-        this.spriteSheet = new Texture(Gdx.files.internal(texturePath));
+
+        FileHandle file = Gdx.files.internal(texturePath);
+
+        if (!file.exists()) {
+            throw new FileNotFoundException(String.format("%s does not exist.", texturePath));
+        }
+
+        this.spriteSheet = new Texture(file);
         this.ssValues = ssValues;
 
         loadAnimationsFromSpiteSheet();
@@ -65,8 +78,11 @@ abstract public class Character implements Disposable {
         this.sprite = new Sprite();
         this.dialogSprite = new Sprite();
         sprite.setSize(characterValues.width, characterValues.height);
-        dialogSprite.setSize(characterValues.width * DIALOG_SPRITE_SIZE_MULTIPLIER * unit, characterValues.height * DIALOG_SPRITE_SIZE_MULTIPLIER * unit);
-        body = createPlayerBody(box2DWorld, bodyType);
+        dialogSprite.setSize(
+                characterValues.width * DIALOG_SPRITE_SIZE_MULTIPLIER * BoleroGame.UNIT,
+                characterValues.height * DIALOG_SPRITE_SIZE_MULTIPLIER * BoleroGame.UNIT
+        );
+        body = createBody(box2DWorld, bodyType);
     }
 
     private void loadAnimationsFromSpiteSheet() {
@@ -93,13 +109,56 @@ abstract public class Character implements Disposable {
     public void setPosition() {
         this.position = this.body.getPosition();
         this.sprite.setPosition(this.position.x - this.characterValues.width / 2, this.position.y - this.characterValues.height / 2);
+
+        if (goal != null) {
+            boolean xReached = false;
+            boolean yReached = false;
+
+            if (MathUtils.isEqual(this.position.y, goal.y, 0.5f)) {
+                stopYMovement();
+                yReached = true;
+            }
+
+            if (MathUtils.isEqual(this.position.x, goal.x, 0.5f)) {
+                stopXMovement();
+                xReached = true;
+            }
+
+            if (yReached && xReached) {
+                goal = null;
+            } else {
+                float impulseX = goal.x - this.position.x;
+                float impulseY = goal.y - this.position.y;
+
+                if (impulseX > 0) {
+                    direction = Direction.right;
+                } else {
+                    direction = Direction.left;
+                }
+
+                Vector2 vel = body.getLinearVelocity();
+
+                if (Math.abs(vel.x) >= characterValues.maxVelocity) {
+                    impulseX = 0;
+                } else {
+                    impulseX = MathUtils.clamp(impulseX, -characterValues.speed, characterValues.speed);
+                }
+
+                if (Math.abs(vel.y) >= characterValues.maxVelocity) {
+                    impulseY = 0;
+                } else {
+                    impulseY = MathUtils.clamp(impulseY, -characterValues.speed, characterValues.speed);
+                }
+
+                body.applyLinearImpulse(impulseX, impulseY, this.position.x, this.position.y, true);
+            }
+        }
     }
 
-    private Body createPlayerBody(World world, BodyDef.BodyType bodyType) {
+    private Body createBody(World world, BodyDef.BodyType bodyType) {
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = bodyType;
         bodyDef.position.set(position.x + characterValues.width / 2, position.y + characterValues.height / 2);
-
         Body body = world.createBody(bodyDef);
 
         circle = new CircleShape();
@@ -110,7 +169,7 @@ abstract public class Character implements Disposable {
         fixtureDef.density = 0.5f;
         fixtureDef.friction = 0.81f;
         fixtureDef.restitution = 0.3f;
-
+        // TODO: Create collision filter (so that player does not collide with NPCs)
         body.createFixture(fixtureDef);
 
         return body;
@@ -191,6 +250,11 @@ abstract public class Character implements Disposable {
         Vector2 pos = body.getPosition();
 
         body.applyLinearImpulse(impulseX, impulseY, pos.x, pos.y, true);
+    }
+
+    public void setGoal(Vector2 goal) {
+        this.goal = goal;
+        this.state = CharacterState.walking;
     }
 
     public void draw(SpriteBatch batch) {

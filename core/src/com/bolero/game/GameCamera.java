@@ -6,7 +6,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.bolero.game.data.MapValues;
 
 public class GameCamera {
-    private final float ZOOM_SPEED = 0.8f;
+    private static final float ZOOM_SPEED = 0.8f;
     private final OrthographicCamera camera;
 
     private float zoomTarget;
@@ -20,22 +20,22 @@ public class GameCamera {
         zoomTarget = camera.zoom;
     }
 
-    public void updatePosition(Vector2 position, float unit, MapValues mapValues) {
+    public void updatePosition(Vector2 position, MapValues mapValues) {
         camera.position.x = position.x;
         camera.position.y = position.y;
 
         float centerX = camera.viewportWidth / 2;
         float centerY = camera.viewportHeight / 2;
 
-        camera.position.x = MathUtils.clamp(camera.position.x, centerX, mapValues.mapWidthPixels / unit - centerX);
-        camera.position.y = MathUtils.clamp(camera.position.y, centerY, mapValues.mapHeightPixels / unit - centerY);
+        camera.position.x = MathUtils.clamp(camera.position.x, centerX, mapValues.mapWidthPixels / BoleroGame.UNIT - centerX);
+        camera.position.y = MathUtils.clamp(camera.position.y, centerY, mapValues.mapHeightPixels / BoleroGame.UNIT - centerY);
 
         camera.update();
     }
 
-    public void update(Vector2 position, float unit, MapValues mapValues, float deltaTime) {
+    public void update(Vector2 position, MapValues mapValues, float deltaTime) {
 
-        updatePosition(position, unit, mapValues);
+        updatePosition(position, mapValues);
 
         if (camera.zoom != zoomTarget) {
             if (camera.zoom > zoomTarget) {

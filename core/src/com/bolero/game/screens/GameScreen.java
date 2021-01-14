@@ -40,7 +40,6 @@ public abstract class GameScreen implements Screen {
     private final Player player;
     private final ButtonIcon eButtonIcon;
 
-    private final float UNIT = 16f;
     private final MapValues mapValues;
 
     private final CollisionController collisionController;
@@ -67,19 +66,19 @@ public abstract class GameScreen implements Screen {
         map = new TmxMapLoader().load(mapPath);
         mapValues = new MapValues(map);
 
-        mapController = new MapController(map, UNIT);
+        mapController = new MapController(map);
         setPlayerSpawnPoint(spawnPos);
 
         gameCamera = new GameCamera();
         world = new World(Vector2.Zero, true);
 
-        player = new Player(playerSpawnPosition, world, UNIT);
+        player = new Player(playerSpawnPosition, world);
         eButtonIcon = new ButtonIcon(player);
 
-        gameCamera.updatePosition(player.getPosition(), UNIT, mapValues);
+        gameCamera.updatePosition(player.getPosition(), mapValues);
 
         collisionController = new CollisionController(world, map);
-        collisionController.map(UNIT, mapValues);
+        collisionController.map(mapValues);
 
         interactionController = new InteractionController(map);
         interactionController.map();
@@ -93,14 +92,14 @@ public abstract class GameScreen implements Screen {
         sun.update(darkenAmount);
 
         lightController = new LightController(map, rayHandler, game.clock);
-        lightController.map(UNIT);
+        lightController.map();
 
         lightController.update();
-        debugDrawer = new DebugDrawer(UNIT, gameCamera.getCamera());
+        debugDrawer = new DebugDrawer(gameCamera.getCamera());
         inspectDrawer = new InspectDrawer();
         dialogDrawer = new DialogDrawer(player, gameCamera.getCamera());
         npcController = new NPCController(map, game.getBundleController());
-        npcController.spawnNPCs(UNIT, world);
+        npcController.map(world);
     }
 
     private void setPlayerSpawnPoint(String name) {
@@ -108,7 +107,7 @@ public abstract class GameScreen implements Screen {
 
         final MapProperties props = playerSpawnObject.getProperties();
 
-        playerSpawnPosition = new Vector2((float) props.get("x") / UNIT, (float) props.get("y") / UNIT);
+        playerSpawnPosition = new Vector2((float) props.get("x") / BoleroGame.UNIT, (float) props.get("y") / BoleroGame.UNIT);
     }
 
     @Override
@@ -117,11 +116,12 @@ public abstract class GameScreen implements Screen {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         Vector2 playerPos = new Vector2(player.getPosition().x, player.getPosition().y);
-        Vector2 playerPosPixels = new Vector2(player.getPosition().x * UNIT, player.getPosition().y * UNIT);
+        Vector2 playerPosPixels = new Vector2(player.getPosition().x * BoleroGame.UNIT, player.getPosition().y * BoleroGame.UNIT);
 
         TransitionRectangle transitionRectangle = interactionController.checkIfInInteractionRectangle(playerPosPixels);
         InspectRectangle inspectRectangle = interactionController.checkIfInInspectRectangle(playerPosPixels);
 
+        npcController.checkSchedules(game.clock);
         NPC npc = npcController.checkIfNearNPC(playerPos);
 
         if (player.getState() != CharacterState.inspecting && player.getState() != CharacterState.talking) {
@@ -134,7 +134,7 @@ public abstract class GameScreen implements Screen {
 
         player.setPosition();
         npcController.setPositions();
-        gameCamera.update(player.getPosition(), UNIT, mapValues, delta);
+        gameCamera.update(player.getPosition(), mapValues, delta);
 
         mapController.setView(gameCamera.getCamera());
         mapController.drawBackground();
@@ -197,7 +197,7 @@ public abstract class GameScreen implements Screen {
     private void drawHUD() {
         game.hudBatch.begin();
         if (game.debugMode) {
-            debugDrawer.drawDebugInfo(game.font, game.hudBatch, player, game.currentScreen.name, gameCamera.getCamera().zoom, game.clock.getCurrentHour(), game.clock.getCurrentDay());
+            debugDrawer.drawDebugInfo(game.font, game.hudBatch, player, game.currentScreen.name, gameCamera.getCamera().zoom, game.clock);
         }
         game.hudBatch.end();
     }

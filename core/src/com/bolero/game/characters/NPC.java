@@ -16,18 +16,17 @@ import java.io.FileNotFoundException;
 
 public class NPC extends Character {
     public final Circle talkCircle;
-
     private final String name;
     private final DialogTree dialogTree;
     private final BundleController bundleController;
 
-    public NPC(String name, Vector2 position, World box2DWorld, CharacterValues characterValues, String texturePath, BundleController bundleController, float unit) throws FileNotFoundException {
-        super(position, box2DWorld, characterValues, texturePath, new SpriteSheetValues(10, 10, 5, 7), BodyDef.BodyType.StaticBody, unit);
+    public NPC(String name, String scriptName, Vector2 position, World box2DWorld, CharacterValues characterValues, String texturePath, BundleController bundleController) throws FileNotFoundException {
+        super(position, box2DWorld, characterValues, texturePath, new SpriteSheetValues(10, 10, 5, 7), BodyDef.BodyType.DynamicBody);
         this.bundleController = bundleController;
         super.setState(CharacterState.idle);
         talkCircle = new Circle(position, 4f);
         this.name = name;
-        this.dialogTree = loadDialogTree();
+        this.dialogTree = loadDialogTree(scriptName);
     }
 
     public Circle getTalkCircle() {
@@ -48,11 +47,11 @@ public class NPC extends Character {
         return dialogTree;
     }
 
-    private DialogTree loadDialogTree() throws FileNotFoundException {
-        String fileName = String.format("dialog/%s.json", this.name);
+    private DialogTree loadDialogTree(String scriptName) throws FileNotFoundException {
+        String fileName = String.format("dialog/%s", scriptName);
         FileHandle file = Gdx.files.internal(fileName);
 
-        if(!file.exists()) {
+        if (!file.exists()) {
             throw new FileNotFoundException(String.format("%s does not exist.", fileName));
         }
         DialogTree dialogTree = new DialogTree();

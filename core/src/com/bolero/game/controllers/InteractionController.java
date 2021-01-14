@@ -1,6 +1,5 @@
 package com.bolero.game.controllers;
 
-import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.MapObjects;
 import com.badlogic.gdx.maps.MapProperties;
@@ -10,69 +9,52 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.bolero.game.BoleroGame;
 import com.bolero.game.enums.InteractionType;
-import com.bolero.game.exceptions.MissingInteractionTypeException;
 import com.bolero.game.exceptions.MissingPropertyException;
-import com.bolero.game.exceptions.WrongInteractionTypeException;
 import com.bolero.game.interactions.InspectRectangle;
 import com.bolero.game.interactions.InteractionRectangle;
 import com.bolero.game.interactions.TransitionRectangle;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
-public class InteractionController {
-    private final TiledMap map;
+public class InteractionController extends BaseMapper {
     private final ArrayList<TransitionRectangle> transitionRectangles;
     private final ArrayList<InspectRectangle> inspectRectangles;
 
     public InteractionController(TiledMap map) {
-        this.map = map;
+        super(map);
         transitionRectangles = new ArrayList<>();
         inspectRectangles = new ArrayList<>();
     }
 
-    public void map() throws MissingInteractionTypeException, WrongInteractionTypeException, MissingPropertyException {
+    public void map() throws MissingPropertyException {
 
-        MapLayer layer = map.getLayers().get(BoleroGame.INT_LAYER);
+        MapObjects objects = super.getLayer(BoleroGame.INT_LAYER);
 
-        if (layer == null) {
-            return;
-        }
-
-        MapObjects objects = layer.getObjects();
         for (MapObject object : objects) {
             Rectangle rectangle = ((RectangleMapObject) object).getRectangle();
             MapProperties props = object.getProperties();
 
+            super.checkMissingProperties(props, Collections.singletonList("type"));
+
             String type = props.get("type", String.class);
 
-            if (type == null) {
-                throw new MissingInteractionTypeException();
-            }
-
-            InteractionType interactionType;
-            try {
-                interactionType = InteractionType.valueOf(type);
-            } catch (IllegalArgumentException e) {
-                throw new WrongInteractionTypeException(type);
-            }
+            InteractionType interactionType = InteractionType.valueOf(type);
 
             switch (interactionType) {
                 case transition:
+                    super.checkMissingProperties(props, Collections.singletonList("map_id"));
                     generateTransitionRectangle(rectangle, props);
                     break;
                 case inspect:
+                    super.checkMissingProperties(props, Collections.singletonList("string_id"));
                     generateInspectRectangle(rectangle, props);
                     break;
-                default:
-                    throw new WrongInteractionTypeException(type);
             }
         }
     }
 
-    private void generateTransitionRectangle(Rectangle rectangle, MapProperties props) throws MissingPropertyException {
-        if (!props.containsKey("map_id")) {
-            throw new MissingPropertyException("map_id");
-        }
+    private void generateTransitionRectangle(Rectangle rectangle, MapProperties props) {
 
         String mapName = props.get("map_id", String.class);
 
@@ -81,11 +63,7 @@ public class InteractionController {
         transitionRectangles.add(new TransitionRectangle(mapName, spawnName, rectangle));
     }
 
-    private void generateInspectRectangle(Rectangle rectangle, MapProperties props) throws MissingPropertyException {
-        if (!props.containsKey("string_id")) {
-            throw new MissingPropertyException("string_id");
-        }
-
+    private void generateInspectRectangle(Rectangle rectangle, MapProperties props) {
         String stringID = props.get("string_id", String.class);
 
         inspectRectangles.add(new InspectRectangle(rectangle, stringID));

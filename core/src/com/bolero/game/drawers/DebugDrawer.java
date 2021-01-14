@@ -10,6 +10,8 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
+import com.bolero.game.BoleroGame;
+import com.bolero.game.Clock;
 import com.bolero.game.characters.NPC;
 import com.bolero.game.characters.Player;
 import com.bolero.game.interactions.InteractionRectangle;
@@ -21,27 +23,25 @@ public class DebugDrawer implements Disposable {
     private final Box2DDebugRenderer box2DDebugRenderer;
 
     private final Camera camera;
-    private final float unit;
 
-    public DebugDrawer(float unit, Camera camera) {
-        this.unit = unit;
+    public DebugDrawer(Camera camera) {
         this.camera = camera;
 
         debugRenderer = new ShapeRenderer();
         box2DDebugRenderer = new Box2DDebugRenderer();
     }
 
-    public void drawDebugInfo(BitmapFont font, SpriteBatch batch, Player player, String mapName, float zoomLevel, int hour, String day) {
-        float cameraRight = Gdx.graphics.getWidth() - unit * 15;
-        float cameraLeft = unit * 2;
-        float cameraY = Gdx.graphics.getHeight() - unit * 2;
-        float camera3Y = Gdx.graphics.getHeight() - unit * 3;
-        float camera4Y = Gdx.graphics.getHeight() - unit * 4;
-        float camera5Y = Gdx.graphics.getHeight() - unit * 5;
+    public void drawDebugInfo(BitmapFont font, SpriteBatch batch, Player player, String mapName, float zoomLevel, Clock clock) {
+        float cameraRight = Gdx.graphics.getWidth() - BoleroGame.UNIT * 15;
+        float cameraLeft = BoleroGame.UNIT * 2;
+        float cameraY = Gdx.graphics.getHeight() - BoleroGame.UNIT * 2;
+        float camera3Y = Gdx.graphics.getHeight() - BoleroGame.UNIT * 3;
+        float camera4Y = Gdx.graphics.getHeight() - BoleroGame.UNIT * 4;
+        float camera5Y = Gdx.graphics.getHeight() - BoleroGame.UNIT * 5;
 
         font.draw(batch, "Map: " + mapName, cameraLeft, cameraY);
         font.draw(batch, "Player State: " + player.getState(), cameraLeft, camera3Y);
-        font.draw(batch, String.format("Time: %d, %s", hour, day), cameraLeft, camera4Y);
+        font.draw(batch, String.format("Time: %d:%d, %s", clock.getCurrentHour(), clock.getCurrentMinute(), clock.getCurrentDay()), cameraLeft, camera4Y);
         font.draw(batch, "Player Pos: " + player.getPosition().x + ", " + player.getPosition().y, cameraRight, cameraY);
         font.draw(batch, "Camera Pos: " + camera.position.x + ", " + camera.position.y, cameraRight, camera3Y);
         font.draw(batch, "Zoom Level: " + zoomLevel, cameraRight, camera4Y);
@@ -59,7 +59,12 @@ public class DebugDrawer implements Disposable {
 
         for (InteractionRectangle intRectangle : interactions) {
             Rectangle rectangle = intRectangle.getRectangle();
-            debugRenderer.rect(rectangle.x / unit, rectangle.y / unit, rectangle.width / unit, rectangle.height / unit);
+            debugRenderer.rect(
+                    rectangle.x / BoleroGame.UNIT,
+                    rectangle.y / BoleroGame.UNIT,
+                    rectangle.width / BoleroGame.UNIT,
+                    rectangle.height / BoleroGame.UNIT
+            );
         }
 
         for (NPC npc : npcs) {

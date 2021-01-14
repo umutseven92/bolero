@@ -4,6 +4,7 @@ import com.bolero.game.controllers.BundleController;
 
 public class Clock {
 
+    // Determines how much real time (in ms) needs to pass for one hour to pass in game
     public final static int RATIO = 200;
     private final static int STEP = 1;
 
@@ -14,6 +15,7 @@ public class Clock {
     private String currentDay;
 
     private int currentHour;
+    private int currentMinute;
     private int dayIndex;
 
     public String getCurrentDay() {
@@ -22,6 +24,10 @@ public class Clock {
 
     public int getCurrentHour() {
         return currentHour;
+    }
+
+    public int getCurrentMinute() {
+        return currentMinute;
     }
 
     public long getTimestamp() {
@@ -44,6 +50,7 @@ public class Clock {
         dayIndex = 0;
         currentDay = days[dayIndex];
         currentHour = 0;
+        currentMinute = 0;
     }
 
     public void increment() {
@@ -58,6 +65,7 @@ public class Clock {
         }
 
         currentHour = (int) timestamp / RATIO;
+        currentMinute = (int) ((timestamp / (RATIO / 60f)) % 60f);
     }
 
 }

@@ -1,6 +1,5 @@
 package com.bolero.game.controllers;
 
-import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.MapObjects;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
@@ -14,58 +13,52 @@ import com.bolero.game.data.MapValues;
 
 import java.util.ArrayList;
 
-public class CollisionController implements Disposable {
+public class CollisionController extends BaseMapper implements Disposable {
     private final World world;
-    private final TiledMap map;
     private final ArrayList<Shape> shapes = new ArrayList<>();
 
     public CollisionController(World world, TiledMap map) {
+        super(map);
         this.world = world;
-        this.map = map;
     }
 
-    private Shape getShapeFromRectangle(Rectangle rectangle, float unit) {
+    private Shape getShapeFromRectangle(Rectangle rectangle) {
         PolygonShape polygonShape = new PolygonShape();
-        polygonShape.setAsBox(rectangle.width * 0.5F / unit, rectangle.height * 0.5F / unit);
+        polygonShape.setAsBox(rectangle.width * 0.5F / BoleroGame.UNIT, rectangle.height * 0.5F / BoleroGame.UNIT);
 
         shapes.add(polygonShape);
         return polygonShape;
     }
 
-    private Vector2 getTransformedCenterForRectangle(Rectangle rectangle, float unit) {
+    private Vector2 getTransformedCenterForRectangle(Rectangle rectangle) {
         Vector2 center = new Vector2();
         rectangle.getCenter(center);
-        return center.scl(1 / unit);
+        return center.scl(1 / BoleroGame.UNIT);
     }
 
-    public void map(float unit, MapValues mapValues) {
-        createWalls(unit, mapValues);
-        createCollisionsFromMap(unit);
+    public void map(MapValues mapValues) {
+        createWalls(mapValues);
+        createCollisionsFromMap();
     }
 
-    private void createCollisionsFromMap(float unit) {
-        MapLayer layer = map.getLayers().get(BoleroGame.COL_LAYER);
+    private void createCollisionsFromMap() {
+        MapObjects objects = super.getLayer(BoleroGame.COL_LAYER);
 
-        if (layer == null) {
-            return;
-        }
-
-        MapObjects objects = layer.getObjects();
         for (MapObject object : objects) {
             Rectangle rectangle = ((RectangleMapObject) object).getRectangle();
 
             BodyDef bodyDef = new BodyDef();
             Body body = world.createBody(bodyDef);
 
-            body.createFixture(getShapeFromRectangle(rectangle, unit), 0.0f);
+            body.createFixture(getShapeFromRectangle(rectangle), 0.0f);
 
-            body.setTransform(getTransformedCenterForRectangle(rectangle, unit), 0);
+            body.setTransform(getTransformedCenterForRectangle(rectangle), 0);
         }
     }
 
-    private void createWalls(float unit, MapValues mapValues) {
-        float heightModifier = mapValues.tileHeightPixels / unit;
-        float widthModifier = mapValues.tileWidthPixels / unit;
+    private void createWalls(MapValues mapValues) {
+        float heightModifier = mapValues.tileHeightPixels / BoleroGame.UNIT;
+        float widthModifier = mapValues.tileWidthPixels / BoleroGame.UNIT;
 
         PolygonShape verticalMapWall = new PolygonShape();
         verticalMapWall.setAsBox(1, mapValues.mapHeightUnit);
