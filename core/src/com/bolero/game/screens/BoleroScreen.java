@@ -7,7 +7,8 @@ import java.io.FileNotFoundException;
 
 public class BoleroScreen extends GameScreen {
 
-    public BoleroScreen(BoleroGame game, String spawnPos) throws MapperException, FileNotFoundException {
-        super(game, "bolero", "map/bolero.tmx", spawnPos);
-    }
+  public BoleroScreen(BoleroGame game, String spawnPos)
+      throws MapperException, FileNotFoundException {
+    super(game, "bolero", "map/bolero.tmx", spawnPos);
+  }
 }

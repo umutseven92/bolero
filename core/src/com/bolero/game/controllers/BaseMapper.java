@@ -9,27 +9,28 @@ import com.bolero.game.exceptions.MissingPropertyException;
 import java.util.List;
 
 public abstract class BaseMapper {
-    private final TiledMap map;
+  private final TiledMap map;
 
-    BaseMapper(TiledMap map) {
-        this.map = map;
+  BaseMapper(TiledMap map) {
+    this.map = map;
+  }
+
+  protected MapObjects getLayer(String layerName) {
+    MapLayer layer = this.map.getLayers().get(layerName);
+
+    if (layer == null) {
+      return new MapObjects();
     }
 
-    protected MapObjects getLayer(String layerName) {
-        MapLayer layer = this.map.getLayers().get(layerName);
+    return layer.getObjects();
+  }
 
-        if (layer == null) {
-            return new MapObjects();
-        }
-
-        return layer.getObjects();
+  protected void checkMissingProperties(MapProperties allProperties, List<String> toCheck)
+      throws MissingPropertyException {
+    for (String prop : toCheck) {
+      if (!allProperties.containsKey(prop)) {
+        throw new MissingPropertyException(prop);
+      }
     }
-
-    protected void checkMissingProperties(MapProperties allProperties, List<String> toCheck) throws MissingPropertyException {
-        for (String prop : toCheck) {
-            if (!allProperties.containsKey(prop)) {
-                throw new MissingPropertyException(prop);
-            }
-        }
-    }
+  }
 }

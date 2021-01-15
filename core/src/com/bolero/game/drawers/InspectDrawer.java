@@ -9,38 +9,38 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Disposable;
 
 public class InspectDrawer extends UIDrawer implements Disposable {
-    private final Table table;
-    private final Texture buttonTexture;
-    private final Label textLabel;
+  private final Table table;
+  private final Texture buttonTexture;
+  private final Label textLabel;
 
-    public InspectDrawer() {
-        super();
-        buttonTexture = new Texture(Gdx.files.internal("buttons/green-E.png"));
-        Image buttonImage = new Image(buttonTexture);
+  public InspectDrawer() {
+    super();
+    buttonTexture = new Texture(Gdx.files.internal("buttons/green-E.png"));
+    Image buttonImage = new Image(buttonTexture);
 
-        table = new Table();
-        table.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        table.bottom();
-        table.padBottom(Gdx.graphics.getHeight() / 10f);
+    table = new Table();
+    table.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+    table.bottom();
+    table.padBottom(Gdx.graphics.getHeight() / 10f);
 
-        textLabel = new Label("", uiSkin);
-        Label label2 = new Label("to continue", uiSkin);
+    textLabel = new Label("", uiSkin);
+    Label label2 = new Label("to continue", uiSkin);
 
-        textLabel.setWrap(true);
-        table.add(textLabel).width(Gdx.graphics.getWidth() / 1.2f);
-        table.row();
-        table.add(buttonImage).right();
-        table.add(label2).right();
-    }
+    textLabel.setWrap(true);
+    table.add(textLabel).width(Gdx.graphics.getWidth() / 1.2f);
+    table.row();
+    table.add(buttonImage).right();
+    table.add(label2).right();
+  }
 
-    public void draw(SpriteBatch batch, String text) {
-        textLabel.setText(text);
-        table.draw(batch, 1f);
-    }
+  public void draw(SpriteBatch batch, String text) {
+    textLabel.setText(text);
+    table.draw(batch, 1f);
+  }
 
-    @Override
-    public void dispose() {
-        super.dispose();
-        buttonTexture.dispose();
-    }
+  @Override
+  public void dispose() {
+    super.dispose();
+    buttonTexture.dispose();
+  }
 }

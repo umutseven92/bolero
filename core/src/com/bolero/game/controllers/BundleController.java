@@ -5,13 +5,13 @@ import com.badlogic.gdx.utils.I18NBundle;
 
 public class BundleController {
 
-    private final I18NBundle bundle;
+  private final I18NBundle bundle;
 
-    public BundleController() {
-        bundle = I18NBundle.createBundle(Gdx.files.internal("locale/strings"));
-    }
+  public BundleController() {
+    bundle = I18NBundle.createBundle(Gdx.files.internal("locale/strings"));
+  }
 
-    public String getString(String key) {
-        return this.bundle.get(key);
-    }
+  public String getString(String key) {
+    return this.bundle.get(key);
+  }
 }

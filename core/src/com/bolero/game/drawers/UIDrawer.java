@@ -5,14 +5,14 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.Disposable;
 
 public abstract class UIDrawer implements Disposable {
-    protected final Skin uiSkin;
+  protected final Skin uiSkin;
 
-    public UIDrawer() {
-        uiSkin = new Skin(Gdx.files.internal("ui/uiskin.json"));
-    }
+  public UIDrawer() {
+    uiSkin = new Skin(Gdx.files.internal("ui/uiskin.json"));
+  }
 
-    @Override
-    public void dispose() {
-        uiSkin.dispose();
-    }
+  @Override
+  public void dispose() {
+    uiSkin.dispose();
+  }
 }

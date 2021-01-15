@@ -30,323 +30,325 @@ import com.bolero.game.interactions.TransitionRectangle;
 import java.io.FileNotFoundException;
 
 public abstract class GameScreen implements Screen {
-    private final BoleroGame game;
-    private final String name;
-    private final World world;
+  private final BoleroGame game;
+  private final String name;
+  private final World world;
 
-    private final GameCamera gameCamera;
-    private final TiledMap map;
+  private final GameCamera gameCamera;
+  private final TiledMap map;
 
-    private final Player player;
-    private final ButtonIcon eButtonIcon;
+  private final Player player;
+  private final ButtonIcon eButtonIcon;
 
-    private final MapValues mapValues;
+  private final MapValues mapValues;
 
-    private final CollisionController collisionController;
-    private final InteractionController interactionController;
-    private final LightController lightController;
+  private final CollisionController collisionController;
+  private final InteractionController interactionController;
+  private final LightController lightController;
 
-    private final DebugDrawer debugDrawer;
-    private final DialogDrawer dialogDrawer;
-    private final InspectDrawer inspectDrawer;
-    private Vector2 playerSpawnPosition;
-    private float accumulator = 0;
+  private final DebugDrawer debugDrawer;
+  private final DialogDrawer dialogDrawer;
+  private final InspectDrawer inspectDrawer;
+  private Vector2 playerSpawnPosition;
+  private float accumulator = 0;
 
-    private final NPCController npcController;
-    private final MapController mapController;
-    private final RayHandler rayHandler;
+  private final NPCController npcController;
+  private final MapController mapController;
+  private final RayHandler rayHandler;
 
-    private final Sun sun;
-    private float darkenAmount;
+  private final Sun sun;
+  private float darkenAmount;
 
-    public GameScreen(BoleroGame game, String name, String mapPath, String spawnPos) throws MapperException, FileNotFoundException {
-        this.game = game;
-        this.name = name;
+  public GameScreen(BoleroGame game, String name, String mapPath, String spawnPos)
+      throws MapperException, FileNotFoundException {
+    this.game = game;
+    this.name = name;
 
-        map = new TmxMapLoader().load(mapPath);
-        mapValues = new MapValues(map);
+    map = new TmxMapLoader().load(mapPath);
+    mapValues = new MapValues(map);
 
-        mapController = new MapController(map);
-        setPlayerSpawnPoint(spawnPos);
+    mapController = new MapController(map);
+    setPlayerSpawnPoint(spawnPos);
 
-        gameCamera = new GameCamera();
-        world = new World(Vector2.Zero, true);
+    gameCamera = new GameCamera();
+    world = new World(Vector2.Zero, true);
 
-        player = new Player(playerSpawnPosition, world);
-        eButtonIcon = new ButtonIcon(player);
+    player = new Player(playerSpawnPosition, world);
+    eButtonIcon = new ButtonIcon(player);
 
-        gameCamera.updatePosition(player.getPosition(), mapValues);
+    gameCamera.updatePosition(player.getPosition(), mapValues);
 
-        collisionController = new CollisionController(world, map);
-        collisionController.map(mapValues);
+    collisionController = new CollisionController(world, map);
+    collisionController.map(mapValues);
 
-        interactionController = new InteractionController(map);
-        interactionController.map();
+    interactionController = new InteractionController(map);
+    interactionController.map();
 
-        rayHandler = new RayHandler(world);
+    rayHandler = new RayHandler(world);
 
-        rayHandler.setBlurNum(3);
+    rayHandler.setBlurNum(3);
 
-        darkenAmount = 0f;
-        sun = new Sun(rayHandler, game.clock);
-        sun.update(darkenAmount);
+    darkenAmount = 0f;
+    sun = new Sun(rayHandler, game.clock);
+    sun.update(darkenAmount);
 
-        lightController = new LightController(map, rayHandler, game.clock);
-        lightController.map();
+    lightController = new LightController(map, rayHandler, game.clock);
+    lightController.map();
 
-        lightController.update();
-        debugDrawer = new DebugDrawer(gameCamera.getCamera());
-        inspectDrawer = new InspectDrawer();
-        dialogDrawer = new DialogDrawer(player, gameCamera.getCamera());
-        npcController = new NPCController(map, game.getBundleController());
-        npcController.map(world);
+    lightController.update();
+    debugDrawer = new DebugDrawer(gameCamera.getCamera());
+    inspectDrawer = new InspectDrawer();
+    dialogDrawer = new DialogDrawer(player, gameCamera.getCamera());
+    npcController = new NPCController(map, game.getBundleController());
+    npcController.map(world);
+  }
+
+  private void setPlayerSpawnPoint(String name) {
+    MapObject playerSpawnObject =
+        map.getLayers().get(BoleroGame.SPAWN_LAYER).getObjects().get(name);
+
+    final MapProperties props = playerSpawnObject.getProperties();
+
+    playerSpawnPosition =
+        new Vector2(
+            (float) props.get("x") / BoleroGame.UNIT, (float) props.get("y") / BoleroGame.UNIT);
+  }
+
+  @Override
+  public void render(float delta) {
+    Gdx.gl.glClearColor(0, 0, 0f, 1);
+    Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+    Vector2 playerPos = new Vector2(player.getPosition().x, player.getPosition().y);
+    Vector2 playerPosPixels =
+        new Vector2(
+            player.getPosition().x * BoleroGame.UNIT, player.getPosition().y * BoleroGame.UNIT);
+
+    TransitionRectangle transitionRectangle =
+        interactionController.checkIfInInteractionRectangle(playerPosPixels);
+    InspectRectangle inspectRectangle =
+        interactionController.checkIfInInspectRectangle(playerPosPixels);
+
+    npcController.checkSchedules(game.clock);
+    NPC npc = npcController.checkIfNearNPC(playerPos);
+
+    if (player.getState() != CharacterState.inspecting
+        && player.getState() != CharacterState.talking) {
+      handleMovementInput();
     }
 
-    private void setPlayerSpawnPoint(String name) {
-        MapObject playerSpawnObject = map.getLayers().get(BoleroGame.SPAWN_LAYER).getObjects().get(name);
-
-        final MapProperties props = playerSpawnObject.getProperties();
-
-        playerSpawnPosition = new Vector2((float) props.get("x") / BoleroGame.UNIT, (float) props.get("y") / BoleroGame.UNIT);
+    if (player.getState() == CharacterState.talking) {
+      dialogDrawer.checkForInput();
     }
 
-    @Override
-    public void render(float delta) {
-        Gdx.gl.glClearColor(0, 0, 0f, 1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+    player.setPosition();
+    npcController.setPositions();
+    gameCamera.update(player.getPosition(), mapValues, delta);
 
-        Vector2 playerPos = new Vector2(player.getPosition().x, player.getPosition().y);
-        Vector2 playerPosPixels = new Vector2(player.getPosition().x * BoleroGame.UNIT, player.getPosition().y * BoleroGame.UNIT);
+    mapController.setView(gameCamera.getCamera());
+    mapController.drawBackground();
 
-        TransitionRectangle transitionRectangle = interactionController.checkIfInInteractionRectangle(playerPosPixels);
-        InspectRectangle inspectRectangle = interactionController.checkIfInInspectRectangle(playerPosPixels);
-
-        npcController.checkSchedules(game.clock);
-        NPC npc = npcController.checkIfNearNPC(playerPos);
-
-        if (player.getState() != CharacterState.inspecting && player.getState() != CharacterState.talking) {
-            handleMovementInput();
-        }
-
-        if (player.getState() == CharacterState.talking) {
-            dialogDrawer.checkForInput();
-        }
-
-        player.setPosition();
-        npcController.setPositions();
-        gameCamera.update(player.getPosition(), mapValues, delta);
-
-        mapController.setView(gameCamera.getCamera());
-        mapController.drawBackground();
-
-        if (game.debugMode) {
-            debugDrawer.drawInteractionZones(interactionController.getAllRectangles(), npcController.getNpcs());
-        }
-
-        game.batch.setProjectionMatrix(gameCamera.getCamera().combined);
-        game.batch.begin();
-        player.draw(game.batch);
-        npcController.drawNPCs(game.batch);
-
-        if ((transitionRectangle != null || inspectRectangle != null || npc != null) &&
-                player.getState() != CharacterState.inspecting &&
-                player.getState() != CharacterState.talking) {
-            eButtonIcon.draw(game.batch);
-        }
-
-        game.batch.end();
-
-        mapController.drawForeground();
-
-        rayHandler.setCombinedMatrix(gameCamera.getCamera());
-        rayHandler.updateAndRender();
-
-        drawHUD();
-
-        if (player.getState() == CharacterState.inspecting && inspectRectangle != null) {
-            drawInspection(inspectRectangle);
-        } else if (player.getState() == CharacterState.talking) {
-            drawDialog();
-        }
-
-        handleInteractionInput(transitionRectangle, inspectRectangle, npc);
-        if (game.debugMode) {
-            debugDrawer.drawBox2DBodies(world);
-        }
-
-        doPhysicsStep(delta);
-
+    if (game.debugMode) {
+      debugDrawer.drawInteractionZones(
+          interactionController.getAllRectangles(), npcController.getNpcs());
     }
 
+    game.batch.setProjectionMatrix(gameCamera.getCamera().combined);
+    game.batch.begin();
+    player.draw(game.batch);
+    npcController.drawNPCs(game.batch);
 
-    private void doPhysicsStep(float deltaTime) {
-        // Fixed time step from https://gafferongames.com/post/fix_your_timestep/
-        // Max frame time to avoid spiral of death on slow devices
-        float frameTime = Math.min(deltaTime, 0.25f);
-        accumulator += frameTime;
-        float TIME_STEP = 1 / 16f;
-        while (accumulator >= TIME_STEP) {
-            world.step(TIME_STEP, 6, 2);
-            game.clock.increment();
-            sun.update(darkenAmount);
-            lightController.update();
-            accumulator -= TIME_STEP;
-        }
+    if ((transitionRectangle != null || inspectRectangle != null || npc != null)
+        && player.getState() != CharacterState.inspecting
+        && player.getState() != CharacterState.talking) {
+      eButtonIcon.draw(game.batch);
     }
 
-    private void drawHUD() {
-        game.hudBatch.begin();
-        if (game.debugMode) {
-            debugDrawer.drawDebugInfo(game.font, game.hudBatch, player, game.currentScreen.name, gameCamera.getCamera().zoom, game.clock);
-        }
-        game.hudBatch.end();
+    game.batch.end();
+
+    mapController.drawForeground();
+
+    rayHandler.setCombinedMatrix(gameCamera.getCamera());
+    rayHandler.updateAndRender();
+
+    drawHUD();
+
+    if (player.getState() == CharacterState.inspecting && inspectRectangle != null) {
+      drawInspection(inspectRectangle);
+    } else if (player.getState() == CharacterState.talking) {
+      drawDialog();
     }
 
-
-    private void handleMovementInput() {
-        if (Gdx.input.isKeyJustPressed(Input.Keys.H)) {
-            game.debugMode = !game.debugMode;
-        }
-
-        if (game.debugMode) {
-            if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
-                respawnPlayer();
-            }
-
-            if (Gdx.input.isKeyJustPressed(Input.Keys.O)) {
-                gameCamera.zoomOutInstant(0.3f);
-            }
-            if (Gdx.input.isKeyJustPressed(Input.Keys.P)) {
-                gameCamera.zoomInInstant(0.3f);
-            }
-        }
-
-        if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-            this.player.applyLeftMovement();
-        }
-
-        if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-            this.player.applyRightMovement();
-        }
-
-        if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-            this.player.applyUpMovement();
-        }
-
-        if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-            this.player.applyDownMovement();
-        }
-
-        if (!Gdx.input.isKeyPressed(Input.Keys.A) && !Gdx.input.isKeyPressed(Input.Keys.D)) {
-            this.player.stopXMovement();
-        }
-
-        if (!Gdx.input.isKeyPressed(Input.Keys.W) && !Gdx.input.isKeyPressed(Input.Keys.S)) {
-            this.player.stopYMovement();
-        }
-
+    handleInteractionInput(transitionRectangle, inspectRectangle, npc);
+    if (game.debugMode) {
+      debugDrawer.drawBox2DBodies(world);
     }
 
-    private void handleInteractionInput(TransitionRectangle transitionRectangle, InspectRectangle inspectRectangle, NPC npc) {
-        if (Gdx.input.isKeyJustPressed(Input.Keys.E) && transitionRectangle != null) {
-            handleTransition(transitionRectangle);
-        } else if (Gdx.input.isKeyJustPressed(Input.Keys.E) && inspectRectangle != null) {
-            inspect();
-        } else if (Gdx.input.isKeyJustPressed(Input.Keys.E) && npc != null) {
-            talkToNPC(npc);
-        }
+    doPhysicsStep(delta);
+  }
+
+  private void doPhysicsStep(float deltaTime) {
+    // Fixed time step from https://gafferongames.com/post/fix_your_timestep/
+    // Max frame time to avoid spiral of death on slow devices
+    float frameTime = Math.min(deltaTime, 0.25f);
+    accumulator += frameTime;
+    float TIME_STEP = 1 / 16f;
+    while (accumulator >= TIME_STEP) {
+      world.step(TIME_STEP, 6, 2);
+      game.clock.increment();
+      sun.update(darkenAmount);
+      lightController.update();
+      accumulator -= TIME_STEP;
+    }
+  }
+
+  private void drawHUD() {
+    game.hudBatch.begin();
+    if (game.debugMode) {
+      debugDrawer.drawDebugInfo(
+          game.font,
+          game.hudBatch,
+          player,
+          game.currentScreen.name,
+          gameCamera.getCamera().zoom,
+          game.clock);
+    }
+    game.hudBatch.end();
+  }
+
+  private void handleMovementInput() {
+    if (Gdx.input.isKeyJustPressed(Input.Keys.H)) {
+      game.debugMode = !game.debugMode;
     }
 
-    private void handleTransition(TransitionRectangle rectangle) {
-        game.loadRoute(rectangle.getName(), rectangle.getSpawnName());
+    if (game.debugMode) {
+      if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
+        respawnPlayer();
+      }
+
+      if (Gdx.input.isKeyJustPressed(Input.Keys.O)) {
+        gameCamera.zoomOutInstant(0.3f);
+      }
+      if (Gdx.input.isKeyJustPressed(Input.Keys.P)) {
+        gameCamera.zoomInInstant(0.3f);
+      }
     }
 
-    private void inspect() {
-        if (player.getState() != CharacterState.inspecting) {
-            gameCamera.zoomIn(0.2f);
-            player.setState(CharacterState.inspecting);
-        } else {
-            gameCamera.zoomOut(0.2f);
-            player.setState(CharacterState.idle);
-        }
+    if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+      this.player.applyLeftMovement();
     }
 
-    private void drawInspection(InspectRectangle rectangle) {
-        String text = game.getBundleController().getString(rectangle.getStringID());
-        game.hudBatch.begin();
-        inspectDrawer.draw(game.hudBatch, text);
-        game.hudBatch.end();
+    if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+      this.player.applyRightMovement();
     }
 
-    private void talkToNPC(NPC npc) {
-        if (dialogDrawer.isActivated()) {
-            return;
-        }
-
-        if (player.getState() != CharacterState.talking) {
-            darkenAmount = 0.2f;
-            dialogDrawer.activate(npc);
-            gameCamera.zoomIn(0.2f);
-            player.setState(CharacterState.talking);
-            npc.setState(CharacterState.talking);
-        } else {
-            darkenAmount = 0f;
-            gameCamera.zoomOut(0.2f);
-            player.setState(CharacterState.idle);
-            npc.setState(CharacterState.idle);
-        }
+    if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+      this.player.applyUpMovement();
     }
 
-
-    private void drawDialog() {
-        dialogDrawer.drawCharacters();
-
-        game.hudBatch.begin();
-        dialogDrawer.draw(game.hudBatch);
-        game.hudBatch.end();
+    if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+      this.player.applyDownMovement();
     }
 
-    private void respawnPlayer() {
-        player.respawn(playerSpawnPosition);
+    if (!Gdx.input.isKeyPressed(Input.Keys.A) && !Gdx.input.isKeyPressed(Input.Keys.D)) {
+      this.player.stopXMovement();
     }
 
-    @Override
-    public void show() {
+    if (!Gdx.input.isKeyPressed(Input.Keys.W) && !Gdx.input.isKeyPressed(Input.Keys.S)) {
+      this.player.stopYMovement();
+    }
+  }
 
+  private void handleInteractionInput(
+      TransitionRectangle transitionRectangle, InspectRectangle inspectRectangle, NPC npc) {
+    if (Gdx.input.isKeyJustPressed(Input.Keys.E) && transitionRectangle != null) {
+      handleTransition(transitionRectangle);
+    } else if (Gdx.input.isKeyJustPressed(Input.Keys.E) && inspectRectangle != null) {
+      inspect();
+    } else if (Gdx.input.isKeyJustPressed(Input.Keys.E) && npc != null) {
+      talkToNPC(npc);
+    }
+  }
+
+  private void handleTransition(TransitionRectangle rectangle) {
+    game.loadRoute(rectangle.getName(), rectangle.getSpawnName());
+  }
+
+  private void inspect() {
+    if (player.getState() != CharacterState.inspecting) {
+      gameCamera.zoomIn(0.2f);
+      player.setState(CharacterState.inspecting);
+    } else {
+      gameCamera.zoomOut(0.2f);
+      player.setState(CharacterState.idle);
+    }
+  }
+
+  private void drawInspection(InspectRectangle rectangle) {
+    String text = game.getBundleController().getString(rectangle.getStringID());
+    game.hudBatch.begin();
+    inspectDrawer.draw(game.hudBatch, text);
+    game.hudBatch.end();
+  }
+
+  private void talkToNPC(NPC npc) {
+    if (dialogDrawer.isActivated()) {
+      return;
     }
 
-    @Override
-    public void resize(int width, int height) {
-
+    if (player.getState() != CharacterState.talking) {
+      darkenAmount = 0.2f;
+      dialogDrawer.activate(npc);
+      gameCamera.zoomIn(0.2f);
+      player.setState(CharacterState.talking);
+      npc.setState(CharacterState.talking);
+    } else {
+      darkenAmount = 0f;
+      gameCamera.zoomOut(0.2f);
+      player.setState(CharacterState.idle);
+      npc.setState(CharacterState.idle);
     }
+  }
 
-    @Override
-    public void pause() {
+  private void drawDialog() {
+    dialogDrawer.drawCharacters();
 
-    }
+    game.hudBatch.begin();
+    dialogDrawer.drawUI(game.hudBatch);
+    game.hudBatch.end();
+  }
 
-    @Override
-    public void resume() {
+  private void respawnPlayer() {
+    player.respawn(playerSpawnPosition);
+  }
 
-    }
+  @Override
+  public void show() {}
 
-    @Override
-    public void hide() {
+  @Override
+  public void resize(int width, int height) {}
 
-    }
+  @Override
+  public void pause() {}
 
-    @Override
-    public void dispose() {
-        map.dispose();
-        world.dispose();
-        player.dispose();
-        collisionController.dispose();
-        mapController.dispose();
-        debugDrawer.dispose();
-        eButtonIcon.dispose();
-        npcController.dispose();
-        inspectDrawer.dispose();
-        lightController.dispose();
-        rayHandler.dispose();
-    }
+  @Override
+  public void resume() {}
+
+  @Override
+  public void hide() {}
+
+  @Override
+  public void dispose() {
+    map.dispose();
+    world.dispose();
+    player.dispose();
+    collisionController.dispose();
+    mapController.dispose();
+    debugDrawer.dispose();
+    eButtonIcon.dispose();
+    npcController.dispose();
+    inspectDrawer.dispose();
+    lightController.dispose();
+    rayHandler.dispose();
+  }
 }

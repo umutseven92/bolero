@@ -19,185 +19,192 @@ import com.bolero.game.dialog.Choice;
 import com.bolero.game.dialog.Dialog;
 
 public class DialogDrawer extends UIDrawer implements Disposable {
-    private static final float SLIDE_SPEED = 5f;
-    private static final String CHOICE_PREFIX = "-> ";
+  private static final float SLIDE_SPEED = 5f;
+  private static final String CHOICE_PREFIX = "-> ";
 
-    private final SpriteBatch batch;
-    private final Table table;
-    private final Texture buttonTexture;
-    private final Label nameLabel;
-    private final Label textLabel;
-    private final VerticalGroup choiceGroup;
-    private final Sprite playerSprite;
+  private final SpriteBatch batch;
+  private final Table table;
+  private final Texture buttonTexture;
+  private final Label nameLabel;
+  private final Label textLabel;
+  private final VerticalGroup choiceGroup;
+  private final Sprite playerSprite;
 
-    private final float npcPosXGoal;
-    private final float playerPosXGoal;
-    private final float spriteY;
+  private final float npcPosXGoal;
+  private final float playerPosXGoal;
+  private final float spriteY;
 
-    private float npcPosX;
-    private float playerPosX;
+  private float npcPosX;
+  private float playerPosX;
 
-    private boolean activated;
-    private NPC npc;
-    private Sprite npcSprite;
+  private boolean activated;
+  private NPC npc;
+  private Sprite npcSprite;
 
-    private Dialog currentDialog;
+  private Dialog currentDialog;
 
-    private int activeIndex;
+  private int activeIndex;
 
-    public boolean isActivated() {
-        return activated;
+  public boolean isActivated() {
+    return activated;
+  }
+
+  public DialogDrawer(Player player, OrthographicCamera camera) {
+    super();
+    this.batch = new SpriteBatch();
+    this.activated = false;
+    this.playerSprite = player.getDialogSprite();
+    this.spriteY = Gdx.graphics.getHeight() / 5f;
+
+    this.npcPosXGoal = camera.viewportWidth / 2f;
+
+    this.playerPosXGoal = Gdx.graphics.getWidth() - this.playerSprite.getWidth();
+    this.playerPosX = playerPosXGoal + 10f;
+
+    this.playerSprite.setPosition(playerPosX, spriteY);
+
+    buttonTexture = new Texture(Gdx.files.internal("buttons/green-E.png"));
+    Image buttonImage = new Image(buttonTexture);
+
+    table = new Table();
+    table.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+    table.bottom();
+    table.padBottom(Gdx.graphics.getHeight() / 10f);
+
+    nameLabel = new Label("", uiSkin);
+    textLabel = new Label("", uiSkin);
+    Label buttonLabel = new Label("to choose", uiSkin);
+
+    textLabel.setWrap(true);
+    table.add(nameLabel).width(Gdx.graphics.getWidth() / 1.2f);
+    table.row();
+    table.add(textLabel).width(Gdx.graphics.getWidth() / 1.2f);
+    table.row();
+
+    choiceGroup = new VerticalGroup();
+    choiceGroup.left();
+    choiceGroup.columnLeft();
+
+    table.add(choiceGroup).width(Gdx.graphics.getWidth() / 1.2f);
+
+    table.add(buttonImage).right();
+    table.add(buttonLabel).right();
+  }
+
+  public void activate(NPC npc) {
+    this.activated = true;
+
+    this.npcSprite = npc.getDialogSprite();
+    this.npcPosX = npcPosXGoal - 100f;
+    this.npcSprite.setPosition(npcPosX, spriteY);
+    this.playerPosX = playerPosXGoal + 100f;
+
+    this.npc = npc;
+    this.currentDialog = npc.getDialogTree().getInitialDialog();
+
+    resetButtons();
+  }
+
+  public void drawCharacters() {
+    if (npcPosX <= npcPosXGoal) {
+      npcPosX += SLIDE_SPEED;
+      this.npcSprite.setX(npcPosX);
     }
 
-    public DialogDrawer(Player player, OrthographicCamera camera) {
-        super();
-        this.batch = new SpriteBatch();
-        this.activated = false;
-        this.playerSprite = player.getDialogSprite();
-        this.spriteY = Gdx.graphics.getHeight() / 5f;
-
-        this.npcPosXGoal = camera.viewportWidth / 2f;
-
-        this.playerPosXGoal = Gdx.graphics.getWidth() - this.playerSprite.getWidth();
-        this.playerPosX = playerPosXGoal + 10f;
-
-        this.playerSprite.setPosition(playerPosX, spriteY);
-
-        buttonTexture = new Texture(Gdx.files.internal("buttons/green-E.png"));
-        Image buttonImage = new Image(buttonTexture);
-
-        table = new Table();
-        table.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        table.bottom();
-        table.padBottom(Gdx.graphics.getHeight() / 10f);
-
-        nameLabel = new Label("", uiSkin);
-        textLabel = new Label("", uiSkin);
-        Label buttonLabel = new Label("to choose", uiSkin);
-
-        textLabel.setWrap(true);
-        table.add(nameLabel).width(Gdx.graphics.getWidth() / 1.2f);
-        table.row();
-        table.add(textLabel).width(Gdx.graphics.getWidth() / 1.2f);
-        table.row();
-
-        choiceGroup = new VerticalGroup();
-        choiceGroup.left();
-        choiceGroup.columnLeft();
-
-        table.add(choiceGroup).width(Gdx.graphics.getWidth() / 1.2f);
-
-        table.add(buttonImage).right();
-        table.add(buttonLabel).right();
+    if (playerPosX > playerPosXGoal) {
+      playerPosX -= SLIDE_SPEED;
+      this.playerSprite.setX(playerPosX);
     }
 
-    public void activate(NPC npc) {
-        this.activated = true;
+    this.batch.begin();
 
-        this.npcSprite = npc.getDialogSprite();
-        this.npcPosX = npcPosXGoal - 100f;
-        this.npcSprite.setPosition(npcPosX, spriteY);
-        this.playerPosX = playerPosXGoal + 100f;
+    // NPC sprite during dialog should always face right.
+    if (npcSprite.isFlipX()) {
+      npcSprite.flip(true, false);
+    }
 
-        this.npc = npc;
-        this.currentDialog = npc.getDialogTree().getInitialDialog();
+    this.npcSprite.draw(batch);
+
+    this.playerSprite.draw(batch);
+    this.batch.end();
+  }
+
+  public void drawUI(SpriteBatch hudBatch) {
+
+    nameLabel.setText(npc.getName() + ":");
+    textLabel.setText(currentDialog.getText());
+
+    table.draw(hudBatch, 1f);
+  }
+
+  public void checkForInput() {
+    if (Gdx.input.isKeyJustPressed(Input.Keys.W) || Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
+      if (activeIndex > 0) {
+        activeIndex--;
+        setActiveIndex(activeIndex);
+      }
+    } else if (Gdx.input.isKeyJustPressed(Input.Keys.S)
+        || Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
+      if (activeIndex < choiceGroup.getChildren().size - 1) {
+        activeIndex++;
+        setActiveIndex(activeIndex);
+      }
+    } else if (Gdx.input.isKeyJustPressed(Input.Keys.E)
+        || Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
+      Dialog leadTo = currentDialog.getChoices().get(activeIndex).getLeadsTo();
+      if (leadTo == null) {
+        quit();
+      } else {
+        currentDialog = leadTo;
 
         resetButtons();
+      }
+    }
+  }
+
+  private void quit() {
+    this.activated = false;
+  }
+
+  private void setActiveIndex(int index) {
+    activeIndex = index;
+    choiceGroup.getChildren().forEach(this::clearChoice);
+
+    choose(index);
+  }
+
+  private void clearChoice(Actor choice) {
+    Label label = (Label) choice;
+    String text = label.getText().toString();
+    if (text.startsWith(CHOICE_PREFIX)) {
+      label.setText(text.substring(CHOICE_PREFIX.length()));
+    }
+    choice.setColor(Color.WHITE);
+  }
+
+  private void choose(int index) {
+    Label chosen = (Label) choiceGroup.getChildren().get(index);
+    chosen.setColor(Color.YELLOW);
+    String text = chosen.getText().toString();
+
+    chosen.setText(CHOICE_PREFIX + text);
+  }
+
+  private void resetButtons() {
+    choiceGroup.clear();
+
+    for (Choice choice : currentDialog.getChoices()) {
+      Label button = new Label(choice.getText(), uiSkin);
+      choiceGroup.addActor(button);
     }
 
-    public void drawCharacters() {
-        if (npcPosX <= npcPosXGoal) {
-            npcPosX += SLIDE_SPEED;
-            this.npcSprite.setX(npcPosX);
-        }
+    choiceGroup.invalidate();
+    setActiveIndex(0);
+  }
 
-        if (playerPosX > playerPosXGoal) {
-            playerPosX -= SLIDE_SPEED;
-            this.playerSprite.setX(playerPosX);
-        }
-
-        this.batch.begin();
-        this.npcSprite.draw(batch);
-        this.playerSprite.draw(batch);
-        this.batch.end();
-    }
-
-    public void draw(SpriteBatch hudBatch) {
-
-        nameLabel.setText(npc.getName() + ":");
-        textLabel.setText(currentDialog.getText());
-
-        table.draw(hudBatch, 1f);
-    }
-
-    public void checkForInput() {
-        if (Gdx.input.isKeyJustPressed(Input.Keys.W) || Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
-            if (activeIndex > 0) {
-                activeIndex--;
-                setActiveIndex(activeIndex);
-            }
-        } else if (Gdx.input.isKeyJustPressed(Input.Keys.S) || Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
-            if (activeIndex < choiceGroup.getChildren().size - 1) {
-                activeIndex++;
-                setActiveIndex(activeIndex);
-            }
-        } else if (Gdx.input.isKeyJustPressed(Input.Keys.E) || Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
-            Dialog leadTo = currentDialog.getChoices().get(activeIndex).getLeadsTo();
-            if (leadTo == null) {
-                quit();
-            } else {
-                currentDialog = leadTo;
-
-                resetButtons();
-            }
-        }
-    }
-
-    private void quit() {
-        this.activated = false;
-    }
-
-    private void setActiveIndex(int index) {
-        activeIndex = index;
-        choiceGroup.getChildren().forEach(this::clearChoice);
-
-        choose(index);
-    }
-
-    private void clearChoice(Actor choice) {
-        Label label = (Label) choice;
-        String text = label.getText().toString();
-        if (text.startsWith(CHOICE_PREFIX)) {
-            label.setText(text.substring(CHOICE_PREFIX.length()));
-        }
-        choice.setColor(Color.WHITE);
-    }
-
-    private void choose(int index) {
-        Label chosen = (Label) choiceGroup.getChildren().get(index);
-        chosen.setColor(Color.YELLOW);
-        String text = chosen.getText().toString();
-
-        chosen.setText(CHOICE_PREFIX + text);
-    }
-
-    private void resetButtons() {
-        choiceGroup.clear();
-
-        for (Choice choice : currentDialog.getChoices()) {
-            Label button = new Label(choice.getText(), uiSkin);
-            choiceGroup.addActor(button);
-        }
-
-        choiceGroup.invalidate();
-        setActiveIndex(0);
-    }
-
-
-    @Override
-    public void dispose() {
-        super.dispose();
-        buttonTexture.dispose();
-    }
-
+  @Override
+  public void dispose() {
+    super.dispose();
+    buttonTexture.dispose();
+  }
 }
