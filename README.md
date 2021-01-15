@@ -19,6 +19,9 @@
 * Day / night cycle
 
 ## Todo
+* Real time map updates during development
+* Read config from file
+* Logging
 * Scenarios
 * Improved NPC AI
 * Screen sizes

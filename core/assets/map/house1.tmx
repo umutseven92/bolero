@@ -162,11 +162,5 @@
    </properties>
    <point/>
   </object>
-  <object id="43" name="wizard" type="npc" x="151" y="314">
-   <properties>
-    <property name="name" value="Wizard"/>
-   </properties>
-   <point/>
-  </object>
  </objectgroup>
 </map>

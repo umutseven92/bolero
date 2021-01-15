@@ -123,9 +123,14 @@ public class DialogDrawer extends UIDrawer implements Disposable {
       npcSprite.flip(true, false);
     }
 
-    this.npcSprite.draw(batch);
+    // Player sprite during dialog should always face left.
+    if(!playerSprite.isFlipX()) {
+      playerSprite.flip(true, false);
+    }
 
+    this.npcSprite.draw(batch);
     this.playerSprite.draw(batch);
+
     this.batch.end();
   }
 

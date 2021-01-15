@@ -23,6 +23,8 @@ import com.bolero.game.drawers.DialogDrawer;
 import com.bolero.game.drawers.InspectDrawer;
 import com.bolero.game.enums.CharacterState;
 import com.bolero.game.exceptions.MapperException;
+import com.bolero.game.exceptions.MissingPropertyException;
+import com.bolero.game.exceptions.NPCDoesNotExistException;
 import com.bolero.game.icons.ButtonIcon;
 import com.bolero.game.interactions.InspectRectangle;
 import com.bolero.game.interactions.TransitionRectangle;
@@ -32,58 +34,66 @@ import java.io.FileNotFoundException;
 public abstract class GameScreen implements Screen {
   private final BoleroGame game;
   private final String name;
-  private final World world;
+  private World world;
 
-  private final GameCamera gameCamera;
-  private final TiledMap map;
+  private GameCamera gameCamera;
+  private TiledMap map;
 
-  private final Player player;
-  private final ButtonIcon eButtonIcon;
+  private Player player;
+  private ButtonIcon eButtonIcon;
 
-  private final MapValues mapValues;
+  private MapValues mapValues;
 
-  private final CollisionController collisionController;
-  private final InteractionController interactionController;
-  private final LightController lightController;
+  private CollisionController collisionController;
+  private InteractionController interactionController;
+  private LightController lightController;
 
-  private final DebugDrawer debugDrawer;
-  private final DialogDrawer dialogDrawer;
-  private final InspectDrawer inspectDrawer;
+  private DebugDrawer debugDrawer;
+  private DialogDrawer dialogDrawer;
+  private InspectDrawer inspectDrawer;
   private Vector2 playerSpawnPosition;
   private float accumulator = 0;
 
-  private final NPCController npcController;
-  private final MapController mapController;
-  private final RayHandler rayHandler;
+  private NPCController npcController;
+  private MapController mapController;
+  private RayHandler rayHandler;
 
-  private final Sun sun;
+  private Sun sun;
   private float darkenAmount;
+
+  private final String mapPath;
+  private final String spawnPos;
 
   public GameScreen(BoleroGame game, String name, String mapPath, String spawnPos)
       throws MapperException, FileNotFoundException {
     this.game = game;
     this.name = name;
 
+    this.mapPath = mapPath;
+    this.spawnPos = spawnPos;
+    initializeAll();
+  }
+
+  private void initializeMap() {
     map = new TmxMapLoader().load(mapPath);
     mapValues = new MapValues(map);
 
     mapController = new MapController(map);
-    setPlayerSpawnPoint(spawnPos);
+  }
 
-    gameCamera = new GameCamera();
+  private void initializeCollision() {
     world = new World(Vector2.Zero, true);
-
-    player = new Player(playerSpawnPosition, world);
-    eButtonIcon = new ButtonIcon(player);
-
-    gameCamera.updatePosition(player.getPosition(), mapValues);
 
     collisionController = new CollisionController(world, map);
     collisionController.map(mapValues);
+  }
 
+  private void initializeInteractions() throws MissingPropertyException {
     interactionController = new InteractionController(map);
     interactionController.map();
+  }
 
+  private void initializeLights(boolean force) throws MissingPropertyException {
     rayHandler = new RayHandler(world);
 
     rayHandler.setBlurNum(3);
@@ -95,12 +105,51 @@ public abstract class GameScreen implements Screen {
     lightController = new LightController(map, rayHandler, game.clock);
     lightController.map();
 
-    lightController.update();
+    lightController.update(force);
+  }
+
+  private void initializeNPCs()
+      throws FileNotFoundException, MissingPropertyException, NPCDoesNotExistException {
+    npcController = new NPCController(map, game.getBundleController());
+    npcController.map(world);
+  }
+
+  private void initializeCamera() {
+    gameCamera = new GameCamera();
+    gameCamera.updatePosition(player.getPosition(), mapValues);
+  }
+
+  private void initializePlayer() throws FileNotFoundException {
+    setPlayerSpawnPoint(spawnPos);
+
+    player = new Player(playerSpawnPosition, world);
+    eButtonIcon = new ButtonIcon(player);
+  }
+
+  private void initializeDrawers() {
     debugDrawer = new DebugDrawer(gameCamera.getCamera());
     inspectDrawer = new InspectDrawer();
     dialogDrawer = new DialogDrawer(player, gameCamera.getCamera());
-    npcController = new NPCController(map, game.getBundleController());
-    npcController.map(world);
+  }
+
+  private void initializeAll()
+      throws FileNotFoundException, MissingPropertyException, NPCDoesNotExistException {
+    initializeMap();
+    initializeCollision();
+    initializeInteractions();
+    initializeLights(false);
+    initializeNPCs();
+    initializePlayer();
+    initializeCamera();
+    initializeDrawers();
+  }
+
+  private void reInitialize()
+      throws FileNotFoundException, MissingPropertyException, NPCDoesNotExistException {
+    initializeMap();
+    initializeInteractions();
+    initializeLights(true);
+    initializeNPCs();
   }
 
   private void setPlayerSpawnPoint(String name) {
@@ -223,7 +272,7 @@ public abstract class GameScreen implements Screen {
 
     if (game.debugMode) {
       if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
-        respawnPlayer();
+        reloadMap();
       }
 
       if (Gdx.input.isKeyJustPressed(Input.Keys.O)) {
@@ -318,8 +367,14 @@ public abstract class GameScreen implements Screen {
     game.hudBatch.end();
   }
 
-  private void respawnPlayer() {
-    player.respawn(playerSpawnPosition);
+  private void reloadMap() {
+    // TODO: Reload the map without moving the Player & NPCs
+    try {
+      reInitialize();
+    } catch (Exception e) {
+      e.printStackTrace();
+      System.exit(1);
+    }
   }
 
   @Override

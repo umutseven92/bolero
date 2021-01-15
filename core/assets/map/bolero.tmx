@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.4" tiledversion="1.4.3" orientation="orthogonal" renderorder="right-down" width="50" height="50" tilewidth="32" tileheight="32" infinite="0" nextlayerid="11" nextobjectid="70">
+<map version="1.4" tiledversion="1.4.3" orientation="orthogonal" renderorder="right-down" width="50" height="50" tilewidth="32" tileheight="32" infinite="0" nextlayerid="11" nextobjectid="71">
  <tileset firstgid="1" source="walls,ground,decorative.tsx"/>
  <tileset firstgid="1025" source="houses.tsx"/>
  <layer id="1" name="Grass" width="50" height="50">
@@ -290,10 +290,10 @@
  <objectgroup id="9" name="Lights">
   <object id="56" name="street2" type="point" x="848" y="586">
    <properties>
-    <property name="color" type="color" value="#ffffbb1c"/>
+    <property name="color" type="color" value="#fffd8008"/>
     <property name="distance" type="float" value="10"/>
     <property name="rays" type="int" value="100"/>
-    <property name="time" value="night"/>
+    <property name="time" value="day"/>
    </properties>
    <point/>
   </object>
@@ -406,6 +406,14 @@
    <properties>
     <property name="hour" type="int" value="0"/>
     <property name="minute" type="int" value="30"/>
+    <property name="npc" value="Villager"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="70" name="villager2s" type="schedule" x="280" y="819">
+   <properties>
+    <property name="hour" type="int" value="1"/>
+    <property name="minute" type="int" value="0"/>
     <property name="npc" value="Villager"/>
    </properties>
    <point/>

@@ -63,11 +63,13 @@ public class LightController extends BaseMapper implements Disposable {
     }
   }
 
-  public void update() {
+  public void update(Boolean force) {
     long timestamp = this.clock.getTimestamp();
     int ratio = Clock.RATIO;
 
     boolean night;
+
+    //noinspection RedundantIfStatement
     if (timestamp >= BoleroGame.DUSK_START * ratio || timestamp < BoleroGame.DAWN_END * ratio) {
       // NIGHT
       night = true;
@@ -77,10 +79,14 @@ public class LightController extends BaseMapper implements Disposable {
     }
 
     // To prevent unnecessary updates
-    if (night != previousNight) {
+    if (force || night != previousNight) {
       toggleLights(night);
       previousNight = night;
     }
+  }
+
+  public void update() {
+    update(false);
   }
 
   private void toggleLights(boolean night) {
