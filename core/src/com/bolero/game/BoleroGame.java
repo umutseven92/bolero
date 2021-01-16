@@ -3,21 +3,19 @@ package com.bolero.game;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.bolero.game.controllers.BundleController;
-import com.bolero.game.screens.BoleroScreen;
 import com.bolero.game.screens.GameScreen;
-import com.bolero.game.screens.HouseScreen;
 
-import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class BoleroGame extends Game {
 
   private ArrayList<GameScreen> screenPool;
-  private HashMap<String, Class> screens;
+  private HashMap<String, String> screens;
   private BundleController bundleController;
 
   public static final float UNIT = 16f;
@@ -62,10 +60,17 @@ public class BoleroGame extends Game {
     screens = new HashMap<>();
     screenPool = new ArrayList<>();
 
-    screens.put("bolero", BoleroScreen.class);
-    screens.put("house1", HouseScreen.class);
+    loadMaps();
+    loadRoute("bolero", SPAWN_INITIAL_OBJ);
+  }
 
-    loadRoute("bolero", "initial");
+  public void loadMaps() {
+    // Load all map files (*.tmx) from assets/map
+    FileHandle files = Gdx.files.internal("./map/");
+
+    for (FileHandle file : files.list(".tmx")) {
+      screens.put(file.nameWithoutExtension(), file.path());
+    }
   }
 
   public void loadRoute(String screenName, String spawnName) {
@@ -74,10 +79,13 @@ public class BoleroGame extends Game {
     try {
       Gdx.app.log(GameScreen.class.getName(), String.format("Loading map %s", screenName));
 
-      Class<GameScreen> clazz = screens.get(screenName);
+      if (!screens.containsKey(screenName)) {
+        throw new Exception(String.format("Screen %s does not exist in screens.", screenName));
+      }
 
-      Constructor<GameScreen> c = clazz.getDeclaredConstructor(BoleroGame.class, String.class);
-      toLoad = c.newInstance(this, spawnName);
+      String path = screens.get(screenName);
+
+      toLoad = new GameScreen(this, screenName, path, spawnName);
     } catch (Exception e) {
       Gdx.app.error(GameScreen.class.getName(), e.toString(), e);
       e.printStackTrace();

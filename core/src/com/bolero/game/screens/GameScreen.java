@@ -30,9 +30,8 @@ import com.bolero.game.interactions.InspectRectangle;
 import com.bolero.game.interactions.TransitionRectangle;
 
 import java.io.FileNotFoundException;
-import java.util.logging.Level;
 
-public abstract class GameScreen implements Screen {
+public class GameScreen implements Screen {
   private final BoleroGame game;
   private final String name;
   private World world;
@@ -386,7 +385,7 @@ public abstract class GameScreen implements Screen {
   }
 
   private void reloadMap() {
-    Gdx.app.log(GameScreen.class.getName(),"Reloading map.");
+    Gdx.app.log(GameScreen.class.getName(), "Reloading map.");
     try {
       reInitialize();
     } catch (Exception e) {
