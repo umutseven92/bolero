@@ -1,6 +1,8 @@
 package com.bolero.game;
 
+import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Game;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.bolero.game.controllers.BundleController;
@@ -13,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class BoleroGame extends Game {
+
   private ArrayList<GameScreen> screenPool;
   private HashMap<String, Class> screens;
   private BundleController bundleController;
@@ -46,6 +49,8 @@ public class BoleroGame extends Game {
 
   @Override
   public void create() {
+    Gdx.app.setLogLevel(Application.LOG_DEBUG);
+
     bundleController = new BundleController();
 
     batch = new SpriteBatch();
@@ -67,11 +72,14 @@ public class BoleroGame extends Game {
     GameScreen toLoad = null;
 
     try {
+      Gdx.app.log(GameScreen.class.getName(), String.format("Loading map %s", screenName));
+
       Class<GameScreen> clazz = screens.get(screenName);
 
       Constructor<GameScreen> c = clazz.getDeclaredConstructor(BoleroGame.class, String.class);
       toLoad = c.newInstance(this, spawnName);
     } catch (Exception e) {
+      Gdx.app.error(GameScreen.class.getName(), e.toString(), e);
       e.printStackTrace();
       System.exit(1);
     }

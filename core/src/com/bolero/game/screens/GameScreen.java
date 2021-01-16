@@ -30,6 +30,7 @@ import com.bolero.game.interactions.InspectRectangle;
 import com.bolero.game.interactions.TransitionRectangle;
 
 import java.io.FileNotFoundException;
+import java.util.logging.Level;
 
 public abstract class GameScreen implements Screen {
   private final BoleroGame game;
@@ -75,6 +76,8 @@ public abstract class GameScreen implements Screen {
   }
 
   private void initializeMap() {
+    Gdx.app.log(GameScreen.class.getName(), "Initializing map..");
+
     map = new TmxMapLoader().load(mapPath);
     mapValues = new MapValues(map);
 
@@ -83,6 +86,8 @@ public abstract class GameScreen implements Screen {
   }
 
   private void initializeCollision() throws MissingPropertyException {
+    Gdx.app.log(GameScreen.class.getName(), "Initializing collisions..");
+
     world = new World(Vector2.Zero, true);
 
     collisionController = new CollisionController(world, map);
@@ -90,11 +95,15 @@ public abstract class GameScreen implements Screen {
   }
 
   private void initializeInteractions() throws MissingPropertyException {
+    Gdx.app.log(GameScreen.class.getName(), "Initializing interactions..");
+
     interactionController = new InteractionController(map);
     interactionController.load();
   }
 
   private void initializeLights(boolean force) throws MissingPropertyException {
+    Gdx.app.log(GameScreen.class.getName(), "Initializing lights..");
+
     rayHandler = new RayHandler(world);
 
     rayHandler.setBlurNum(3);
@@ -111,16 +120,22 @@ public abstract class GameScreen implements Screen {
 
   private void initializeNPCs()
       throws FileNotFoundException, MissingPropertyException, NPCDoesNotExistException {
+    Gdx.app.log(GameScreen.class.getName(), "Initializing NPCs..");
+
     npcController = new NPCController(map, game.getBundleController());
     npcController.load(world);
   }
 
   private void initializeCamera() {
+    Gdx.app.log(GameScreen.class.getName(), "Initializing camera..");
+
     gameCamera = new GameCamera();
     gameCamera.updatePosition(player.getPosition(), mapValues);
   }
 
   private void initializePlayer() throws FileNotFoundException {
+    Gdx.app.log(GameScreen.class.getName(), "Initializing player..");
+
     setPlayerSpawnPoint(spawnPos);
 
     player = new Player(playerSpawnPosition, world);
@@ -128,6 +143,8 @@ public abstract class GameScreen implements Screen {
   }
 
   private void initializeDrawers() {
+    Gdx.app.log(GameScreen.class.getName(), "Initializing drawers..");
+
     debugDrawer = new DebugDrawer(gameCamera.getCamera());
     inspectDrawer = new InspectDrawer();
     dialogDrawer = new DialogDrawer(player, gameCamera.getCamera());
@@ -369,10 +386,11 @@ public abstract class GameScreen implements Screen {
   }
 
   private void reloadMap() {
-    // TODO: Reload the map without moving the Player & NPCs
+    Gdx.app.log(GameScreen.class.getName(),"Reloading map.");
     try {
       reInitialize();
     } catch (Exception e) {
+      Gdx.app.error(GameScreen.class.getName(), e.toString(), e);
       e.printStackTrace();
       System.exit(1);
     }

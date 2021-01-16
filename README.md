@@ -14,14 +14,14 @@
     * NPC spawn points
     * Talk to NPCs
     * Simple schedule
-* Spritesheet animation
+* Sprite sheet animation
 * 2D Lighting
 * Day / night cycle
+* Real time map updates during development
 
 ## Todo
-* Real time map updates during development
+
 * Read config from file
-* Logging
 * Scenarios
 * Improved NPC AI
 * Screen sizes
