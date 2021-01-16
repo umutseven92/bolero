@@ -79,18 +79,19 @@ public abstract class GameScreen implements Screen {
     mapValues = new MapValues(map);
 
     mapController = new MapController(map);
+    mapController.load();
   }
 
-  private void initializeCollision() {
+  private void initializeCollision() throws MissingPropertyException {
     world = new World(Vector2.Zero, true);
 
     collisionController = new CollisionController(world, map);
-    collisionController.map(mapValues);
+    collisionController.load(mapValues);
   }
 
   private void initializeInteractions() throws MissingPropertyException {
     interactionController = new InteractionController(map);
-    interactionController.map();
+    interactionController.load();
   }
 
   private void initializeLights(boolean force) throws MissingPropertyException {
@@ -103,7 +104,7 @@ public abstract class GameScreen implements Screen {
     sun.update(darkenAmount);
 
     lightController = new LightController(map, rayHandler, game.clock);
-    lightController.map();
+    lightController.load();
 
     lightController.update(force);
   }
@@ -111,7 +112,7 @@ public abstract class GameScreen implements Screen {
   private void initializeNPCs()
       throws FileNotFoundException, MissingPropertyException, NPCDoesNotExistException {
     npcController = new NPCController(map, game.getBundleController());
-    npcController.map(world);
+    npcController.load(world);
   }
 
   private void initializeCamera() {

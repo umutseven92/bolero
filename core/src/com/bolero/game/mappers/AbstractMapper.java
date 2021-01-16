@@ -1,4 +1,4 @@
-package com.bolero.game.controllers;
+package com.bolero.game.mappers;
 
 import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapObjects;
@@ -8,10 +8,10 @@ import com.bolero.game.exceptions.MissingPropertyException;
 
 import java.util.List;
 
-public abstract class BaseMapper {
+public abstract class AbstractMapper {
   private final TiledMap map;
 
-  BaseMapper(TiledMap map) {
+  public AbstractMapper(TiledMap map) {
     this.map = map;
   }
 

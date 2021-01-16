@@ -1,60 +1,40 @@
 package com.bolero.game.controllers;
 
-import com.badlogic.gdx.maps.MapObject;
-import com.badlogic.gdx.maps.MapObjects;
-import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.*;
+import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.PolygonShape;
+import com.badlogic.gdx.physics.box2d.Shape;
+import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
 import com.bolero.game.BoleroGame;
 import com.bolero.game.data.MapValues;
+import com.bolero.game.exceptions.MissingPropertyException;
+import com.bolero.game.mappers.CollisionMapper;
 
 import java.util.ArrayList;
+import java.util.List;
 
-public class CollisionController extends BaseMapper implements Disposable {
+public class CollisionController implements Disposable {
   private final World world;
-  private final ArrayList<Shape> shapes = new ArrayList<>();
+  private final ArrayList<Shape> shapes;
+
+  private final CollisionMapper mapper;
 
   public CollisionController(World world, TiledMap map) {
-    super(map);
     this.world = world;
+    mapper = new CollisionMapper(map, world);
+    shapes = new ArrayList<>();
   }
 
-  private Shape getShapeFromRectangle(Rectangle rectangle) {
-    PolygonShape polygonShape = new PolygonShape();
-    polygonShape.setAsBox(
-        rectangle.width * 0.5F / BoleroGame.UNIT, rectangle.height * 0.5F / BoleroGame.UNIT);
-
-    shapes.add(polygonShape);
-    return polygonShape;
-  }
-
-  private Vector2 getTransformedCenterForRectangle(Rectangle rectangle) {
-    Vector2 center = new Vector2();
-    rectangle.getCenter(center);
-    return center.scl(1 / BoleroGame.UNIT);
-  }
-
-  public void map(MapValues mapValues) {
+  public void load(MapValues mapValues) throws MissingPropertyException {
     createWalls(mapValues);
     createCollisionsFromMap();
   }
 
-  private void createCollisionsFromMap() {
-    MapObjects objects = super.getLayer(BoleroGame.COL_LAYER);
-
-    for (MapObject object : objects) {
-      Rectangle rectangle = ((RectangleMapObject) object).getRectangle();
-
-      BodyDef bodyDef = new BodyDef();
-      Body body = world.createBody(bodyDef);
-
-      body.createFixture(getShapeFromRectangle(rectangle), 0.0f);
-
-      body.setTransform(getTransformedCenterForRectangle(rectangle), 0);
-    }
+  private void createCollisionsFromMap() throws MissingPropertyException {
+    List<Shape> collisionShapes = mapper.map();
+    shapes.addAll(collisionShapes);
   }
 
   private void createWalls(MapValues mapValues) {

@@ -12,15 +12,16 @@ import java.util.ArrayList;
 
 public class MapController implements Disposable {
   private final OrthogonalTiledMapRenderer mapRenderer;
+  private final TiledMap map;
   private int[] backgroundLayers;
   private int[] foregroundLayers;
 
   public MapController(TiledMap map) {
+    this.map = map;
     mapRenderer = new OrthogonalTiledMapRenderer(map, 1 / BoleroGame.UNIT);
-    setLayers(map);
   }
 
-  private void setLayers(TiledMap map) {
+  public void load() {
     ArrayList<Integer> bg = new ArrayList<>();
     ArrayList<Integer> fg = new ArrayList<>();
 
