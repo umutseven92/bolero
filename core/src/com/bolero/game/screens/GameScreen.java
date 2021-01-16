@@ -161,12 +161,10 @@ public class GameScreen implements Screen {
     initializeDrawers();
   }
 
-  private void reInitialize()
-      throws FileNotFoundException, MissingPropertyException, NPCDoesNotExistException {
+  private void reInitialize() throws MissingPropertyException {
     initializeMap();
     initializeInteractions();
     initializeLights(true);
-    initializeNPCs();
   }
 
   private void setPlayerSpawnPoint(String name) {

@@ -120,6 +120,7 @@ public abstract class Character implements Disposable {
         this.position.y - this.characterValues.height / 2);
 
     if (goal != null && this.state != CharacterState.talking) {
+      this.state = CharacterState.walking;
       boolean xReached = false;
       boolean yReached = false;
 
@@ -186,13 +187,6 @@ public abstract class Character implements Disposable {
     body.createFixture(fixtureDef);
 
     return body;
-  }
-
-  public void respawn(Vector2 position) {
-    this.position = position;
-    this.body.setLinearVelocity(0, 0);
-    this.body.setTransform(position, this.body.getAngle());
-    this.sprite.setPosition(position.x, position.y);
   }
 
   public void applyRightMovement() {

@@ -1,5 +1,6 @@
 package com.bolero.game.controllers;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.math.Vector2;
@@ -57,6 +58,11 @@ public class NPCController implements Disposable {
     for (Schedule schedule : schedules) {
       if (clock.getCurrentHour() == schedule.getHour()
           && clock.getCurrentMinute() == schedule.getMinute()) {
+        Gdx.app.log(
+            NPCController.class.getName(),
+            String.format(
+                "Schedule activated for NPC %s at %d:%d",
+                schedule.getNpc().getName(), schedule.getHour(), schedule.getMinute()));
         schedule.getNpc().setGoal(schedule.getPosition());
       }
     }
