@@ -8,6 +8,7 @@ public class BundleController {
   private final I18NBundle bundle;
 
   public BundleController() {
+    I18NBundle.setExceptionOnMissingKey(true);
     bundle = I18NBundle.createBundle(Gdx.files.internal("locale/strings"));
   }
 

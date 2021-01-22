@@ -5,7 +5,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.bolero.game.data.Tuple;
 import com.bolero.game.exceptions.MissingPropertyException;
 import com.bolero.game.interactions.InspectRectangle;
-import com.bolero.game.interactions.InteractionRectangle;
+import com.bolero.game.interactions.AbstractRectangle;
 import com.bolero.game.interactions.TransitionRectangle;
 import com.bolero.game.mappers.InteractionMapper;
 
@@ -30,8 +30,8 @@ public class InteractionController {
     inspectRectangles = rectangles.y;
   }
 
-  public List<InteractionRectangle> getAllRectangles() {
-    List<InteractionRectangle> allRectangles = new ArrayList<>(transitionRectangles);
+  public List<AbstractRectangle> getAllRectangles() {
+    List<AbstractRectangle> allRectangles = new ArrayList<>(transitionRectangles);
     allRectangles.addAll(inspectRectangles);
 
     return allRectangles;
@@ -45,7 +45,7 @@ public class InteractionController {
     return checkIfInTriangle(playerPosPixels, inspectRectangles);
   }
 
-  private <E extends InteractionRectangle> E checkIfInTriangle(
+  private <E extends AbstractRectangle> E checkIfInTriangle(
       Vector2 playerPosPixels, List<E> rectangles) {
     for (E intRectangle : rectangles) {
 

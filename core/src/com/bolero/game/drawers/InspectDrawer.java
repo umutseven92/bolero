@@ -8,7 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Disposable;
 
-public class InspectDrawer extends UIDrawer implements Disposable {
+public class InspectDrawer extends AbstractDrawer implements Disposable {
   private final Table table;
   private final Texture buttonTexture;
   private final Label textLabel;

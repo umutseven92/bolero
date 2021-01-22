@@ -9,6 +9,7 @@ import com.badlogic.gdx.utils.Disposable;
 import com.bolero.game.Clock;
 import com.bolero.game.Schedule;
 import com.bolero.game.characters.NPC;
+import com.bolero.game.exceptions.FileFormatException;
 import com.bolero.game.exceptions.MissingPropertyException;
 import com.bolero.game.exceptions.NPCDoesNotExistException;
 import com.bolero.game.mappers.NPCMapper;
@@ -34,13 +35,13 @@ public class NPCController implements Disposable {
   }
 
   public void load(World world)
-      throws FileNotFoundException, MissingPropertyException, NPCDoesNotExistException {
+          throws FileNotFoundException, MissingPropertyException, NPCDoesNotExistException, FileFormatException {
     loadNPCs(world);
     loadSchedules();
   }
 
   private void loadNPCs(World world)
-      throws FileNotFoundException, MissingPropertyException, NPCDoesNotExistException {
+          throws FileNotFoundException, MissingPropertyException, NPCDoesNotExistException, FileFormatException {
     NPCMapper mapper = new NPCMapper(map, world, bundleController);
     npcs = mapper.map();
   }

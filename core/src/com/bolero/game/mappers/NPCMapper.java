@@ -10,7 +10,9 @@ import com.bolero.game.BoleroGame;
 import com.bolero.game.characters.NPC;
 import com.bolero.game.controllers.BundleController;
 import com.bolero.game.data.CharacterValues;
+import com.bolero.game.dialog.DialogLoader;
 import com.bolero.game.enums.SpawnType;
+import com.bolero.game.exceptions.FileFormatException;
 import com.bolero.game.exceptions.MissingPropertyException;
 import com.bolero.game.exceptions.NPCDoesNotExistException;
 
@@ -32,7 +34,8 @@ public class NPCMapper extends AbstractMapper implements Mapper<List<NPC>> {
 
   @Override
   public List<NPC> map()
-      throws MissingPropertyException, NPCDoesNotExistException, FileNotFoundException {
+      throws MissingPropertyException, NPCDoesNotExistException, FileNotFoundException,
+          FileFormatException {
     MapObjects spawnObjects = super.getLayer(BoleroGame.SPAWN_LAYER);
 
     List<NPC> npcs = new ArrayList<>();
@@ -56,6 +59,8 @@ public class NPCMapper extends AbstractMapper implements Mapper<List<NPC>> {
             new Vector2(
                 (float) props.get("x") / BoleroGame.UNIT, (float) props.get("y") / BoleroGame.UNIT);
 
+        DialogLoader loader = new DialogLoader();
+
         NPC npc =
             new NPC(
                 name,
@@ -64,7 +69,8 @@ public class NPCMapper extends AbstractMapper implements Mapper<List<NPC>> {
                 world,
                 new CharacterValues(2.7f, 2.5f, 5f, 0.5f),
                 spriteSheet,
-                bundleController);
+                bundleController,
+                loader);
         npcs.add(npc);
       }
     }

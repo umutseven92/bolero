@@ -395,7 +395,7 @@
   <object id="67" name="villager1" type="npc" x="670" y="770">
    <properties>
     <property name="name" value="Villager"/>
-    <property name="script" value="Villager.json"/>
+    <property name="script" value="Wizard.yaml"/>
     <property name="sprite_sheet" value="npc.png"/>
    </properties>
    <point/>

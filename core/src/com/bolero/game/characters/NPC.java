@@ -9,12 +9,14 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.bolero.game.controllers.BundleController;
 import com.bolero.game.data.CharacterValues;
 import com.bolero.game.data.SpriteSheetValues;
+import com.bolero.game.dialog.DialogLoader;
 import com.bolero.game.dialog.DialogTree;
 import com.bolero.game.enums.CharacterState;
+import com.bolero.game.exceptions.FileFormatException;
 
 import java.io.FileNotFoundException;
 
-public class NPC extends Character {
+public class NPC extends AbstractCharacter {
   public final Circle talkCircle;
   private final String name;
   private final DialogTree dialogTree;
@@ -27,8 +29,9 @@ public class NPC extends Character {
       World box2DWorld,
       CharacterValues characterValues,
       String texturePath,
-      BundleController bundleController)
-      throws FileNotFoundException {
+      BundleController bundleController,
+      DialogLoader dialogLoader)
+      throws FileNotFoundException, FileFormatException {
     super(
         position,
         box2DWorld,
@@ -40,7 +43,7 @@ public class NPC extends Character {
     super.setState(CharacterState.idle);
     talkCircle = new Circle(position, 4f);
     this.name = name;
-    this.dialogTree = loadDialogTree(scriptName);
+    this.dialogTree = loadDialogTree(dialogLoader, scriptName);
   }
 
   public Circle getTalkCircle() {
@@ -61,16 +64,15 @@ public class NPC extends Character {
     return dialogTree;
   }
 
-  private DialogTree loadDialogTree(String scriptName) throws FileNotFoundException {
+  private DialogTree loadDialogTree(DialogLoader loader, String scriptName)
+      throws FileNotFoundException, FileFormatException {
     String fileName = String.format("dialog/%s", scriptName);
     FileHandle file = Gdx.files.internal(fileName);
 
     if (!file.exists()) {
       throw new FileNotFoundException(String.format("%s does not exist.", fileName));
     }
-    DialogTree dialogTree = new DialogTree();
-    dialogTree.load(file, bundleController);
 
-    return dialogTree;
+    return loader.load(file, bundleController);
   }
 }

@@ -8,7 +8,7 @@ import com.bolero.game.data.SpriteSheetValues;
 
 import java.io.FileNotFoundException;
 
-public class Player extends Character {
+public class Player extends AbstractCharacter {
   public Player(Vector2 position, World box2DWorld) throws FileNotFoundException {
     super(
         position,

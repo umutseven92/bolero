@@ -2,7 +2,7 @@ package com.bolero.game.interactions;
 
 import com.badlogic.gdx.math.Rectangle;
 
-public class InspectRectangle extends InteractionRectangle {
+public class InspectRectangle extends AbstractRectangle {
 
   private final String stringID;
 

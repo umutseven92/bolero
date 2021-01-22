@@ -1,0 +1,18 @@
+---
+dialogs:
+  - &dialog3
+    textID: dialog3
+    choices:
+      - &bye
+        textID: choice3 # Bye
+  - &dialog2
+    textID: dialog2
+    choices:
+      - *bye
+  - textID: dialog1
+    choices:
+      - textID: choice1 # Accept
+        next: *dialog3
+      - textID: choice2 # Deny
+        next: *dialog2
+...
