@@ -4,10 +4,10 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.Disposable;
 
-public abstract class UIDrawer implements Disposable {
+public abstract class AbstractDrawer implements Disposable {
   protected final Skin uiSkin;
 
-  public UIDrawer() {
+  public AbstractDrawer() {
     uiSkin = new Skin(Gdx.files.internal("ui/uiskin.json"));
   }
 

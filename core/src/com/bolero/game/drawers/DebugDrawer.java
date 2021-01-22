@@ -14,7 +14,7 @@ import com.bolero.game.BoleroGame;
 import com.bolero.game.Clock;
 import com.bolero.game.characters.NPC;
 import com.bolero.game.characters.Player;
-import com.bolero.game.interactions.InteractionRectangle;
+import com.bolero.game.interactions.AbstractRectangle;
 
 import java.util.List;
 
@@ -68,7 +68,7 @@ public class DebugDrawer implements Disposable {
     font.draw(batch, "O to zoom out, P to zoom in", cameraRight, camera5Y);
   }
 
-  public void drawInteractionZones(List<InteractionRectangle> interactions, List<NPC> npcs) {
+  public void drawInteractionZones(List<AbstractRectangle> interactions, List<NPC> npcs) {
     Gdx.gl.glEnable(GL20.GL_BLEND);
     Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
     debugRenderer.setProjectionMatrix(camera.combined);
@@ -76,7 +76,7 @@ public class DebugDrawer implements Disposable {
     debugRenderer.begin(ShapeRenderer.ShapeType.Filled);
     debugRenderer.setColor(1, 0, 0, 0.5f);
 
-    for (InteractionRectangle intRectangle : interactions) {
+    for (AbstractRectangle intRectangle : interactions) {
       Rectangle rectangle = intRectangle.getRectangle();
       debugRenderer.rect(
           rectangle.x / BoleroGame.UNIT,

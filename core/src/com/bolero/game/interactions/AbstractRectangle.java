@@ -2,10 +2,10 @@ package com.bolero.game.interactions;
 
 import com.badlogic.gdx.math.Rectangle;
 
-public abstract class InteractionRectangle {
+public abstract class AbstractRectangle {
   private final Rectangle rectangle;
 
-  public InteractionRectangle(Rectangle rectangle) {
+  public AbstractRectangle(Rectangle rectangle) {
 
     this.rectangle = rectangle;
   }

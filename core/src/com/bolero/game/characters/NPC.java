@@ -16,12 +16,11 @@ import com.bolero.game.exceptions.FileFormatException;
 
 import java.io.FileNotFoundException;
 
-public class NPC extends Character {
+public class NPC extends AbstractCharacter {
   public final Circle talkCircle;
   private final String name;
   private final DialogTree dialogTree;
   private final BundleController bundleController;
-  private final DialogLoader dialogLoader;
 
   public NPC(
       String name,
@@ -44,8 +43,7 @@ public class NPC extends Character {
     super.setState(CharacterState.idle);
     talkCircle = new Circle(position, 4f);
     this.name = name;
-    this.dialogLoader = dialogLoader;
-    this.dialogTree = loadDialogTree(scriptName);
+    this.dialogTree = loadDialogTree(dialogLoader, scriptName);
   }
 
   public Circle getTalkCircle() {
@@ -66,7 +64,7 @@ public class NPC extends Character {
     return dialogTree;
   }
 
-  private DialogTree loadDialogTree(String scriptName)
+  private DialogTree loadDialogTree(DialogLoader loader, String scriptName)
       throws FileNotFoundException, FileFormatException {
     String fileName = String.format("dialog/%s", scriptName);
     FileHandle file = Gdx.files.internal(fileName);
@@ -75,8 +73,6 @@ public class NPC extends Character {
       throw new FileNotFoundException(String.format("%s does not exist.", fileName));
     }
 
-    DialogTree dialogTree = dialogLoader.load(file, bundleController);
-
-    return dialogTree;
+    return loader.load(file, bundleController);
   }
 }

@@ -1,16 +1,18 @@
 ---
 dialogs:
-  - text: dialog1
-    choices:
-      - text: choice1 # Accept
-        leadsTo: wizard3
-      - text: choice2 # Deny
-        leadsTo: wizard2
-  - text: dialog2
+  - &dialog3
+    textID: dialog3
     choices:
       - &bye
-        text: choice3 # Bye
-  - text: dialog3
+        textID: choice3 # Bye
+  - &dialog2
+    textID: dialog2
     choices:
       - *bye
+  - textID: dialog1
+    choices:
+      - textID: choice1 # Accept
+        next: *dialog3
+      - textID: choice2 # Deny
+        next: *dialog2
 ...

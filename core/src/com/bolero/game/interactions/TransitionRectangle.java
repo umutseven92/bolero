@@ -2,7 +2,7 @@ package com.bolero.game.interactions;
 
 import com.badlogic.gdx.math.Rectangle;
 
-public class TransitionRectangle extends InteractionRectangle {
+public class TransitionRectangle extends AbstractRectangle {
   private final String mapName;
   private final String spawnName;
 

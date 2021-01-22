@@ -3,7 +3,7 @@ package com.bolero.game.data;
 import com.badlogic.gdx.graphics.Color;
 import com.bolero.game.enums.LightTime;
 
-public class ConeLightValues extends BaseLightValues {
+public class ConeLightValues extends AbstractLightValues {
   private final float directionDegree;
   private final float coneDegree;
 

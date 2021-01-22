@@ -5,11 +5,16 @@ import java.util.List;
 public class DialogTree {
   private List<Dialog> dialogs;
 
-  public Dialog getInitialDialog() {
-    return dialogs.get(0);
+  public List<Dialog> getDialogs() {
+    return dialogs;
   }
 
   public void setDialogs(List<Dialog> dialogs) {
     this.dialogs = dialogs;
+  }
+
+  public Dialog getInitialDialog() {
+    // Since dialogs are written in reverse in the yaml file, the initial dialog is the last one.
+    return dialogs.get(dialogs.size() - 1);
   }
 }

@@ -18,7 +18,7 @@ import com.bolero.game.enums.CharacterState;
 
 import java.io.FileNotFoundException;
 
-public abstract class Character implements Disposable {
+public abstract class AbstractCharacter implements Disposable {
   private static final float DIALOG_SPRITE_SIZE_MULTIPLIER = 10f;
   private CharacterState state = CharacterState.idle;
   private Direction direction = Direction.right;
@@ -59,7 +59,7 @@ public abstract class Character implements Disposable {
     this.state = state;
   }
 
-  public Character(
+  public AbstractCharacter(
       Vector2 position,
       World box2DWorld,
       CharacterValues characterValues,

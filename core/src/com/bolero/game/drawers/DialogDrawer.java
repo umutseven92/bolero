@@ -18,7 +18,7 @@ import com.bolero.game.characters.Player;
 import com.bolero.game.dialog.Choice;
 import com.bolero.game.dialog.Dialog;
 
-public class DialogDrawer extends UIDrawer implements Disposable {
+public class DialogDrawer extends AbstractDrawer implements Disposable {
   private static final float SLIDE_SPEED = 5f;
   private static final String CHOICE_PREFIX = "-> ";
 
@@ -124,7 +124,7 @@ public class DialogDrawer extends UIDrawer implements Disposable {
     }
 
     // Player sprite during dialog should always face left.
-    if(!playerSprite.isFlipX()) {
+    if (!playerSprite.isFlipX()) {
       playerSprite.flip(true, false);
     }
 
