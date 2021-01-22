@@ -22,6 +22,7 @@ import com.bolero.game.drawers.DebugDrawer;
 import com.bolero.game.drawers.DialogDrawer;
 import com.bolero.game.drawers.InspectDrawer;
 import com.bolero.game.enums.CharacterState;
+import com.bolero.game.exceptions.FileFormatException;
 import com.bolero.game.exceptions.MapperException;
 import com.bolero.game.exceptions.MissingPropertyException;
 import com.bolero.game.exceptions.NPCDoesNotExistException;
@@ -65,7 +66,7 @@ public class GameScreen implements Screen {
   private final String spawnPos;
 
   public GameScreen(BoleroGame game, String name, String mapPath, String spawnPos)
-      throws MapperException, FileNotFoundException {
+          throws MapperException, FileNotFoundException, FileFormatException {
     this.game = game;
     this.name = name;
 
@@ -118,7 +119,7 @@ public class GameScreen implements Screen {
   }
 
   private void initializeNPCs()
-      throws FileNotFoundException, MissingPropertyException, NPCDoesNotExistException {
+          throws FileNotFoundException, MissingPropertyException, NPCDoesNotExistException, FileFormatException {
     Gdx.app.log(GameScreen.class.getName(), "Initializing NPCs..");
 
     npcController = new NPCController(map, game.getBundleController());
@@ -150,7 +151,7 @@ public class GameScreen implements Screen {
   }
 
   private void initializeAll()
-      throws FileNotFoundException, MissingPropertyException, NPCDoesNotExistException {
+          throws FileNotFoundException, MissingPropertyException, NPCDoesNotExistException, FileFormatException {
     initializeMap();
     initializeCollision();
     initializeInteractions();

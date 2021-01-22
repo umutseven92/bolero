@@ -1,25 +1,24 @@
 package com.bolero.game.dialog;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class Dialog {
-  private final String text;
-  private final ArrayList<Choice> choices;
-
-  public Dialog(String text) {
-    this.text = text;
-    this.choices = new ArrayList<>();
-  }
-
-  public void addChoice(Choice choice) {
-    choices.add(choice);
-  }
+  private String text;
+  private List<Choice> choices;
 
   public String getText() {
     return text;
   }
 
-  public ArrayList<Choice> getChoices() {
+  public List<Choice> getChoices() {
     return choices;
+  }
+
+  public void setText(String text) {
+    this.text = text;
+  }
+
+  public void setChoices(List<Choice> choices) {
+    this.choices = choices;
   }
 }

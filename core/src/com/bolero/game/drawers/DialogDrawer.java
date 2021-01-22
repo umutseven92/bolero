@@ -156,7 +156,7 @@ public class DialogDrawer extends UIDrawer implements Disposable {
       }
     } else if (Gdx.input.isKeyJustPressed(Input.Keys.E)
         || Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
-      Dialog leadTo = currentDialog.getChoices().get(activeIndex).getLeadsTo();
+      Dialog leadTo = currentDialog.getChoices().get(activeIndex).getNext();
       if (leadTo == null) {
         quit();
       } else {

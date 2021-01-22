@@ -1,24 +1,31 @@
 package com.bolero.game.dialog;
 
 public class Choice {
-  private final String text;
-
-  private final Dialog leadsTo;
-
-  public Choice(String text) {
-    this(text, null);
-  }
-
-  public Choice(String text, Dialog leadsTo) {
-    this.text = text;
-    this.leadsTo = leadsTo;
-  }
+  private String text;
+  private Dialog next;
+  private String leadsTo;
 
   public String getText() {
     return text;
   }
 
-  public Dialog getLeadsTo() {
+  public Dialog getNext() {
+    return next;
+  }
+
+  public void setText(String text) {
+    this.text = text;
+  }
+
+  public void setNext(Dialog next) {
+    this.next = next;
+  }
+
+  public String getLeadsTo() {
     return leadsTo;
+  }
+
+  public void setLeadsTo(String leadsTo) {
+    this.leadsTo = leadsTo;
   }
 }
