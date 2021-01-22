@@ -9,6 +9,7 @@ public abstract class AbstractText {
     return textID;
   }
 
+  @SuppressWarnings("unused") // Used by snakeyaml
   public void setTextID(String textID) {
     this.textID = textID;
   }

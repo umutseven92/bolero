@@ -7,6 +7,7 @@ public class Choice extends AbstractText {
     return next;
   }
 
+  @SuppressWarnings("unused") // Used by snakeyaml
   public void setNext(Dialog next) {
     this.next = next;
   }

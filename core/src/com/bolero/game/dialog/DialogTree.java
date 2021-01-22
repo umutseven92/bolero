@@ -9,6 +9,7 @@ public class DialogTree {
     return dialogs;
   }
 
+  @SuppressWarnings("unused") // Used by snakeyaml
   public void setDialogs(List<Dialog> dialogs) {
     this.dialogs = dialogs;
   }

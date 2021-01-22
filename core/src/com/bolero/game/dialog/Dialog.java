@@ -9,6 +9,7 @@ public class Dialog extends AbstractText {
     return choices;
   }
 
+  @SuppressWarnings("unused") // Used by snakeyaml
   public void setChoices(List<Choice> choices) {
     this.choices = choices;
   }

@@ -1,8 +1,6 @@
 ---
 dialogs:
-  - id: villager1
-    text: dialog4
-choices:
-  - under: # Bye
-      - villager1
-    text: choice3
+  - textID: dialog4
+    choices:
+      - textID: choice3 # Bye
+...

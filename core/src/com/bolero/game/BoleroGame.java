@@ -8,6 +8,8 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.bolero.game.controllers.BundleController;
 import com.bolero.game.screens.GameScreen;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.Constructor;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,6 +33,7 @@ public class BoleroGame extends Game {
   public static final int DUSK_START = 18;
   public static final int DUSK_END = 20;
 
+  public Config config;
   public SpriteBatch batch;
   public SpriteBatch hudBatch;
   public BitmapFont font;
@@ -60,8 +63,9 @@ public class BoleroGame extends Game {
     screens = new HashMap<>();
     screenPool = new ArrayList<>();
 
+    loadConfig();
     loadMaps();
-    loadRoute("bolero", SPAWN_INITIAL_OBJ);
+    loadRoute(this.config.getInitialMap(), SPAWN_INITIAL_OBJ);
   }
 
   public void loadMaps() {
@@ -96,6 +100,14 @@ public class BoleroGame extends Game {
     this.setScreen(toLoad);
 
     currentScreen = toLoad;
+  }
+
+  private void loadConfig() {
+    FileHandle file = Gdx.files.internal("./config.yaml");
+
+    Yaml yaml = new Yaml(new Constructor(Config.class));
+
+    this.config = yaml.load(file.readString());
   }
 
   @Override

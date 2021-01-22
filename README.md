@@ -18,10 +18,10 @@
 * 2D Lighting
 * Day / night cycle
 * Real time map updates during development
+* Read config from file
 
 ## Todo
 
-* Read config from file
 * Scenarios
 * Improved NPC AI
 * Screen sizes

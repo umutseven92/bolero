@@ -157,7 +157,7 @@
   <object id="37" name="wizard" type="npc" x="201" y="202">
    <properties>
     <property name="name" value="Wizard"/>
-    <property name="script" value="Wizard.json"/>
+    <property name="script" value="Wizard.yaml"/>
     <property name="sprite_sheet" value="npc.png"/>
    </properties>
    <point/>
