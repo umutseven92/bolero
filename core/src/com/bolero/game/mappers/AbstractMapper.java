@@ -5,7 +5,6 @@ import com.badlogic.gdx.maps.MapObjects;
 import com.badlogic.gdx.maps.MapProperties;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.bolero.game.exceptions.MissingPropertyException;
-
 import java.util.List;
 
 public abstract class AbstractMapper {

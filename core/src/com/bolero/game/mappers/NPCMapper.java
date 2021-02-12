@@ -1,5 +1,7 @@
 package com.bolero.game.mappers;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.MapObjects;
 import com.badlogic.gdx.maps.MapProperties;
@@ -7,35 +9,42 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.bolero.game.BoleroGame;
+import com.bolero.game.NPCLoader;
 import com.bolero.game.characters.NPC;
-import com.bolero.game.controllers.BundleController;
-import com.bolero.game.data.CharacterValues;
-import com.bolero.game.dialog.DialogLoader;
+import com.bolero.game.dtos.NpcDTO;
+import com.bolero.game.dtos.NpcsDTO;
 import com.bolero.game.enums.SpawnType;
 import com.bolero.game.exceptions.FileFormatException;
 import com.bolero.game.exceptions.MissingPropertyException;
 import com.bolero.game.exceptions.NPCDoesNotExistException;
-
+import com.bolero.game.managers.BundleManager;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 public class NPCMapper extends AbstractMapper implements Mapper<List<NPC>> {
   private final World world;
-  private final BundleController bundleController;
+  private final BundleManager bundleManager;
 
-  public NPCMapper(TiledMap map, World world, BundleController bundleController) {
+  public NPCMapper(TiledMap map, World world, BundleManager bundleManager) {
     super(map);
     this.world = world;
-    this.bundleController = bundleController;
+    this.bundleManager = bundleManager;
   }
 
   @Override
   public List<NPC> map()
       throws MissingPropertyException, NPCDoesNotExistException, FileNotFoundException,
           FileFormatException {
+    FileHandle file = Gdx.files.internal("npcs.yaml");
+
+    NPCLoader npcLoader = new NPCLoader();
+    NpcsDTO npcsDTO = npcLoader.load(file);
+
     MapObjects spawnObjects = super.getLayer(BoleroGame.SPAWN_LAYER);
 
     List<NPC> npcs = new ArrayList<>();
@@ -47,31 +56,32 @@ public class NPCMapper extends AbstractMapper implements Mapper<List<NPC>> {
       String type = props.get("type", String.class);
 
       if (SpawnType.valueOf(type) == SpawnType.npc) {
-        super.checkMissingProperties(props, Arrays.asList("name", "script", "sprite_sheet"));
-
         String name = props.get("name", String.class);
-
-        String script = props.get("script", String.class);
-
-        String spriteSheet = props.get("sprite_sheet", String.class);
 
         Vector2 spawnPosition =
             new Vector2(
                 (float) props.get("x") / BoleroGame.UNIT, (float) props.get("y") / BoleroGame.UNIT);
 
-        DialogLoader loader = new DialogLoader();
+        Optional<NpcDTO> npcDTO = npcsDTO.getNpcDTOFromSpawn(name);
 
-        NPC npc =
-            new NPC(
-                name,
-                script,
-                spawnPosition,
-                world,
-                new CharacterValues(2.7f, 2.5f, 5f, 0.5f),
-                spriteSheet,
-                bundleController,
-                loader);
-        npcs.add(npc);
+        if (npcDTO.isPresent()) {
+          MapObjects scheduleObjects = super.getLayer(BoleroGame.SCHEDULE_LAYER);
+
+          Map<String, Vector2> scheduleMap = new HashMap<String, Vector2>();
+
+          for (MapObject scheduleObj : scheduleObjects) {
+            final MapProperties scheduleProps = scheduleObj.getProperties();
+            String scheduleName = scheduleProps.get("name", String.class);
+
+            Vector2 schedulePosition =
+                new Vector2(
+                    (float) scheduleProps.get("x") / BoleroGame.UNIT,
+                    (float) scheduleProps.get("y") / BoleroGame.UNIT);
+            scheduleMap.put(scheduleName, schedulePosition);
+          }
+          NPC npc = npcDTO.get().toNPC(spawnPosition, scheduleMap, world, bundleManager);
+          npcs.add(npc);
+        }
       }
     }
 

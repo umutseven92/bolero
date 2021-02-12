@@ -16,7 +16,11 @@ import com.bolero.game.GameCamera;
 import com.bolero.game.Sun;
 import com.bolero.game.characters.NPC;
 import com.bolero.game.characters.Player;
-import com.bolero.game.controllers.*;
+import com.bolero.game.controllers.CollisionController;
+import com.bolero.game.controllers.InteractionController;
+import com.bolero.game.controllers.LightController;
+import com.bolero.game.controllers.MapController;
+import com.bolero.game.controllers.NPCController;
 import com.bolero.game.data.MapValues;
 import com.bolero.game.drawers.DebugDrawer;
 import com.bolero.game.drawers.DialogDrawer;
@@ -29,7 +33,6 @@ import com.bolero.game.exceptions.NPCDoesNotExistException;
 import com.bolero.game.icons.ButtonIcon;
 import com.bolero.game.interactions.InspectRectangle;
 import com.bolero.game.interactions.TransitionRectangle;
-
 import java.io.FileNotFoundException;
 
 public class GameScreen implements Screen {
@@ -66,7 +69,7 @@ public class GameScreen implements Screen {
   private final String spawnPos;
 
   public GameScreen(BoleroGame game, String name, String mapPath, String spawnPos)
-          throws MapperException, FileNotFoundException, FileFormatException {
+      throws MapperException, FileNotFoundException, FileFormatException {
     this.game = game;
     this.name = name;
 
@@ -119,7 +122,8 @@ public class GameScreen implements Screen {
   }
 
   private void initializeNPCs()
-          throws FileNotFoundException, MissingPropertyException, NPCDoesNotExistException, FileFormatException {
+      throws FileNotFoundException, MissingPropertyException, NPCDoesNotExistException,
+          FileFormatException {
     Gdx.app.log(GameScreen.class.getName(), "Initializing NPCs..");
 
     npcController = new NPCController(map, game.getBundleController());
@@ -151,7 +155,8 @@ public class GameScreen implements Screen {
   }
 
   private void initializeAll()
-          throws FileNotFoundException, MissingPropertyException, NPCDoesNotExistException, FileFormatException {
+      throws FileNotFoundException, MissingPropertyException, NPCDoesNotExistException,
+          FileFormatException {
     initializeMap();
     initializeCollision();
     initializeInteractions();
@@ -342,10 +347,10 @@ public class GameScreen implements Screen {
   private void inspect() {
     if (player.getState() != CharacterState.inspecting) {
       gameCamera.zoomIn(0.2f);
-      player.setState(CharacterState.inspecting);
+      player.startInspecting();
     } else {
       gameCamera.zoomOut(0.2f);
-      player.setState(CharacterState.idle);
+      player.stopInspecting();
     }
   }
 
@@ -365,13 +370,13 @@ public class GameScreen implements Screen {
       darkenAmount = 0.2f;
       dialogDrawer.activate(npc);
       gameCamera.zoomIn(0.2f);
-      player.setState(CharacterState.talking);
-      npc.setState(CharacterState.talking);
+      player.startTalking();
+      npc.startTalking();
     } else {
       darkenAmount = 0f;
       gameCamera.zoomOut(0.2f);
-      player.setState(CharacterState.idle);
-      npc.setState(CharacterState.idle);
+      player.stopTalking();
+      npc.stopTalking();
     }
   }
 

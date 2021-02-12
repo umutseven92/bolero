@@ -9,19 +9,24 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.*;
+import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.CircleShape;
+import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
 import com.bolero.game.BoleroGame;
-import com.bolero.game.data.CharacterValues;
 import com.bolero.game.data.SpriteSheetValues;
+import com.bolero.game.dtos.MovementDTO;
+import com.bolero.game.dtos.SizeDTO;
 import com.bolero.game.enums.CharacterState;
-
 import java.io.FileNotFoundException;
 
 public abstract class AbstractCharacter implements Disposable {
   private static final float DIALOG_SPRITE_SIZE_MULTIPLIER = 10f;
-  private CharacterState state = CharacterState.idle;
-  private Direction direction = Direction.right;
+
+  private CharacterState state;
+  private Direction direction;
 
   private final SpriteSheetValues ssValues;
 
@@ -29,7 +34,8 @@ public abstract class AbstractCharacter implements Disposable {
   private Animation<TextureRegion> idleAnimation;
 
   private final Texture spriteSheet;
-  private final CharacterValues characterValues;
+  private final SizeDTO size;
+  private final MovementDTO movement;
 
   private final Sprite sprite;
   private final Sprite dialogSprite;
@@ -54,22 +60,20 @@ public abstract class AbstractCharacter implements Disposable {
     return dialogSprite;
   }
 
-  public void setState(CharacterState state) {
-    this.stop();
-    this.state = state;
-  }
-
   public AbstractCharacter(
       Vector2 position,
       World box2DWorld,
-      CharacterValues characterValues,
+      SizeDTO sizeDTO,
+      MovementDTO movementDTO,
       String texturePath,
       SpriteSheetValues ssValues,
       BodyDef.BodyType bodyType)
       throws FileNotFoundException {
-    this.characterValues = characterValues;
+    this.size = sizeDTO;
+    this.movement = movementDTO;
     this.position = position;
-
+    this.direction = Direction.right;
+    this.state = CharacterState.idle;
     FileHandle file = Gdx.files.internal(texturePath);
 
     if (!file.exists()) {
@@ -83,10 +87,10 @@ public abstract class AbstractCharacter implements Disposable {
 
     this.sprite = new Sprite();
     this.dialogSprite = new Sprite();
-    sprite.setSize(characterValues.width, characterValues.height);
+    sprite.setSize(size.getWidth(), sizeDTO.getHeight());
     dialogSprite.setSize(
-        characterValues.width * DIALOG_SPRITE_SIZE_MULTIPLIER * BoleroGame.UNIT,
-        characterValues.height * DIALOG_SPRITE_SIZE_MULTIPLIER * BoleroGame.UNIT);
+        size.getWidth() * DIALOG_SPRITE_SIZE_MULTIPLIER * BoleroGame.UNIT,
+        size.getHeight() * DIALOG_SPRITE_SIZE_MULTIPLIER * BoleroGame.UNIT);
     body = createBody(box2DWorld, bodyType);
   }
 
@@ -113,14 +117,34 @@ public abstract class AbstractCharacter implements Disposable {
     animationTime = 0f;
   }
 
+  public void startTalking() {
+    stopMovement();
+    this.state = CharacterState.talking;
+  }
+
+  public void stopTalking() {
+    this.state = CharacterState.idle;
+  }
+
+  public void startInspecting() {
+    stopMovement();
+    this.state = CharacterState.inspecting;
+  }
+
+  public void stopInspecting() {
+    this.state = CharacterState.idle;
+  }
+
   public void setPosition() {
     this.position = this.body.getPosition();
     this.sprite.setPosition(
-        this.position.x - this.characterValues.width / 2,
-        this.position.y - this.characterValues.height / 2);
+        this.position.x - this.size.getWidth() / 2, this.position.y - this.size.getHeight() / 2);
 
+    handleSchedule();
+  }
+
+  private void handleSchedule() {
     if (goal != null && this.state != CharacterState.talking) {
-      this.state = CharacterState.walking;
       boolean xReached = false;
       boolean yReached = false;
 
@@ -148,19 +172,19 @@ public abstract class AbstractCharacter implements Disposable {
 
         Vector2 vel = body.getLinearVelocity();
 
-        if (Math.abs(vel.x) >= characterValues.maxVelocity) {
+        if (Math.abs(vel.x) >= movement.getMaxVelocity()) {
           impulseX = 0;
         } else {
-          impulseX = MathUtils.clamp(impulseX, -characterValues.speed, characterValues.speed);
+          impulseX = MathUtils.clamp(impulseX, -movement.getSpeed(), movement.getSpeed());
         }
 
-        if (Math.abs(vel.y) >= characterValues.maxVelocity) {
+        if (Math.abs(vel.y) >= movement.getMaxVelocity()) {
           impulseY = 0;
         } else {
-          impulseY = MathUtils.clamp(impulseY, -characterValues.speed, characterValues.speed);
+          impulseY = MathUtils.clamp(impulseY, -movement.getSpeed(), movement.getSpeed());
         }
 
-        body.applyLinearImpulse(impulseX, impulseY, this.position.x, this.position.y, true);
+        this.applyMovement(impulseX, impulseY);
       }
     }
   }
@@ -168,8 +192,7 @@ public abstract class AbstractCharacter implements Disposable {
   private Body createBody(World world, BodyDef.BodyType bodyType) {
     BodyDef bodyDef = new BodyDef();
     bodyDef.type = bodyType;
-    bodyDef.position.set(
-        position.x + characterValues.width / 2, position.y + characterValues.height / 2);
+    bodyDef.position.set(position.x + size.getWidth() / 2, position.y + size.getHeight() / 2);
     Body body = world.createBody(bodyDef);
 
     circle = new CircleShape();
@@ -194,44 +217,44 @@ public abstract class AbstractCharacter implements Disposable {
 
     Vector2 vel = body.getLinearVelocity();
 
-    if (vel.x > characterValues.maxVelocity) {
+    if (vel.x > movement.getMaxVelocity()) {
       return;
     }
 
-    applyMovement(characterValues.speed, 0);
+    applyMovement(movement.getSpeed(), 0);
   }
 
   public void applyLeftMovement() {
     this.direction = Direction.left;
 
     Vector2 vel = body.getLinearVelocity();
-    if (vel.x < -characterValues.maxVelocity) {
+    if (vel.x < -movement.getMaxVelocity()) {
       return;
     }
 
-    applyMovement(-characterValues.speed, 0);
+    applyMovement(-movement.getSpeed(), 0);
   }
 
   public void applyUpMovement() {
     Vector2 vel = body.getLinearVelocity();
 
-    if (vel.y > characterValues.maxVelocity) {
+    if (vel.y > movement.getMaxVelocity()) {
       return;
     }
-    applyMovement(0, characterValues.speed);
+    applyMovement(0, movement.getSpeed());
   }
 
   public void applyDownMovement() {
     Vector2 vel = body.getLinearVelocity();
 
-    if (vel.y < -characterValues.maxVelocity) {
+    if (vel.y < -movement.getMaxVelocity()) {
       return;
     }
 
-    applyMovement(0, -characterValues.speed);
+    applyMovement(0, -movement.getSpeed());
   }
 
-  public void stop() {
+  public void stopMovement() {
     stopXMovement();
     stopYMovement();
   }
@@ -261,7 +284,6 @@ public abstract class AbstractCharacter implements Disposable {
 
   public void setGoal(Vector2 goal) {
     this.goal = goal;
-    this.state = CharacterState.walking;
   }
 
   public void draw(SpriteBatch batch) {

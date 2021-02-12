@@ -6,19 +6,18 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.bolero.game.controllers.BundleController;
+import com.bolero.game.managers.BundleManager;
 import com.bolero.game.screens.GameScreen;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
-
 import java.util.ArrayList;
 import java.util.HashMap;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.Constructor;
 
 public class BoleroGame extends Game {
 
   private ArrayList<GameScreen> screenPool;
   private HashMap<String, String> screens;
-  private BundleController bundleController;
+  private BundleManager bundleManager;
 
   public static final float UNIT = 16f;
   public static final String COL_LAYER = "Collision";
@@ -44,21 +43,21 @@ public class BoleroGame extends Game {
 
   public Clock clock;
 
-  public BundleController getBundleController() {
-    return bundleController;
+  public BundleManager getBundleController() {
+    return bundleManager;
   }
 
   @Override
   public void create() {
     Gdx.app.setLogLevel(Application.LOG_DEBUG);
 
-    bundleController = new BundleController();
+    bundleManager = new BundleManager();
 
     batch = new SpriteBatch();
     hudBatch = new SpriteBatch();
     font = new BitmapFont();
 
-    clock = new Clock(bundleController);
+    clock = new Clock(bundleManager);
 
     screens = new HashMap<>();
     screenPool = new ArrayList<>();

@@ -1,6 +1,6 @@
 package com.bolero.game;
 
-import com.bolero.game.controllers.BundleController;
+import com.bolero.game.managers.BundleManager;
 
 public class Clock {
 
@@ -34,7 +34,7 @@ public class Clock {
     return timestamp;
   }
 
-  public Clock(BundleController bundle) {
+  public Clock(BundleManager bundle) {
     timestamp = 0;
 
     days =

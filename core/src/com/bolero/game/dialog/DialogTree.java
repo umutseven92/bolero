@@ -3,14 +3,9 @@ package com.bolero.game.dialog;
 import java.util.List;
 
 public class DialogTree {
-  private List<Dialog> dialogs;
+  private final List<Dialog> dialogs;
 
-  public List<Dialog> getDialogs() {
-    return dialogs;
-  }
-
-  @SuppressWarnings("unused") // Used by snakeyaml
-  public void setDialogs(List<Dialog> dialogs) {
+  public DialogTree(List<Dialog> dialogs) {
     this.dialogs = dialogs;
   }
 

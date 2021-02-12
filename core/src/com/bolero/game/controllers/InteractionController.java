@@ -4,11 +4,10 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.math.Vector2;
 import com.bolero.game.data.Tuple;
 import com.bolero.game.exceptions.MissingPropertyException;
-import com.bolero.game.interactions.InspectRectangle;
 import com.bolero.game.interactions.AbstractRectangle;
+import com.bolero.game.interactions.InspectRectangle;
 import com.bolero.game.interactions.TransitionRectangle;
 import com.bolero.game.mappers.InteractionMapper;
-
 import java.util.ArrayList;
 import java.util.List;
 

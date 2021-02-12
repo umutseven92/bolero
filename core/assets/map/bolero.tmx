@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.4" tiledversion="1.4.3" orientation="orthogonal" renderorder="right-down" width="50" height="50" tilewidth="32" tileheight="32" infinite="0" nextlayerid="11" nextobjectid="71">
+<map version="1.4" tiledversion="1.4.3" orientation="orthogonal" renderorder="right-down" width="50" height="50" tilewidth="32" tileheight="32" infinite="0" nextlayerid="11" nextobjectid="74">
  <tileset firstgid="1" source="walls,ground,decorative.tsx"/>
  <tileset firstgid="1025" source="houses.tsx"/>
  <layer id="1" name="Grass" width="50" height="50">
@@ -404,16 +404,12 @@
  <objectgroup id="10" name="Schedule">
   <object id="69" name="villager1s" type="schedule" x="477" y="762">
    <properties>
-    <property name="hour" type="int" value="0"/>
-    <property name="minute" type="int" value="30"/>
     <property name="npc" value="Villager"/>
    </properties>
    <point/>
   </object>
-  <object id="70" name="villager2s" type="schedule" x="280" y="819">
+  <object id="73" name="villager2s" type="schedule" x="253" y="764">
    <properties>
-    <property name="hour" type="int" value="1"/>
-    <property name="minute" type="int" value="0"/>
     <property name="npc" value="Villager"/>
    </properties>
    <point/>

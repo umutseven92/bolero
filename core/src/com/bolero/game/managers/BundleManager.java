@@ -1,13 +1,13 @@
-package com.bolero.game.controllers;
+package com.bolero.game.managers;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.I18NBundle;
 
-public class BundleController {
+public class BundleManager {
 
   private final I18NBundle bundle;
 
-  public BundleController() {
+  public BundleManager() {
     I18NBundle.setExceptionOnMissingKey(true);
     bundle = I18NBundle.createBundle(Gdx.files.internal("locale/strings"));
   }

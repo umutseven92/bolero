@@ -16,7 +16,6 @@ import com.bolero.game.data.PointLightValues;
 import com.bolero.game.enums.LightTime;
 import com.bolero.game.enums.LightType;
 import com.bolero.game.exceptions.MissingPropertyException;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;

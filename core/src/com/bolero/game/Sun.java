@@ -33,13 +33,17 @@ public class Sun {
       // DAWN
       // Represented as a linear function (y = mx + c), with x being alpha and y being the
       // timestamp.
-      float m = ((BoleroGame.DAWN_END * ratio) - (BoleroGame.DAWN_START * ratio)) / (DAY_LIGHT - NIGHT_LIGHT);
+      float m =
+          ((BoleroGame.DAWN_END * ratio) - (BoleroGame.DAWN_START * ratio))
+              / (DAY_LIGHT - NIGHT_LIGHT);
       float c = (BoleroGame.DAWN_START * ratio) - (m * NIGHT_LIGHT);
       alpha = (timestamp - c) / m;
     } else {
       // DUSK
       // Similar to dawn, but goes from DAY to NIGHT.
-      float m = ((BoleroGame.DUSK_END * ratio) - (BoleroGame.DUSK_START * ratio)) / (NIGHT_LIGHT - DAY_LIGHT);
+      float m =
+          ((BoleroGame.DUSK_END * ratio) - (BoleroGame.DUSK_START * ratio))
+              / (NIGHT_LIGHT - DAY_LIGHT);
       float c = (BoleroGame.DUSK_START * ratio) - (m * DAY_LIGHT);
       alpha = (timestamp - c) / m;
     }

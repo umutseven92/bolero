@@ -1,0 +1,41 @@
+---
+npcs:
+  - name: Wizard
+    spawn: wizard1
+    spriteSheet: npc.png
+    movement:
+      speed: 0.5
+      maxVelocity: 5
+    size:
+      height: 2.5
+      width: 2.7
+    dialogs:
+      - &dialog3
+        textID: dialog3
+        choices:
+          - &bye
+            textID: choice3 # Bye
+      - &dialog2
+        textID: dialog2
+        choices:
+          - *bye
+      - textID: dialog1
+        choices:
+          - textID: choice1 # Accept
+            next: *dialog3
+          - textID: choice2 # Deny
+            next: *dialog2
+  - name: Villager
+    spawn: villager1
+    spriteSheet: npc.png
+    movement:
+      speed: 1
+      maxVelocity: 7
+    size:
+      height: 3.2
+      width: 3
+    schedules:
+      - hour: 0
+        minute: 30
+        node: villager1s
+...

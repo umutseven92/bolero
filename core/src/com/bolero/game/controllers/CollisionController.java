@@ -11,7 +11,6 @@ import com.bolero.game.BoleroGame;
 import com.bolero.game.data.MapValues;
 import com.bolero.game.exceptions.MissingPropertyException;
 import com.bolero.game.mappers.CollisionMapper;
-
 import java.util.ArrayList;
 import java.util.List;
 

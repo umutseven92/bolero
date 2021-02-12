@@ -1,6 +1,0 @@
----
-dialogs:
-  - textID: dialog4
-    choices:
-      - textID: choice3 # Bye
-...

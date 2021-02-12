@@ -12,7 +12,6 @@ import com.bolero.game.enums.InteractionType;
 import com.bolero.game.exceptions.MissingPropertyException;
 import com.bolero.game.interactions.InspectRectangle;
 import com.bolero.game.interactions.TransitionRectangle;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

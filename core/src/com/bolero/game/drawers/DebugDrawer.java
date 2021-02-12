@@ -15,7 +15,6 @@ import com.bolero.game.Clock;
 import com.bolero.game.characters.NPC;
 import com.bolero.game.characters.Player;
 import com.bolero.game.interactions.AbstractRectangle;
-
 import java.util.List;
 
 public class DebugDrawer implements Disposable {

@@ -9,7 +9,6 @@ import com.bolero.game.LightContainer;
 import com.bolero.game.enums.LightTime;
 import com.bolero.game.exceptions.MissingPropertyException;
 import com.bolero.game.mappers.LightMapper;
-
 import java.util.ArrayList;
 import java.util.List;
 

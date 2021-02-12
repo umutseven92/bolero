@@ -7,14 +7,13 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
 import com.bolero.game.Clock;
-import com.bolero.game.Schedule;
 import com.bolero.game.characters.NPC;
 import com.bolero.game.exceptions.FileFormatException;
 import com.bolero.game.exceptions.MissingPropertyException;
 import com.bolero.game.exceptions.NPCDoesNotExistException;
+import com.bolero.game.managers.BundleManager;
 import com.bolero.game.mappers.NPCMapper;
-import com.bolero.game.mappers.ScheduleMapper;
-
+import com.bolero.game.schedule.Schedule;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,49 +21,41 @@ import java.util.List;
 public class NPCController implements Disposable {
 
   private final TiledMap map;
-  private final BundleController bundleController;
+  private final BundleManager bundleManager;
 
   private List<NPC> npcs;
-  private List<Schedule> schedules;
 
-  public NPCController(TiledMap map, BundleController bundleController) {
+  public NPCController(TiledMap map, BundleManager bundleManager) {
     this.map = map;
-    this.bundleController = bundleController;
+    this.bundleManager = bundleManager;
     npcs = new ArrayList<>();
-    schedules = new ArrayList<>();
   }
 
   public void load(World world)
-          throws FileNotFoundException, MissingPropertyException, NPCDoesNotExistException, FileFormatException {
+      throws FileNotFoundException, MissingPropertyException, NPCDoesNotExistException,
+          FileFormatException {
     loadNPCs(world);
-    loadSchedules();
   }
 
   private void loadNPCs(World world)
-          throws FileNotFoundException, MissingPropertyException, NPCDoesNotExistException, FileFormatException {
-    NPCMapper mapper = new NPCMapper(map, world, bundleController);
+      throws FileNotFoundException, MissingPropertyException, NPCDoesNotExistException,
+          FileFormatException {
+    NPCMapper mapper = new NPCMapper(map, world, bundleManager);
     npcs = mapper.map();
   }
 
-  private void loadSchedules() throws MissingPropertyException, NPCDoesNotExistException {
-    if (npcs.size() <= 0) {
-      return;
-    }
-
-    ScheduleMapper mapper = new ScheduleMapper(map, npcs);
-    schedules = mapper.map();
-  }
-
   public void checkSchedules(Clock clock) {
-    for (Schedule schedule : schedules) {
-      if (clock.getCurrentHour() == schedule.getHour()
-          && clock.getCurrentMinute() == schedule.getMinute()) {
-        Gdx.app.log(
-            NPCController.class.getName(),
-            String.format(
-                "Schedule activated for NPC %s at %d:%d",
-                schedule.getNpc().getName(), schedule.getHour(), schedule.getMinute()));
-        schedule.getNpc().setGoal(schedule.getPosition());
+    for (NPC npc : npcs) {
+      for (Schedule schedule : npc.getScheduleList().getSchedules()) {
+        if (clock.getCurrentHour() == schedule.getHour()
+            && clock.getCurrentMinute() == schedule.getMinute()) {
+          Gdx.app.log(
+              NPCController.class.getName(),
+              String.format(
+                  "Schedule activated for NPC %s at %d:%d",
+                  npc.getName(), schedule.getHour(), schedule.getMinute()));
+          npc.setGoal(schedule.getPosition());
+        }
       }
     }
   }
