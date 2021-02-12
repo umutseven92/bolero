@@ -54,7 +54,7 @@ public class NPCController implements Disposable {
               String.format(
                   "Schedule activated for NPC %s at %d:%d",
                   npc.getName(), schedule.getHour(), schedule.getMinute()));
-          npc.setGoal(schedule.getPosition());
+          npc.setGoals(schedule.getPositions());
         }
       }
     }

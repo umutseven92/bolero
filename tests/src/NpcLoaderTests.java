@@ -95,6 +95,8 @@ public class NpcLoaderTests {
     assertEquals(villagerSchedule.getHour(), 0);
     assertEquals(villagerSchedule.getMinute(), 30);
 
-    assertEquals(villagerSchedule.getNode(), "villager1s");
+    assertEquals(villagerSchedule.getNodes().size(), 2);
+    assertEquals(villagerSchedule.getNodes().get(0).getId(), "villager1s");
+    assertEquals(villagerSchedule.getNodes().get(1).getId(), "villager2s");
   }
 }

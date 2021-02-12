@@ -1,10 +1,10 @@
 package com.bolero.game.schedule;
 
 import com.badlogic.gdx.math.Vector2;
-import com.bolero.game.characters.NPC;
+import java.util.List;
 
 public class Schedule {
-  private final Vector2 position;
+  private final List<Vector2> positions;
   private final int hour;
   private final int minute;
 
@@ -16,12 +16,12 @@ public class Schedule {
     return minute;
   }
 
-  public Vector2 getPosition() {
-    return position;
+  public List<Vector2> getPositions() {
+    return positions;
   }
 
-  public Schedule(Vector2 position, int hour, int minute) {
-    this.position = position;
+  public Schedule(List<Vector2> positions, int hour, int minute) {
+    this.positions = positions;
     this.hour = hour;
     this.minute = minute;
   }

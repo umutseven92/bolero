@@ -21,6 +21,8 @@ import com.bolero.game.dtos.MovementDTO;
 import com.bolero.game.dtos.SizeDTO;
 import com.bolero.game.enums.CharacterState;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class AbstractCharacter implements Disposable {
   private static final float DIALOG_SPRITE_SIZE_MULTIPLIER = 10f;
@@ -45,7 +47,8 @@ public abstract class AbstractCharacter implements Disposable {
 
   private CircleShape circle;
 
-  private Vector2 goal;
+  private List<Vector2> goals;
+  private int goalIndex;
   private Vector2 position;
 
   public Vector2 getPosition() {
@@ -92,6 +95,8 @@ public abstract class AbstractCharacter implements Disposable {
         size.getWidth() * DIALOG_SPRITE_SIZE_MULTIPLIER * BoleroGame.UNIT,
         size.getHeight() * DIALOG_SPRITE_SIZE_MULTIPLIER * BoleroGame.UNIT);
     body = createBody(box2DWorld, bodyType);
+    goals = new ArrayList<>();
+    goalIndex = 0;
   }
 
   private void loadAnimationsFromSpiteSheet() {
@@ -144,6 +149,11 @@ public abstract class AbstractCharacter implements Disposable {
   }
 
   private void handleSchedule() {
+    if (goals.isEmpty()) {
+      return;
+    }
+
+    Vector2 goal = goals.get(goalIndex);
     if (goal != null && this.state != CharacterState.talking) {
       boolean xReached = false;
       boolean yReached = false;
@@ -159,7 +169,10 @@ public abstract class AbstractCharacter implements Disposable {
       }
 
       if (yReached && xReached) {
-        goal = null;
+        goalIndex++;
+        if (goalIndex >= goals.size()) {
+          goals.clear();
+        }
       } else {
         float impulseX = goal.x - this.position.x;
         float impulseY = goal.y - this.position.y;
@@ -282,8 +295,9 @@ public abstract class AbstractCharacter implements Disposable {
     body.applyLinearImpulse(impulseX, impulseY, pos.x, pos.y, true);
   }
 
-  public void setGoal(Vector2 goal) {
-    this.goal = goal;
+  public void setGoals(List<Vector2> goals) {
+    this.goals = goals;
+    this.goalIndex = 0;
   }
 
   public void draw(SpriteBatch batch) {

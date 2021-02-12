@@ -228,7 +228,9 @@ public class GameScreen implements Screen {
     player.draw(game.batch);
     npcController.drawNPCs(game.batch);
 
-    if ((transitionRectangle != null || inspectRectangle != null || npc != null)
+    if ((transitionRectangle != null
+            || inspectRectangle != null
+            || (npc != null && npc.hasDialog()))
         && player.getState() != CharacterState.inspecting
         && player.getState() != CharacterState.talking) {
       eButtonIcon.draw(game.batch);
@@ -335,7 +337,7 @@ public class GameScreen implements Screen {
       handleTransition(transitionRectangle);
     } else if (Gdx.input.isKeyJustPressed(Input.Keys.E) && inspectRectangle != null) {
       inspect();
-    } else if (Gdx.input.isKeyJustPressed(Input.Keys.E) && npc != null) {
+    } else if (Gdx.input.isKeyJustPressed(Input.Keys.E) && npc != null && npc.hasDialog()) {
       talkToNPC(npc);
     }
   }

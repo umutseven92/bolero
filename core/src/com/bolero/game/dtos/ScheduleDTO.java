@@ -2,11 +2,12 @@ package com.bolero.game.dtos;
 
 import com.badlogic.gdx.math.Vector2;
 import com.bolero.game.schedule.Schedule;
+import java.util.List;
 
 public class ScheduleDTO {
   private int hour;
   private int minute;
-  private String node;
+  private List<NodeDTO> nodes;
 
   public int getHour() {
     return hour;
@@ -24,15 +25,15 @@ public class ScheduleDTO {
     this.minute = minute;
   }
 
-  public String getNode() {
-    return node;
+  public Schedule toSchedule(List<Vector2> positions) {
+    return new Schedule(positions, getHour(), getMinute());
   }
 
-  public void setNode(String node) {
-    this.node = node;
+  public List<NodeDTO> getNodes() {
+    return nodes;
   }
 
-  public Schedule toSchedule(Vector2 position) {
-    return new Schedule(position, getHour(), getMinute());
+  public void setNodes(List<NodeDTO> nodes) {
+    this.nodes = nodes;
   }
 }

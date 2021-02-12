@@ -14,7 +14,7 @@ public class Player extends AbstractCharacter {
         position,
         box2DWorld,
         new SizeDTO(2.7f, 2.5f),
-        new MovementDTO(5.5f, 0.7f),
+        new MovementDTO(0.7f, 5.5f),
         "player.png",
         new SpriteSheetValues(10, 10, 5, 7),
         BodyDef.BodyType.DynamicBody);

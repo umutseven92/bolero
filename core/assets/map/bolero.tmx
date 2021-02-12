@@ -394,24 +394,16 @@
   </object>
   <object id="67" name="villager1" type="npc" x="670" y="770">
    <properties>
-    <property name="name" value="Villager"/>
-    <property name="script" value="Villager.yaml"/>
-    <property name="sprite_sheet" value="npc.png"/>
+    <property name="npc" value="Villager"/>
    </properties>
    <point/>
   </object>
  </objectgroup>
  <objectgroup id="10" name="Schedule">
-  <object id="69" name="villager1s" type="schedule" x="477" y="762">
-   <properties>
-    <property name="npc" value="Villager"/>
-   </properties>
+  <object id="69" name="villager1s" type="schedule" x="375" y="769">
    <point/>
   </object>
-  <object id="73" name="villager2s" type="schedule" x="253" y="764">
-   <properties>
-    <property name="npc" value="Villager"/>
-   </properties>
+  <object id="73" name="villager2s" type="schedule" x="366" y="542">
    <point/>
   </object>
  </objectgroup>

@@ -56,29 +56,31 @@ public class NPCMapper extends AbstractMapper implements Mapper<List<NPC>> {
       String type = props.get("type", String.class);
 
       if (SpawnType.valueOf(type) == SpawnType.npc) {
-        String name = props.get("name", String.class);
+        super.checkMissingProperties(props, Collections.singletonList("npc"));
+
+        String name = props.get("npc", String.class);
 
         Vector2 spawnPosition =
             new Vector2(
                 (float) props.get("x") / BoleroGame.UNIT, (float) props.get("y") / BoleroGame.UNIT);
 
-        Optional<NpcDTO> npcDTO = npcsDTO.getNpcDTOFromSpawn(name);
+        Optional<NpcDTO> npcDTO = npcsDTO.getNpcDTOFromName(name);
 
         if (npcDTO.isPresent()) {
           MapObjects scheduleObjects = super.getLayer(BoleroGame.SCHEDULE_LAYER);
 
-          Map<String, Vector2> scheduleMap = new HashMap<String, Vector2>();
+          Map<String, Vector2> scheduleMap = new HashMap<>();
 
           for (MapObject scheduleObj : scheduleObjects) {
             final MapProperties scheduleProps = scheduleObj.getProperties();
-            String scheduleName = scheduleProps.get("name", String.class);
 
             Vector2 schedulePosition =
                 new Vector2(
                     (float) scheduleProps.get("x") / BoleroGame.UNIT,
                     (float) scheduleProps.get("y") / BoleroGame.UNIT);
-            scheduleMap.put(scheduleName, schedulePosition);
+            scheduleMap.put(scheduleObj.getName(), schedulePosition);
           }
+
           NPC npc = npcDTO.get().toNPC(spawnPosition, scheduleMap, world, bundleManager);
           npcs.add(npc);
         }

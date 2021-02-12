@@ -14,7 +14,7 @@ public class NpcsDTO {
     this.npcs = npcs;
   }
 
-  public Optional<NpcDTO> getNpcDTOFromSpawn(String spawnName) {
-    return npcs.stream().filter(n -> n.getSpawn().equals(spawnName)).findFirst();
+  public Optional<NpcDTO> getNpcDTOFromName(String name) {
+    return npcs.stream().filter(n -> n.getName().equals(name)).findFirst();
   }
 }

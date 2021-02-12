@@ -94,10 +94,15 @@ public class NpcDTO {
 
     List<Schedule> scheduleList = new ArrayList<>();
     for (ScheduleDTO scheduleDTO : schedules) {
+      List<Vector2> positions = new ArrayList<>();
 
       // TODO: Raise exception if schedule does not exist
-      Vector2 position = scheduleMap.get(scheduleDTO.getNode());
-      Schedule schedule = scheduleDTO.toSchedule(position);
+      for (NodeDTO node : scheduleDTO.getNodes()) {
+        Vector2 position = scheduleMap.get(node.getId());
+        positions.add(position);
+      }
+
+      Schedule schedule = scheduleDTO.toSchedule(positions);
       scheduleList.add(schedule);
     }
 

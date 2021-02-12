@@ -37,5 +37,7 @@ npcs:
     schedules:
       - hour: 0
         minute: 30
-        node: villager1s
+        nodes:
+          - id: villager1s
+          - id: villager2s
 ...

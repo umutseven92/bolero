@@ -34,8 +34,10 @@ npcs:
     size:
       height: 2.5
       width: 2.7
-    schedule:
+    schedules:
       - hour: 0
         minute: 30
-        node: villager1s
+        nodes:
+          - id: villager1s
+          - id: villager2s
 ...

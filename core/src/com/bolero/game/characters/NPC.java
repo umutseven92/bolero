@@ -63,4 +63,8 @@ public class NPC extends AbstractCharacter {
   public ScheduleList getScheduleList() {
     return scheduleList;
   }
+
+  public boolean hasDialog() {
+    return !this.dialogTree.isEmpty();
+  }
 }

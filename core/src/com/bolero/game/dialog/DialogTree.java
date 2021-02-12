@@ -13,4 +13,8 @@ public class DialogTree {
     // Since dialogs are written in reverse in the yaml file, the initial dialog is the last one.
     return dialogs.get(dialogs.size() - 1);
   }
+
+  public boolean isEmpty() {
+    return this.dialogs.isEmpty();
+  }
 }
