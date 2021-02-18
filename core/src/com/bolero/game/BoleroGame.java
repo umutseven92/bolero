@@ -64,12 +64,12 @@ public class BoleroGame extends Game {
 
     loadConfig();
     loadMaps();
-    loadRoute(this.config.getInitialMap(), SPAWN_INITIAL_OBJ);
+    loadRoute(this.config.initialMap, SPAWN_INITIAL_OBJ);
   }
 
   public void loadMaps() {
     // Load all map files (*.tmx) from assets/map
-    FileHandle files = Gdx.files.internal("./map/");
+    FileHandle files = Gdx.files.internal(this.config.mapsPath);
 
     for (FileHandle file : files.list(".tmx")) {
       screens.put(file.nameWithoutExtension(), file.path());

@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="NpcLoaderTests" tests="1" skipped="0" failures="0" errors="0" timestamp="2021-02-12T01:58:39" hostname="Umuts-MBP" time="0.091">
-  <properties/>
-  <testcase name="canLoadNpcs" classname="NpcLoaderTests" time="0.091"/>
-  <system-out><![CDATA[]]></system-out>
-  <system-err><![CDATA[]]></system-err>
-</testsuite>

@@ -2,7 +2,7 @@
 npcs:
   - name: Wizard
     spawn: wizard1
-    spriteSheet: npc.png
+    spriteSheet: images/npc.png
     movement:
       speed: 0.5
       maxVelocity: 5
@@ -27,13 +27,17 @@ npcs:
             next: *dialog2
   - name: Villager
     spawn: villager1
-    spriteSheet: npc.png
+    spriteSheet: images/npc.png
     movement:
       speed: 0.5
       maxVelocity: 5
     size:
       height: 2.5
       width: 2.7
+    dialogs:
+      - textID: dialog4
+        choices:
+          - textID: choice3 # Bye
     schedules:
       - hour: 0
         minute: 30

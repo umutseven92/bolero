@@ -2,7 +2,6 @@ package com.bolero.game.screens;
 
 import box2dLight.RayHandler;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.maps.MapObject;
@@ -13,6 +12,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.bolero.game.BoleroGame;
 import com.bolero.game.GameCamera;
+import com.bolero.game.Keys;
 import com.bolero.game.Sun;
 import com.bolero.game.characters.NPC;
 import com.bolero.game.characters.Player;
@@ -68,6 +68,8 @@ public class GameScreen implements Screen {
   private final String mapPath;
   private final String spawnPos;
 
+  private final Keys keys;
+
   public GameScreen(BoleroGame game, String name, String mapPath, String spawnPos)
       throws MapperException, FileNotFoundException, FileFormatException {
     this.game = game;
@@ -75,6 +77,8 @@ public class GameScreen implements Screen {
 
     this.mapPath = mapPath;
     this.spawnPos = spawnPos;
+    this.keys = game.config.keys;
+
     initializeAll();
   }
 
@@ -289,55 +293,57 @@ public class GameScreen implements Screen {
   }
 
   private void handleMovementInput() {
-    if (Gdx.input.isKeyJustPressed(Input.Keys.H)) {
+    if (Gdx.input.isKeyJustPressed(keys.getDebug())) {
       game.debugMode = !game.debugMode;
     }
 
     if (game.debugMode) {
-      if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
+      if (Gdx.input.isKeyJustPressed(keys.getReload())) {
         reloadMap();
       }
 
-      if (Gdx.input.isKeyJustPressed(Input.Keys.O)) {
+      if (Gdx.input.isKeyJustPressed(keys.getZoomIn())) {
         gameCamera.zoomOutInstant(0.3f);
       }
-      if (Gdx.input.isKeyJustPressed(Input.Keys.P)) {
+      if (Gdx.input.isKeyJustPressed(keys.getZoomOut())) {
         gameCamera.zoomInInstant(0.3f);
       }
     }
 
-    if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+    if (Gdx.input.isKeyPressed(keys.getLeft())) {
       this.player.applyLeftMovement();
     }
 
-    if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+    if (Gdx.input.isKeyPressed(keys.getRight())) {
       this.player.applyRightMovement();
     }
 
-    if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+    if (Gdx.input.isKeyPressed(keys.getUp())) {
       this.player.applyUpMovement();
     }
 
-    if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+    if (Gdx.input.isKeyPressed(keys.getDown())) {
       this.player.applyDownMovement();
     }
 
-    if (!Gdx.input.isKeyPressed(Input.Keys.A) && !Gdx.input.isKeyPressed(Input.Keys.D)) {
+    if (!Gdx.input.isKeyPressed(keys.getLeft()) && !Gdx.input.isKeyPressed(keys.getRight())) {
       this.player.stopXMovement();
     }
 
-    if (!Gdx.input.isKeyPressed(Input.Keys.W) && !Gdx.input.isKeyPressed(Input.Keys.S)) {
+    if (!Gdx.input.isKeyPressed(keys.getUp()) && !Gdx.input.isKeyPressed(keys.getDown())) {
       this.player.stopYMovement();
     }
   }
 
   private void handleInteractionInput(
       TransitionRectangle transitionRectangle, InspectRectangle inspectRectangle, NPC npc) {
-    if (Gdx.input.isKeyJustPressed(Input.Keys.E) && transitionRectangle != null) {
+    boolean interactionPressed = Gdx.input.isKeyJustPressed(keys.getInteract());
+
+    if (interactionPressed && transitionRectangle != null) {
       handleTransition(transitionRectangle);
-    } else if (Gdx.input.isKeyJustPressed(Input.Keys.E) && inspectRectangle != null) {
+    } else if (interactionPressed && inspectRectangle != null) {
       inspect();
-    } else if (Gdx.input.isKeyJustPressed(Input.Keys.E) && npc != null && npc.hasDialog()) {
+    } else if (interactionPressed && npc != null && npc.hasDialog()) {
       talkToNPC(npc);
     }
   }

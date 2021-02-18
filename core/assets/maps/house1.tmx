@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.4" tiledversion="1.4.3" orientation="orthogonal" renderorder="right-down" width="20" height="15" tilewidth="32" tileheight="32" infinite="0" nextlayerid="10" nextobjectid="44">
- <tileset firstgid="1" source="walls,ground,decorative.tsx"/>
- <tileset firstgid="1025" source="interiors.tsx"/>
- <tileset firstgid="2049" source="furniture.tsx"/>
+<map version="1.4" tiledversion="1.4.3" orientation="orthogonal" renderorder="right-down" width="20" height="15" tilewidth="32" tileheight="32" infinite="0" nextlayerid="10" nextobjectid="45">
+ <tileset firstgid="1" source="../tilesets/walls,ground,decorative.tsx"/>
+ <tileset firstgid="1025" source="../tilesets/interiors.tsx"/>
+ <tileset firstgid="2049" source="../tilesets/furniture.tsx"/>
  <layer id="1" name="Ground" width="20" height="15">
   <properties>
    <property name="foreground" type="bool" value="false"/>
@@ -154,11 +154,9 @@
   <object id="15" name="initial" type="player" x="336" y="334">
    <point/>
   </object>
-  <object id="37" name="wizard" type="npc" x="201" y="202">
+  <object id="44" name="wizard" type="npc" x="163" y="209">
    <properties>
-    <property name="name" value="Wizard"/>
-    <property name="script" value="Wizard.yaml"/>
-    <property name="sprite_sheet" value="npc.png"/>
+    <property name="npc" value="Wizard"/>
    </properties>
    <point/>
   </object>
