@@ -1,3 +1,5 @@
+package src;
+
 import org.mockito.Mockito;
 
 import com.badlogic.gdx.ApplicationListener;

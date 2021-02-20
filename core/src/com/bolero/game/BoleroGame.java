@@ -104,7 +104,7 @@ public class BoleroGame extends Game {
   }
 
   private void loadConfig() {
-    val file = Gdx.files.internal("./config.yaml");
+    val file = Gdx.files.internal("./config/game.yaml");
 
     val yaml = new Yaml(new Constructor(Config.class));
 

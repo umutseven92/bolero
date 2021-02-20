@@ -1,6 +1,6 @@
+loader/NpcLoaderTests.java
+ loader.NpcLoaderTests
 GdxTestRunner.java
- GdxTestRunner
-NpcDTOTests.java
- NpcDTOTests
-NpcLoaderTests.java
- NpcLoaderTests
+ src.GdxTestRunner
+loader/PlayerLoaderTests.java
+ loader.PlayerLoaderTests

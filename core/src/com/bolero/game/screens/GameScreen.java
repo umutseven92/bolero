@@ -33,6 +33,7 @@ import com.bolero.game.exceptions.NPCDoesNotExistException;
 import com.bolero.game.icons.ButtonIcon;
 import com.bolero.game.interactions.InspectRectangle;
 import com.bolero.game.interactions.TransitionRectangle;
+import com.bolero.game.mappers.PlayerMapper;
 import java.io.FileNotFoundException;
 import lombok.val;
 
@@ -142,12 +143,14 @@ public class GameScreen implements Screen {
     gameCamera.updatePosition(player.getPosition(), mapValues);
   }
 
-  private void initializePlayer() throws FileNotFoundException {
+  private void initializePlayer()
+      throws FileNotFoundException, FileFormatException {
     Gdx.app.log(GameScreen.class.getName(), "Initializing player..");
 
     setPlayerSpawnPoint(spawnPos);
 
-    player = new Player(playerSpawnPosition, world);
+    val mapper = new PlayerMapper(map, world, playerSpawnPosition);
+    player = mapper.map();
     eButtonIcon = new ButtonIcon(player);
   }
 
@@ -204,6 +207,8 @@ public class GameScreen implements Screen {
 
     npcController.checkSchedules(game.clock);
     NPC npc = npcController.checkIfNearNPC(playerPos);
+
+    handleMiscInput();
 
     if (player.getState() != CharacterState.inspecting
         && player.getState() != CharacterState.talking) {
@@ -291,7 +296,7 @@ public class GameScreen implements Screen {
     game.hudBatch.end();
   }
 
-  private void handleMovementInput() {
+  private void handleMiscInput() {
     if (Gdx.input.isKeyJustPressed(keys.getDebugInput())) {
       game.debugMode = !game.debugMode;
     }
@@ -309,6 +314,13 @@ public class GameScreen implements Screen {
       }
     }
 
+    if (Gdx.input.isKeyJustPressed(keys.getQuitInput())) {
+      Gdx.app.exit();
+    }
+  }
+
+  private void handleMovementInput() {
+
     if (Gdx.input.isKeyPressed(keys.getLeftInput())) {
       this.player.applyLeftMovement();
     }
@@ -325,11 +337,13 @@ public class GameScreen implements Screen {
       this.player.applyDownMovement();
     }
 
-    if (!Gdx.input.isKeyPressed(keys.getLeftInput()) && !Gdx.input.isKeyPressed(keys.getRightInput())) {
+    if (!Gdx.input.isKeyPressed(keys.getLeftInput())
+        && !Gdx.input.isKeyPressed(keys.getRightInput())) {
       this.player.stopXMovement();
     }
 
-    if (!Gdx.input.isKeyPressed(keys.getUpInput()) && !Gdx.input.isKeyPressed(keys.getDownInput())) {
+    if (!Gdx.input.isKeyPressed(keys.getUpInput())
+        && !Gdx.input.isKeyPressed(keys.getDownInput())) {
       this.player.stopYMovement();
     }
   }

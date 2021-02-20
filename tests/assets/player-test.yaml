@@ -1,0 +1,7 @@
+spriteSheet: player.png
+movement:
+  speed: 0.7
+  maxVelocity: 5.5
+size:
+  height: 2.5
+  width: 2.7

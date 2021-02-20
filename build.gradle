@@ -76,7 +76,6 @@ project(":tests") {
 
         compile "com.badlogicgames.gdx:gdx-backend-headless:$gdxVersion"
         compile "com.badlogicgames.gdx:gdx:$gdxVersion"
-
         testCompile 'junit:junit:4.+'
         testCompile "org.mockito:mockito-all:1.9.+"
 

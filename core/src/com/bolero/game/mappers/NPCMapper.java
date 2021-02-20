@@ -6,7 +6,7 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.bolero.game.BoleroGame;
-import com.bolero.game.NPCLoader;
+import com.bolero.game.loaders.NPCLoader;
 import com.bolero.game.characters.NPC;
 import com.bolero.game.enums.SpawnType;
 import com.bolero.game.exceptions.FileFormatException;
@@ -34,7 +34,7 @@ public class NPCMapper extends AbstractMapper implements Mapper<List<NPC>> {
   public List<NPC> map()
       throws MissingPropertyException, NPCDoesNotExistException, FileNotFoundException,
           FileFormatException {
-    val file = Gdx.files.internal("npcs.yaml");
+    val file = Gdx.files.internal("config/npcs.yaml");
 
     val npcLoader = new NPCLoader();
     val npcsDTO = npcLoader.load(file);
