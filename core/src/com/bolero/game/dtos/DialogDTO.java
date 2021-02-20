@@ -5,26 +5,13 @@ import com.bolero.game.dialog.Dialog;
 import com.bolero.game.managers.BundleManager;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Data;
 
+@Data
 public class DialogDTO {
   private List<ChoiceDTO> choices;
+
   private String textID;
-
-  public String getTextID() {
-    return textID;
-  }
-
-  public void setTextID(String textID) {
-    this.textID = textID;
-  }
-
-  public List<ChoiceDTO> getChoices() {
-    return choices;
-  }
-
-  public void setChoices(List<ChoiceDTO> choices) {
-    this.choices = choices;
-  }
 
   private List<Choice> getChoiceList(BundleManager bundleManager) {
     List<Choice> choiceList = new ArrayList<>();

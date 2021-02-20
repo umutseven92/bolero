@@ -13,17 +13,18 @@ import com.bolero.game.exceptions.MissingPropertyException;
 import com.bolero.game.exceptions.NPCDoesNotExistException;
 import com.bolero.game.managers.BundleManager;
 import com.bolero.game.mappers.NPCMapper;
-import com.bolero.game.schedule.Schedule;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Getter;
+import lombok.val;
 
 public class NPCController implements Disposable {
 
   private final TiledMap map;
   private final BundleManager bundleManager;
 
-  private List<NPC> npcs;
+  @Getter private List<NPC> npcs;
 
   public NPCController(TiledMap map, BundleManager bundleManager) {
     this.map = map;
@@ -40,13 +41,13 @@ public class NPCController implements Disposable {
   private void loadNPCs(World world)
       throws FileNotFoundException, MissingPropertyException, NPCDoesNotExistException,
           FileFormatException {
-    NPCMapper mapper = new NPCMapper(map, world, bundleManager);
+    val mapper = new NPCMapper(map, world, bundleManager);
     npcs = mapper.map();
   }
 
   public void checkSchedules(Clock clock) {
-    for (NPC npc : npcs) {
-      for (Schedule schedule : npc.getScheduleList().getSchedules()) {
+    for (val npc : npcs) {
+      for (val schedule : npc.getScheduleList().getSchedules()) {
         if (clock.getCurrentHour() == schedule.getHour()
             && clock.getCurrentMinute() == schedule.getMinute()) {
           Gdx.app.log(
@@ -61,23 +62,19 @@ public class NPCController implements Disposable {
   }
 
   public void setPositions() {
-    for (NPC npc : npcs) {
+    for (val npc : npcs) {
       npc.setPosition();
     }
   }
 
-  public List<NPC> getNpcs() {
-    return npcs;
-  }
-
   public void drawNPCs(SpriteBatch batch) {
-    for (NPC npc : npcs) {
+    for (val npc : npcs) {
       npc.draw(batch);
     }
   }
 
   public NPC checkIfNearNPC(Vector2 playerPos) {
-    for (NPC npc : this.npcs) {
+    for (val npc : this.npcs) {
 
       if (npc.getTalkCircle().contains(playerPos)) {
         return npc;
@@ -89,7 +86,7 @@ public class NPCController implements Disposable {
 
   @Override
   public void dispose() {
-    for (NPC npc : npcs) {
+    for (val npc : npcs) {
       npc.dispose();
     }
   }

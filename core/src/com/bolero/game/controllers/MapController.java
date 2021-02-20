@@ -1,13 +1,12 @@
 package com.bolero.game.controllers;
 
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.maps.MapLayer;
-import com.badlogic.gdx.maps.MapLayers;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.utils.Disposable;
 import com.bolero.game.BoleroGame;
 import java.util.ArrayList;
+import lombok.val;
 
 public class MapController implements Disposable {
   private final OrthogonalTiledMapRenderer mapRenderer;
@@ -21,12 +20,12 @@ public class MapController implements Disposable {
   }
 
   public void load() {
-    ArrayList<Integer> bg = new ArrayList<>();
-    ArrayList<Integer> fg = new ArrayList<>();
+    val bg = new ArrayList<Integer>();
+    val fg = new ArrayList<Integer>();
 
-    MapLayers layers = map.getLayers();
+    val layers = map.getLayers();
     for (int i = 0; i < layers.getCount(); i++) {
-      MapLayer layer = layers.get(i);
+      val layer = layers.get(i);
       Boolean foreground = layer.getProperties().get("foreground", Boolean.class);
       if (foreground != null) {
         if (foreground) {

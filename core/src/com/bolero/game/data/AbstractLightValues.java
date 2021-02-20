@@ -2,7 +2,10 @@ package com.bolero.game.data;
 
 import com.badlogic.gdx.graphics.Color;
 import com.bolero.game.enums.LightTime;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
 public abstract class AbstractLightValues {
   private final float distance;
   private final Color color;
@@ -14,21 +17,5 @@ public abstract class AbstractLightValues {
     this.color = color;
     this.rays = rays;
     this.time = time;
-  }
-
-  public int getRays() {
-    return rays;
-  }
-
-  public Color getColor() {
-    return color;
-  }
-
-  public float getDistance() {
-    return distance;
-  }
-
-  public LightTime getTime() {
-    return time;
   }
 }

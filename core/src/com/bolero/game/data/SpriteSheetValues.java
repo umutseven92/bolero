@@ -1,10 +1,13 @@
 package com.bolero.game.data;
 
+import lombok.Data;
+
+@Data
 public class SpriteSheetValues {
-  public final int rows;
-  public final int cols;
-  public final int idleRow;
-  public final int walkRow;
+  private final int rows;
+  private final int cols;
+  private final int idleRow;
+  private final int walkRow;
 
   public SpriteSheetValues(int rows, int cols, int idleRow, int walkRow) {
     this.rows = rows;

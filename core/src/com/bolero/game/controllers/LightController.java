@@ -11,6 +11,7 @@ import com.bolero.game.exceptions.MissingPropertyException;
 import com.bolero.game.mappers.LightMapper;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.val;
 
 public class LightController implements Disposable {
 
@@ -56,7 +57,7 @@ public class LightController implements Disposable {
   }
 
   private void toggleLights(boolean night) {
-    for (LightContainer light : lights) {
+    for (val light : lights) {
       if (night) {
         if (light.getTime() == LightTime.night) {
           light.setActive(true);
@@ -78,7 +79,7 @@ public class LightController implements Disposable {
 
   @Override
   public void dispose() {
-    for (LightContainer light : lights) {
+    for (val light : lights) {
       light.dispose();
     }
   }

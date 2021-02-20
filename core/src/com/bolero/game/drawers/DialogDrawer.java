@@ -17,6 +17,7 @@ import com.bolero.game.characters.NPC;
 import com.bolero.game.characters.Player;
 import com.bolero.game.dialog.Choice;
 import com.bolero.game.dialog.Dialog;
+import lombok.val;
 
 public class DialogDrawer extends AbstractDrawer implements Disposable {
   private static final float SLIDE_SPEED = 5f;
@@ -64,7 +65,7 @@ public class DialogDrawer extends AbstractDrawer implements Disposable {
     this.playerSprite.setPosition(playerPosX, spriteY);
 
     buttonTexture = new Texture(Gdx.files.internal("buttons/green-E.png"));
-    Image buttonImage = new Image(buttonTexture);
+    val buttonImage = new Image(buttonTexture);
 
     table = new Table();
     table.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -73,7 +74,7 @@ public class DialogDrawer extends AbstractDrawer implements Disposable {
 
     nameLabel = new Label("", uiSkin);
     textLabel = new Label("", uiSkin);
-    Label buttonLabel = new Label("to choose", uiSkin);
+    val buttonLabel = new Label("to choose", uiSkin);
 
     textLabel.setWrap(true);
     table.add(nameLabel).width(Gdx.graphics.getWidth() / 1.2f);
@@ -156,7 +157,7 @@ public class DialogDrawer extends AbstractDrawer implements Disposable {
       }
     } else if (Gdx.input.isKeyJustPressed(Input.Keys.E)
         || Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
-      Dialog leadTo = currentDialog.getChoices().get(activeIndex).getNext();
+      val leadTo = currentDialog.getChoices().get(activeIndex).getNext();
       if (leadTo == null) {
         quit();
       } else {
@@ -179,8 +180,8 @@ public class DialogDrawer extends AbstractDrawer implements Disposable {
   }
 
   private void clearChoice(Actor choice) {
-    Label label = (Label) choice;
-    String text = label.getText().toString();
+    val label = (Label) choice;
+    val text = label.getText().toString();
     if (text.startsWith(CHOICE_PREFIX)) {
       label.setText(text.substring(CHOICE_PREFIX.length()));
     }
@@ -188,9 +189,9 @@ public class DialogDrawer extends AbstractDrawer implements Disposable {
   }
 
   private void choose(int index) {
-    Label chosen = (Label) choiceGroup.getChildren().get(index);
+    val chosen = (Label) choiceGroup.getChildren().get(index);
     chosen.setColor(Color.YELLOW);
-    String text = chosen.getText().toString();
+    val text = chosen.getText().toString();
 
     chosen.setText(CHOICE_PREFIX + text);
   }
@@ -198,8 +199,8 @@ public class DialogDrawer extends AbstractDrawer implements Disposable {
   private void resetButtons() {
     choiceGroup.clear();
 
-    for (Choice choice : currentDialog.getChoices()) {
-      Label button = new Label(choice.getText(), uiSkin);
+    for (val choice : currentDialog.getChoices()) {
+      val button = new Label(choice.getText(), uiSkin);
       choiceGroup.addActor(button);
     }
 

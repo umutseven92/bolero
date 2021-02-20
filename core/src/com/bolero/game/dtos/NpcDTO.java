@@ -13,7 +13,9 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import lombok.Data;
 
+@Data
 public class NpcDTO {
   private String name;
   private String spawn;
@@ -22,62 +24,6 @@ public class NpcDTO {
   private List<DialogDTO> dialogs = new ArrayList<>();
   private SizeDTO size;
   private MovementDTO movement;
-
-  public String getName() {
-    return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  public String getSpawn() {
-    return spawn;
-  }
-
-  public void setSpawn(String spawn) {
-    this.spawn = spawn;
-  }
-
-  public String getSpriteSheet() {
-    return spriteSheet;
-  }
-
-  public void setSpriteSheet(String spriteSheet) {
-    this.spriteSheet = spriteSheet;
-  }
-
-  public List<DialogDTO> getDialogs() {
-    return dialogs;
-  }
-
-  public void setDialogs(List<DialogDTO> dialogs) {
-    this.dialogs = dialogs;
-  }
-
-  public List<ScheduleDTO> getSchedules() {
-    return schedules;
-  }
-
-  public void setSchedules(List<ScheduleDTO> schedules) {
-    this.schedules = schedules;
-  }
-
-  public SizeDTO getSize() {
-    return size;
-  }
-
-  public void setSize(SizeDTO size) {
-    this.size = size;
-  }
-
-  public MovementDTO getMovement() {
-    return movement;
-  }
-
-  public void setMovement(MovementDTO movement) {
-    this.movement = movement;
-  }
 
   private DialogTree getDialogTree(BundleManager bundleManager) {
 
@@ -111,7 +57,7 @@ public class NpcDTO {
 
   public NPC toNPC(
       Vector2 spawnPos, Map<String, Vector2> scheduleMap, World world, BundleManager bundleManager)
-      throws FileNotFoundException, FileFormatException {
+      throws FileNotFoundException {
     DialogTree dialogTree = getDialogTree(bundleManager);
     ScheduleList scheduleList = getScheduleList(scheduleMap);
 

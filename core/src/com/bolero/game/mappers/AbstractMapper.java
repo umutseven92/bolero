@@ -1,11 +1,11 @@
 package com.bolero.game.mappers;
 
-import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapObjects;
 import com.badlogic.gdx.maps.MapProperties;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.bolero.game.exceptions.MissingPropertyException;
 import java.util.List;
+import lombok.val;
 
 public abstract class AbstractMapper {
   private final TiledMap map;
@@ -15,7 +15,7 @@ public abstract class AbstractMapper {
   }
 
   protected MapObjects getLayer(String layerName) {
-    MapLayer layer = this.map.getLayers().get(layerName);
+    val layer = this.map.getLayers().get(layerName);
 
     if (layer == null) {
       return new MapObjects();
@@ -26,7 +26,7 @@ public abstract class AbstractMapper {
 
   protected void checkMissingProperties(MapProperties allProperties, List<String> toCheck)
       throws MissingPropertyException {
-    for (String prop : toCheck) {
+    for (val prop : toCheck) {
       if (!allProperties.containsKey(prop)) {
         throw new MissingPropertyException(prop);
       }

@@ -10,9 +10,11 @@ import com.bolero.game.managers.BundleManager;
 import com.bolero.game.screens.GameScreen;
 import java.util.ArrayList;
 import java.util.HashMap;
+import lombok.val;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 
+// TODO: Refactor the public fields
 public class BoleroGame extends Game {
 
   private ArrayList<GameScreen> screenPool;
@@ -64,14 +66,14 @@ public class BoleroGame extends Game {
 
     loadConfig();
     loadMaps();
-    loadRoute(this.config.initialMap, SPAWN_INITIAL_OBJ);
+    loadRoute(this.config.getInitialMap(), SPAWN_INITIAL_OBJ);
   }
 
   public void loadMaps() {
     // Load all map files (*.tmx) from assets/map
-    FileHandle files = Gdx.files.internal(this.config.mapsPath);
+    val files = Gdx.files.internal(this.config.getMapsPath());
 
-    for (FileHandle file : files.list(".tmx")) {
+    for (val file : files.list(".tmx")) {
       screens.put(file.nameWithoutExtension(), file.path());
     }
   }
@@ -86,7 +88,7 @@ public class BoleroGame extends Game {
         throw new Exception(String.format("Screen %s does not exist in screens.", screenName));
       }
 
-      String path = screens.get(screenName);
+      val path = screens.get(screenName);
 
       toLoad = new GameScreen(this, screenName, path, spawnName);
     } catch (Exception e) {
@@ -102,9 +104,9 @@ public class BoleroGame extends Game {
   }
 
   private void loadConfig() {
-    FileHandle file = Gdx.files.internal("./config.yaml");
+    val file = Gdx.files.internal("./config.yaml");
 
-    Yaml yaml = new Yaml(new Constructor(Config.class));
+    val yaml = new Yaml(new Constructor(Config.class));
 
     this.config = yaml.load(file.readString());
   }

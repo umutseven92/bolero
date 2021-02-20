@@ -1,12 +1,9 @@
 package com.bolero.game.mappers;
 
-import com.badlogic.gdx.maps.MapObject;
-import com.badlogic.gdx.maps.MapObjects;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.Shape;
@@ -15,6 +12,7 @@ import com.bolero.game.BoleroGame;
 import com.bolero.game.exceptions.MissingPropertyException;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.val;
 
 public class CollisionMapper extends AbstractMapper implements Mapper<List<Shape>> {
   private final World world;
@@ -26,20 +24,20 @@ public class CollisionMapper extends AbstractMapper implements Mapper<List<Shape
 
   @Override
   public List<Shape> map() throws MissingPropertyException {
-    MapObjects objects = super.getLayer(BoleroGame.COL_LAYER);
+    val objects = super.getLayer(BoleroGame.COL_LAYER);
 
-    ArrayList<Shape> shapes = new ArrayList<>();
+    val shapes = new ArrayList<Shape>();
 
-    for (MapObject object : objects) {
-      Rectangle rectangle = ((RectangleMapObject) object).getRectangle();
+    for (val object : objects) {
+      val rectangle = ((RectangleMapObject) object).getRectangle();
 
-      Shape shape = getShapeFromRectangle(rectangle);
+      val shape = getShapeFromRectangle(rectangle);
       shapes.add(shape);
 
-      Vector2 center = getTransformedCenterForRectangle(rectangle);
+      val center = getTransformedCenterForRectangle(rectangle);
 
-      BodyDef bodyDef = new BodyDef();
-      Body body = world.createBody(bodyDef);
+      val bodyDef = new BodyDef();
+      val body = world.createBody(bodyDef);
 
       body.createFixture(shape, 0.0f);
 
@@ -50,7 +48,7 @@ public class CollisionMapper extends AbstractMapper implements Mapper<List<Shape
   }
 
   private Shape getShapeFromRectangle(Rectangle rectangle) {
-    PolygonShape polygonShape = new PolygonShape();
+    val polygonShape = new PolygonShape();
     polygonShape.setAsBox(
         rectangle.width * 0.5F / BoleroGame.UNIT, rectangle.height * 0.5F / BoleroGame.UNIT);
 
@@ -58,7 +56,7 @@ public class CollisionMapper extends AbstractMapper implements Mapper<List<Shape
   }
 
   private Vector2 getTransformedCenterForRectangle(Rectangle rectangle) {
-    Vector2 center = new Vector2();
+    val center = new Vector2();
     rectangle.getCenter(center);
     return center.scl(1 / BoleroGame.UNIT);
   }

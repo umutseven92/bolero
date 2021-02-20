@@ -29,10 +29,10 @@ public class GameCamera {
 
     camera.position.x =
         MathUtils.clamp(
-            camera.position.x, centerX, mapValues.mapWidthPixels / BoleroGame.UNIT - centerX);
+            camera.position.x, centerX, mapValues.getMapWidthPixels() / BoleroGame.UNIT - centerX);
     camera.position.y =
         MathUtils.clamp(
-            camera.position.y, centerY, mapValues.mapHeightPixels / BoleroGame.UNIT - centerY);
+            camera.position.y, centerY, mapValues.getMapHeightPixels() / BoleroGame.UNIT - centerY);
 
     camera.update();
   }

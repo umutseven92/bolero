@@ -1,6 +1,7 @@
 package com.bolero.game;
 
 import com.bolero.game.managers.BundleManager;
+import lombok.Getter;
 
 public class Clock {
 
@@ -8,31 +9,14 @@ public class Clock {
   public static final int RATIO = 200;
   private static final int STEP = 1;
 
-  private long timestamp;
-
   private final String[] days;
 
-  private String currentDay;
+  @Getter private String currentDay;
+  @Getter private int currentHour;
+  @Getter private int currentMinute;
+  @Getter private long timestamp;
 
-  private int currentHour;
-  private int currentMinute;
   private int dayIndex;
-
-  public String getCurrentDay() {
-    return currentDay;
-  }
-
-  public int getCurrentHour() {
-    return currentHour;
-  }
-
-  public int getCurrentMinute() {
-    return currentMinute;
-  }
-
-  public long getTimestamp() {
-    return timestamp;
-  }
 
   public Clock(BundleManager bundle) {
     timestamp = 0;

@@ -3,6 +3,7 @@ package com.bolero.game;
 import com.badlogic.gdx.files.FileHandle;
 import com.bolero.game.dtos.NpcsDTO;
 import com.bolero.game.exceptions.FileFormatException;
+import lombok.val;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.representer.Representer;
@@ -13,9 +14,9 @@ public class NPCLoader {
       throw new FileFormatException(file.name(), new String[] {"yaml"});
     }
 
-    Representer representer = new Representer();
-    representer.getPropertyUtils().setSkipMissingProperties(true);
-    Yaml yaml = new Yaml(new Constructor(NpcsDTO.class), representer);
+    val repr = new Representer();
+    repr.getPropertyUtils().setSkipMissingProperties(true);
+    val yaml = new Yaml(new Constructor(NpcsDTO.class), repr);
 
     return yaml.load(file.readString());
   }

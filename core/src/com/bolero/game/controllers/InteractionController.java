@@ -2,7 +2,6 @@ package com.bolero.game.controllers;
 
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.math.Vector2;
-import com.bolero.game.data.Tuple;
 import com.bolero.game.exceptions.MissingPropertyException;
 import com.bolero.game.interactions.AbstractRectangle;
 import com.bolero.game.interactions.InspectRectangle;
@@ -10,6 +9,7 @@ import com.bolero.game.interactions.TransitionRectangle;
 import com.bolero.game.mappers.InteractionMapper;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.val;
 
 public class InteractionController {
   private List<TransitionRectangle> transitionRectangles;
@@ -24,13 +24,13 @@ public class InteractionController {
   }
 
   public void load() throws MissingPropertyException {
-    Tuple<List<TransitionRectangle>, List<InspectRectangle>> rectangles = mapper.map();
+    val rectangles = mapper.map();
     transitionRectangles = rectangles.x;
     inspectRectangles = rectangles.y;
   }
 
   public List<AbstractRectangle> getAllRectangles() {
-    List<AbstractRectangle> allRectangles = new ArrayList<>(transitionRectangles);
+    val allRectangles = new ArrayList<AbstractRectangle>(transitionRectangles);
     allRectangles.addAll(inspectRectangles);
 
     return allRectangles;

@@ -34,6 +34,7 @@ import com.bolero.game.icons.ButtonIcon;
 import com.bolero.game.interactions.InspectRectangle;
 import com.bolero.game.interactions.TransitionRectangle;
 import java.io.FileNotFoundException;
+import lombok.val;
 
 public class GameScreen implements Screen {
   private final BoleroGame game;
@@ -77,7 +78,7 @@ public class GameScreen implements Screen {
 
     this.mapPath = mapPath;
     this.spawnPos = spawnPos;
-    this.keys = game.config.keys;
+    this.keys = game.config.getKeys();
 
     initializeAll();
   }
@@ -193,15 +194,13 @@ public class GameScreen implements Screen {
     Gdx.gl.glClearColor(0, 0, 0f, 1);
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-    Vector2 playerPos = new Vector2(player.getPosition().x, player.getPosition().y);
-    Vector2 playerPosPixels =
+    val playerPos = new Vector2(player.getPosition().x, player.getPosition().y);
+    val playerPosPixels =
         new Vector2(
             player.getPosition().x * BoleroGame.UNIT, player.getPosition().y * BoleroGame.UNIT);
 
-    TransitionRectangle transitionRectangle =
-        interactionController.checkIfInInteractionRectangle(playerPosPixels);
-    InspectRectangle inspectRectangle =
-        interactionController.checkIfInInspectRectangle(playerPosPixels);
+    val transitionRectangle = interactionController.checkIfInInteractionRectangle(playerPosPixels);
+    val inspectRectangle = interactionController.checkIfInInspectRectangle(playerPosPixels);
 
     npcController.checkSchedules(game.clock);
     NPC npc = npcController.checkIfNearNPC(playerPos);
@@ -293,51 +292,51 @@ public class GameScreen implements Screen {
   }
 
   private void handleMovementInput() {
-    if (Gdx.input.isKeyJustPressed(keys.getDebug())) {
+    if (Gdx.input.isKeyJustPressed(keys.getDebugInput())) {
       game.debugMode = !game.debugMode;
     }
 
     if (game.debugMode) {
-      if (Gdx.input.isKeyJustPressed(keys.getReload())) {
+      if (Gdx.input.isKeyJustPressed(keys.getReloadInput())) {
         reloadMap();
       }
 
-      if (Gdx.input.isKeyJustPressed(keys.getZoomIn())) {
+      if (Gdx.input.isKeyJustPressed(keys.getZoomInInput())) {
         gameCamera.zoomOutInstant(0.3f);
       }
-      if (Gdx.input.isKeyJustPressed(keys.getZoomOut())) {
+      if (Gdx.input.isKeyJustPressed(keys.getZoomOutInput())) {
         gameCamera.zoomInInstant(0.3f);
       }
     }
 
-    if (Gdx.input.isKeyPressed(keys.getLeft())) {
+    if (Gdx.input.isKeyPressed(keys.getLeftInput())) {
       this.player.applyLeftMovement();
     }
 
-    if (Gdx.input.isKeyPressed(keys.getRight())) {
+    if (Gdx.input.isKeyPressed(keys.getRightInput())) {
       this.player.applyRightMovement();
     }
 
-    if (Gdx.input.isKeyPressed(keys.getUp())) {
+    if (Gdx.input.isKeyPressed(keys.getUpInput())) {
       this.player.applyUpMovement();
     }
 
-    if (Gdx.input.isKeyPressed(keys.getDown())) {
+    if (Gdx.input.isKeyPressed(keys.getDownInput())) {
       this.player.applyDownMovement();
     }
 
-    if (!Gdx.input.isKeyPressed(keys.getLeft()) && !Gdx.input.isKeyPressed(keys.getRight())) {
+    if (!Gdx.input.isKeyPressed(keys.getLeftInput()) && !Gdx.input.isKeyPressed(keys.getRightInput())) {
       this.player.stopXMovement();
     }
 
-    if (!Gdx.input.isKeyPressed(keys.getUp()) && !Gdx.input.isKeyPressed(keys.getDown())) {
+    if (!Gdx.input.isKeyPressed(keys.getUpInput()) && !Gdx.input.isKeyPressed(keys.getDownInput())) {
       this.player.stopYMovement();
     }
   }
 
   private void handleInteractionInput(
       TransitionRectangle transitionRectangle, InspectRectangle inspectRectangle, NPC npc) {
-    boolean interactionPressed = Gdx.input.isKeyJustPressed(keys.getInteract());
+    boolean interactionPressed = Gdx.input.isKeyJustPressed(keys.getInteractInput());
 
     if (interactionPressed && transitionRectangle != null) {
       handleTransition(transitionRectangle);
@@ -349,7 +348,7 @@ public class GameScreen implements Screen {
   }
 
   private void handleTransition(TransitionRectangle rectangle) {
-    game.loadRoute(rectangle.getName(), rectangle.getSpawnName());
+    game.loadRoute(rectangle.getMapName(), rectangle.getSpawnName());
   }
 
   private void inspect() {

@@ -8,15 +8,15 @@ import com.bolero.game.data.SpriteSheetValues;
 import com.bolero.game.dialog.DialogTree;
 import com.bolero.game.dtos.MovementDTO;
 import com.bolero.game.dtos.SizeDTO;
-import com.bolero.game.exceptions.FileFormatException;
 import com.bolero.game.schedule.ScheduleList;
 import java.io.FileNotFoundException;
+import lombok.Getter;
 
 public class NPC extends AbstractCharacter {
-  public final Circle talkCircle;
-  private final String name;
-  private final DialogTree dialogTree;
-  private final ScheduleList scheduleList;
+  @Getter private final Circle talkCircle;
+  @Getter private final String name;
+  @Getter private final DialogTree dialogTree;
+  @Getter private final ScheduleList scheduleList;
 
   public NPC(
       String name,
@@ -27,7 +27,7 @@ public class NPC extends AbstractCharacter {
       String texturePath,
       DialogTree dialogTree,
       ScheduleList scheduleList)
-      throws FileNotFoundException, FileFormatException {
+      throws FileNotFoundException {
     super(
         position,
         box2DWorld,
@@ -42,26 +42,10 @@ public class NPC extends AbstractCharacter {
     this.scheduleList = scheduleList;
   }
 
-  public Circle getTalkCircle() {
-    return talkCircle;
-  }
-
   @Override
   public void setPosition() {
     talkCircle.setPosition(this.body.getPosition());
     super.setPosition();
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public DialogTree getDialogTree() {
-    return dialogTree;
-  }
-
-  public ScheduleList getScheduleList() {
-    return scheduleList;
   }
 
   public boolean hasDialog() {

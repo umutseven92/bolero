@@ -1,51 +1,53 @@
 package com.bolero.game;
 
 import com.badlogic.gdx.Input;
+import lombok.Data;
 
+@Data
 public class Keys {
-  public String up;
-  public String down;
-  public String left;
-  public String right;
-  public String interact;
-  public String reload;
-  public String debug;
-  public String zoomIn;
-  public String zoomOut;
+  private String up;
+  private String down;
+  private String left;
+  private String right;
+  private String interact;
+  private String reload;
+  private String debug;
+  private String zoomIn;
+  private String zoomOut;
 
-  public int getUp() {
+  public int getUpInput() {
     return Input.Keys.valueOf(up);
   }
 
-  public int getDown() {
+  public int getDownInput() {
     return Input.Keys.valueOf(down);
   }
 
-  public int getLeft() {
+  public int getLeftInput() {
     return Input.Keys.valueOf(left);
   }
 
-  public int getRight() {
+  public int getRightInput() {
     return Input.Keys.valueOf(right);
   }
 
-  public int getInteract() {
+  public int getInteractInput() {
     return Input.Keys.valueOf(interact);
   }
 
-  public int getReload() {
+  public int getReloadInput() {
     return Input.Keys.valueOf(reload);
   }
 
-  public int getDebug() {
+  public int getDebugInput() {
     return Input.Keys.valueOf(debug);
   }
 
-  public int getZoomIn() {
+  public int getZoomInInput() {
     return Input.Keys.valueOf(zoomIn);
   }
 
-  public int getZoomOut() {
+  public int getZoomOutInput() {
     return Input.Keys.valueOf(zoomOut);
   }
 }

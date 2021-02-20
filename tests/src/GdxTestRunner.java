@@ -1,4 +1,4 @@
-import static org.mockito.Mockito.mock;
+import org.mockito.Mockito;
 
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
@@ -22,7 +22,7 @@ public class GdxTestRunner extends BlockJUnit4ClassRunner implements Application
     HeadlessApplicationConfiguration conf = new HeadlessApplicationConfiguration();
 
     new HeadlessApplication(this, conf);
-    Gdx.gl = mock(GL20.class);
+    Gdx.gl = Mockito.mock(GL20.class);
   }
 
   @Override

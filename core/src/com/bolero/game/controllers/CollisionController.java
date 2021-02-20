@@ -13,6 +13,7 @@ import com.bolero.game.exceptions.MissingPropertyException;
 import com.bolero.game.mappers.CollisionMapper;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.val;
 
 public class CollisionController implements Disposable {
   private final World world;
@@ -37,32 +38,34 @@ public class CollisionController implements Disposable {
   }
 
   private void createWalls(MapValues mapValues) {
-    float heightModifier = mapValues.tileHeightPixels / BoleroGame.UNIT;
-    float widthModifier = mapValues.tileWidthPixels / BoleroGame.UNIT;
+    float heightModifier = mapValues.getTileHeightPixels() / BoleroGame.UNIT;
+    float widthModifier = mapValues.getTileWidthPixels() / BoleroGame.UNIT;
 
-    PolygonShape verticalMapWall = new PolygonShape();
-    verticalMapWall.setAsBox(1, mapValues.mapHeightUnit);
-
-    shapes.add(verticalMapWall);
-
-    PolygonShape horizontalMapWall = new PolygonShape();
-    horizontalMapWall.setAsBox(mapValues.mapWidthUnit, 1);
+    val verticalMapWall = new PolygonShape();
+    verticalMapWall.setAsBox(1, mapValues.getMapHeightUnit());
 
     shapes.add(verticalMapWall);
 
-    BodyDef eastWallDef = new BodyDef();
+    val horizontalMapWall = new PolygonShape();
+    horizontalMapWall.setAsBox(mapValues.getMapWidthUnit(), 1);
+
+    shapes.add(verticalMapWall);
+
+    val eastWallDef = new BodyDef();
     eastWallDef.position.set(
-        new Vector2((mapValues.mapWidthUnit * widthModifier) + 1, mapValues.mapHeightUnit));
+        new Vector2(
+            (mapValues.getMapWidthUnit() * widthModifier) + 1, mapValues.getMapHeightUnit()));
 
-    BodyDef westWallDef = new BodyDef();
-    westWallDef.position.set(-1, mapValues.mapHeightUnit);
+    val westWallDef = new BodyDef();
+    westWallDef.position.set(-1, mapValues.getMapHeightUnit());
 
-    BodyDef northWallDef = new BodyDef();
+    val northWallDef = new BodyDef();
     northWallDef.position.set(
-        new Vector2(mapValues.mapWidthUnit, (mapValues.mapHeightUnit * heightModifier) + 1));
+        new Vector2(
+            mapValues.getMapWidthUnit(), (mapValues.getMapHeightUnit() * heightModifier) + 1));
 
-    BodyDef southWallDef = new BodyDef();
-    southWallDef.position.set(mapValues.mapWidthUnit, -1);
+    val southWallDef = new BodyDef();
+    southWallDef.position.set(mapValues.getMapWidthUnit(), -1);
 
     world.createBody(eastWallDef).createFixture(verticalMapWall, 0.0f);
     world.createBody(westWallDef).createFixture(verticalMapWall, 0.0f);

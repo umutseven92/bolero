@@ -16,6 +16,7 @@ import com.bolero.game.characters.NPC;
 import com.bolero.game.characters.Player;
 import com.bolero.game.interactions.AbstractRectangle;
 import java.util.List;
+import lombok.val;
 
 public class DebugDrawer implements Disposable {
   private final ShapeRenderer debugRenderer;
@@ -85,7 +86,8 @@ public class DebugDrawer implements Disposable {
     }
 
     for (NPC npc : npcs) {
-      debugRenderer.circle(npc.talkCircle.x, npc.talkCircle.y, npc.talkCircle.radius);
+      val talkCircle = npc.getTalkCircle();
+      debugRenderer.circle(talkCircle.x, talkCircle.y, talkCircle.radius);
     }
 
     debugRenderer.end();

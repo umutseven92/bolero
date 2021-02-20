@@ -7,6 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Disposable;
+import lombok.val;
 
 public class InspectDrawer extends AbstractDrawer implements Disposable {
   private final Table table;
@@ -16,7 +17,7 @@ public class InspectDrawer extends AbstractDrawer implements Disposable {
   public InspectDrawer() {
     super();
     buttonTexture = new Texture(Gdx.files.internal("buttons/green-E.png"));
-    Image buttonImage = new Image(buttonTexture);
+    val buttonImage = new Image(buttonTexture);
 
     table = new Table();
     table.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -24,7 +25,7 @@ public class InspectDrawer extends AbstractDrawer implements Disposable {
     table.padBottom(Gdx.graphics.getHeight() / 10f);
 
     textLabel = new Label("", uiSkin);
-    Label label2 = new Label("to continue", uiSkin);
+    val label2 = new Label("to continue", uiSkin);
 
     textLabel.setWrap(true);
     table.add(textLabel).width(Gdx.graphics.getWidth() / 1.2f);

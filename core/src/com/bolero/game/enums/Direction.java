@@ -1,4 +1,4 @@
-package com.bolero.game.characters;
+package com.bolero.game.enums;
 
 public enum Direction {
   left,

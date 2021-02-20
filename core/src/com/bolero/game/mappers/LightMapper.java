@@ -4,8 +4,6 @@ import box2dLight.ConeLight;
 import box2dLight.PointLight;
 import box2dLight.RayHandler;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.maps.MapObject;
-import com.badlogic.gdx.maps.MapObjects;
 import com.badlogic.gdx.maps.MapProperties;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.math.Vector2;
@@ -20,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import lombok.val;
 
 public class LightMapper extends AbstractMapper implements Mapper<List<LightContainer>> {
   private final RayHandler rayHandler;
@@ -31,21 +30,20 @@ public class LightMapper extends AbstractMapper implements Mapper<List<LightCont
 
   @Override
   public List<LightContainer> map() throws MissingPropertyException {
-    MapObjects objects = super.getLayer(BoleroGame.LIGHT_LAYER);
+    val objects = super.getLayer(BoleroGame.LIGHT_LAYER);
 
-    List<LightContainer> lights = new ArrayList<>();
+    val lights = new ArrayList<LightContainer>();
 
-    for (MapObject object : objects) {
+    for (val object : objects) {
 
-      final MapProperties props = object.getProperties();
+      val props = object.getProperties();
 
       super.checkMissingProperties(props, Collections.singletonList("type"));
 
-      String type = props.get("type", String.class);
+      val type = props.get("type", String.class);
 
-      LightType lightType = LightType.valueOf(type);
+      val lightType = LightType.valueOf(type);
 
-      LightContainer light;
       switch (lightType) {
         case point:
           lights.add(generatePointLight(props));
@@ -60,10 +58,10 @@ public class LightMapper extends AbstractMapper implements Mapper<List<LightCont
   }
 
   private LightContainer generatePointLight(MapProperties props) throws MissingPropertyException {
-    PointLightValues lightValues = getPointLightValues(props);
-    Vector2 pos = getPosition(props);
+    val lightValues = getPointLightValues(props);
+    val pos = getPosition(props);
 
-    PointLight light =
+    val light =
         new PointLight(
             rayHandler,
             lightValues.getRays(),
@@ -76,10 +74,10 @@ public class LightMapper extends AbstractMapper implements Mapper<List<LightCont
   }
 
   private LightContainer generateConeLight(MapProperties props) throws MissingPropertyException {
-    ConeLightValues lightValues = getConeLightValues(props);
-    Vector2 pos = getPosition(props);
+    val lightValues = getConeLightValues(props);
+    val pos = getPosition(props);
 
-    ConeLight light =
+    val light =
         new ConeLight(
             rayHandler,
             lightValues.getRays(),
@@ -98,11 +96,11 @@ public class LightMapper extends AbstractMapper implements Mapper<List<LightCont
     super.checkMissingProperties(props, Arrays.asList("direction_degree", "cone_degree"));
 
     float distance = props.get("distance", float.class);
-    Color color = props.get("color", Color.class);
+    val color = props.get("color", Color.class);
     int rays = props.get("rays", int.class);
     float directionDegree = props.get("direction_degree", float.class);
     float coneDegree = props.get("cone_degree", float.class);
-    LightTime time = getLightTime(props);
+    val time = getLightTime(props);
 
     return new ConeLightValues(distance, color, rays, directionDegree, coneDegree, time);
   }
@@ -111,9 +109,9 @@ public class LightMapper extends AbstractMapper implements Mapper<List<LightCont
       throws MissingPropertyException {
     checkProps(props);
     float distance = props.get("distance", float.class);
-    Color color = props.get("color", Color.class);
+    val color = props.get("color", Color.class);
     int rays = props.get("rays", int.class);
-    LightTime time = getLightTime(props);
+    val time = getLightTime(props);
     return new PointLightValues(distance, color, rays, time);
   }
 
@@ -122,7 +120,7 @@ public class LightMapper extends AbstractMapper implements Mapper<List<LightCont
   }
 
   private LightTime getLightTime(MapProperties props) {
-    String time = props.get("time", String.class);
+    val time = props.get("time", String.class);
 
     if (time == null) {
       return LightTime.both;

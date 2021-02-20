@@ -1,7 +1,6 @@
 package com.bolero.game.characters;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -20,9 +19,11 @@ import com.bolero.game.data.SpriteSheetValues;
 import com.bolero.game.dtos.MovementDTO;
 import com.bolero.game.dtos.SizeDTO;
 import com.bolero.game.enums.CharacterState;
+import com.bolero.game.enums.Direction;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.val;
 
 public abstract class AbstractCharacter implements Disposable {
   private static final float DIALOG_SPRITE_SIZE_MULTIPLIER = 10f;
@@ -77,7 +78,7 @@ public abstract class AbstractCharacter implements Disposable {
     this.position = position;
     this.direction = Direction.right;
     this.state = CharacterState.idle;
-    FileHandle file = Gdx.files.internal(texturePath);
+    val file = Gdx.files.internal(texturePath);
 
     if (!file.exists()) {
       throw new FileNotFoundException(String.format("%s does not exist.", texturePath));
@@ -103,16 +104,15 @@ public abstract class AbstractCharacter implements Disposable {
     TextureRegion[][] textureMatrix =
         TextureRegion.split(
             spriteSheet,
-            spriteSheet.getWidth() / ssValues.cols,
-            spriteSheet.getHeight() / ssValues.rows);
-
-    TextureRegion[] walkFrames = new TextureRegion[ssValues.cols];
-    TextureRegion[] idleFrames = new TextureRegion[ssValues.cols];
+            spriteSheet.getWidth() / ssValues.getCols(),
+            spriteSheet.getHeight() / ssValues.getRows());
+    TextureRegion[] walkFrames = new TextureRegion[ssValues.getCols()];
+    TextureRegion[] idleFrames = new TextureRegion[ssValues.getCols()];
 
     int index = 0;
-    for (int j = 0; j < ssValues.cols; j++) {
-      idleFrames[index] = textureMatrix[ssValues.idleRow][j];
-      walkFrames[index] = textureMatrix[ssValues.walkRow][j];
+    for (int j = 0; j < ssValues.getCols(); j++) {
+      idleFrames[index] = textureMatrix[ssValues.getIdleRow()][j];
+      walkFrames[index] = textureMatrix[ssValues.getWalkRow()][j];
       index++;
     }
 
@@ -153,7 +153,7 @@ public abstract class AbstractCharacter implements Disposable {
       return;
     }
 
-    Vector2 goal = goals.get(goalIndex);
+    val goal = goals.get(goalIndex);
     if (goal != null && this.state != CharacterState.talking) {
       boolean xReached = false;
       boolean yReached = false;
@@ -203,15 +203,15 @@ public abstract class AbstractCharacter implements Disposable {
   }
 
   private Body createBody(World world, BodyDef.BodyType bodyType) {
-    BodyDef bodyDef = new BodyDef();
+    val bodyDef = new BodyDef();
     bodyDef.type = bodyType;
     bodyDef.position.set(position.x + size.getWidth() / 2, position.y + size.getHeight() / 2);
-    Body body = world.createBody(bodyDef);
+    val body = world.createBody(bodyDef);
 
     circle = new CircleShape();
     circle.setRadius(1);
 
-    FixtureDef fixtureDef = new FixtureDef();
+    val fixtureDef = new FixtureDef();
     fixtureDef.shape = circle;
     fixtureDef.density = 0.5f;
     fixtureDef.friction = 0.81f;
@@ -228,7 +228,7 @@ public abstract class AbstractCharacter implements Disposable {
   public void applyRightMovement() {
     this.direction = Direction.right;
 
-    Vector2 vel = body.getLinearVelocity();
+    val vel = body.getLinearVelocity();
 
     if (vel.x > movement.getMaxVelocity()) {
       return;
@@ -240,7 +240,7 @@ public abstract class AbstractCharacter implements Disposable {
   public void applyLeftMovement() {
     this.direction = Direction.left;
 
-    Vector2 vel = body.getLinearVelocity();
+    val vel = body.getLinearVelocity();
     if (vel.x < -movement.getMaxVelocity()) {
       return;
     }
@@ -249,7 +249,7 @@ public abstract class AbstractCharacter implements Disposable {
   }
 
   public void applyUpMovement() {
-    Vector2 vel = body.getLinearVelocity();
+    val vel = body.getLinearVelocity();
 
     if (vel.y > movement.getMaxVelocity()) {
       return;
@@ -258,7 +258,7 @@ public abstract class AbstractCharacter implements Disposable {
   }
 
   public void applyDownMovement() {
-    Vector2 vel = body.getLinearVelocity();
+    val vel = body.getLinearVelocity();
 
     if (vel.y < -movement.getMaxVelocity()) {
       return;

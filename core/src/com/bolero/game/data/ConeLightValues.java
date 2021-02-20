@@ -2,10 +2,11 @@ package com.bolero.game.data;
 
 import com.badlogic.gdx.graphics.Color;
 import com.bolero.game.enums.LightTime;
+import lombok.Getter;
 
 public class ConeLightValues extends AbstractLightValues {
-  private final float directionDegree;
-  private final float coneDegree;
+  @Getter private final float directionDegree;
+  @Getter private final float coneDegree;
 
   public ConeLightValues(
       float distance,
@@ -17,13 +18,5 @@ public class ConeLightValues extends AbstractLightValues {
     super(distance, color, rays, time);
     this.directionDegree = directionDegree;
     this.coneDegree = coneDegree;
-  }
-
-  public float getDirectionDegree() {
-    return directionDegree;
-  }
-
-  public float getConeDegree() {
-    return coneDegree;
   }
 }

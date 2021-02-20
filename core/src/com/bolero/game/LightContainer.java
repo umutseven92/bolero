@@ -3,9 +3,10 @@ package com.bolero.game;
 import box2dLight.Light;
 import com.badlogic.gdx.utils.Disposable;
 import com.bolero.game.enums.LightTime;
+import lombok.Getter;
 
 public class LightContainer implements Disposable {
-  private final LightTime time;
+  @Getter private final LightTime time;
   private final Light light;
 
   public LightContainer(LightTime time, Light light) {
@@ -20,9 +21,5 @@ public class LightContainer implements Disposable {
   @Override
   public void dispose() {
     light.dispose();
-  }
-
-  public LightTime getTime() {
-    return time;
   }
 }

@@ -2,14 +2,17 @@ package com.bolero.game.data;
 
 import com.badlogic.gdx.maps.MapProperties;
 import com.badlogic.gdx.maps.tiled.TiledMap;
+import lombok.Data;
 
+@Data
 public class MapValues {
-  public final int mapWidthUnit;
-  public final int mapHeightUnit;
-  public final int mapWidthPixels;
-  public final int mapHeightPixels;
-  public final int tileWidthPixels;
-  public final int tileHeightPixels;
+  private final int mapWidthUnit;
+  private final int mapHeightUnit;
+  private final int mapWidthPixels;
+  private final int mapHeightPixels;
+
+  private final int tileWidthPixels;
+  private final int tileHeightPixels;
 
   public MapValues(TiledMap map) {
     MapProperties prop = map.getProperties();
