@@ -41,5 +41,4 @@ npcs:
       - hour: 0
         minute: 30
         nodes:
-          - id: villager1s
-          - id: villager2s
+          - id: villager3s

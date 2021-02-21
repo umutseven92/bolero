@@ -13,6 +13,7 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.bolero.game.BoleroGame;
 import com.bolero.game.GameCamera;
 import com.bolero.game.Keys;
+import com.bolero.game.PathGraph;
 import com.bolero.game.Sun;
 import com.bolero.game.characters.NPC;
 import com.bolero.game.characters.Player;
@@ -22,6 +23,7 @@ import com.bolero.game.controllers.LightController;
 import com.bolero.game.controllers.MapController;
 import com.bolero.game.controllers.NPCController;
 import com.bolero.game.data.MapValues;
+import com.bolero.game.data.PathNode;
 import com.bolero.game.drawers.DebugDrawer;
 import com.bolero.game.drawers.DialogDrawer;
 import com.bolero.game.drawers.InspectDrawer;
@@ -33,8 +35,10 @@ import com.bolero.game.exceptions.NPCDoesNotExistException;
 import com.bolero.game.icons.ButtonIcon;
 import com.bolero.game.interactions.InspectRectangle;
 import com.bolero.game.interactions.TransitionRectangle;
+import com.bolero.game.mappers.PathMapper;
 import com.bolero.game.mappers.PlayerMapper;
 import java.io.FileNotFoundException;
+import java.util.List;
 import lombok.val;
 
 public class GameScreen implements Screen {
@@ -72,6 +76,8 @@ public class GameScreen implements Screen {
 
   private final Keys keys;
 
+  private PathGraph pathNodes;
+
   public GameScreen(BoleroGame game, String name, String mapPath, String spawnPos)
       throws MapperException, FileNotFoundException, FileFormatException {
     this.game = game;
@@ -103,6 +109,13 @@ public class GameScreen implements Screen {
     collisionController.load(mapValues);
   }
 
+  private void initializePaths() throws FileNotFoundException, FileFormatException {
+    Gdx.app.log(GameScreen.class.getName(), "Initializing paths..");
+
+    val mapper = new PathMapper(map);
+    this.pathNodes = mapper.map();
+  }
+
   private void initializeInteractions() throws MissingPropertyException {
     Gdx.app.log(GameScreen.class.getName(), "Initializing interactions..");
 
@@ -132,7 +145,7 @@ public class GameScreen implements Screen {
           FileFormatException {
     Gdx.app.log(GameScreen.class.getName(), "Initializing NPCs..");
 
-    npcController = new NPCController(map, game.getBundleController());
+    npcController = new NPCController(map, game.getBundleController(), pathNodes);
     npcController.load(world);
   }
 
@@ -143,8 +156,7 @@ public class GameScreen implements Screen {
     gameCamera.updatePosition(player.getPosition(), mapValues);
   }
 
-  private void initializePlayer()
-      throws FileNotFoundException, FileFormatException {
+  private void initializePlayer() throws FileNotFoundException, FileFormatException {
     Gdx.app.log(GameScreen.class.getName(), "Initializing player..");
 
     setPlayerSpawnPoint(spawnPos);
@@ -162,6 +174,7 @@ public class GameScreen implements Screen {
     dialogDrawer = new DialogDrawer(player, gameCamera.getCamera());
   }
 
+  // TODO: Parallelize these- watch out for order
   private void initializeAll()
       throws FileNotFoundException, MissingPropertyException, NPCDoesNotExistException,
           FileFormatException {
@@ -169,6 +182,7 @@ public class GameScreen implements Screen {
     initializeCollision();
     initializeInteractions();
     initializeLights(false);
+    initializePaths();
     initializeNPCs();
     initializePlayer();
     initializeCamera();
@@ -227,8 +241,8 @@ public class GameScreen implements Screen {
     mapController.drawBackground();
 
     if (game.debugMode) {
-      debugDrawer.drawInteractionZones(
-          interactionController.getAllRectangles(), npcController.getNpcs());
+      debugDrawer.drawDebugShapes(
+          interactionController.getAllRectangles(), npcController.getNpcs(), pathNodes);
     }
 
     game.batch.setProjectionMatrix(gameCamera.getCamera().combined);

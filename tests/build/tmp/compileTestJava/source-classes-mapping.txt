@@ -1,6 +1,0 @@
-loader/NpcLoaderTests.java
- loader.NpcLoaderTests
-GdxTestRunner.java
- src.GdxTestRunner
-loader/PlayerLoaderTests.java
- loader.PlayerLoaderTests

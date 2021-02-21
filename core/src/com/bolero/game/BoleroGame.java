@@ -3,7 +3,6 @@ package com.bolero.game;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.bolero.game.managers.BundleManager;
@@ -27,6 +26,7 @@ public class BoleroGame extends Game {
   public static final String SCHEDULE_LAYER = "Schedule";
   public static final String INT_LAYER = "Interaction";
   public static final String LIGHT_LAYER = "Lights";
+  public static final String PATH_LAYER = "Path";
   public static final String SPAWN_INITIAL_OBJ = "initial";
   public static final int DAWN_START = 6;
   public static final int DAWN_END = 8;

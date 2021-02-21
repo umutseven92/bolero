@@ -12,8 +12,10 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
 import com.bolero.game.BoleroGame;
 import com.bolero.game.Clock;
+import com.bolero.game.PathGraph;
 import com.bolero.game.characters.NPC;
 import com.bolero.game.characters.Player;
+import com.bolero.game.data.PathNode;
 import com.bolero.game.interactions.AbstractRectangle;
 import java.util.List;
 import lombok.val;
@@ -68,12 +70,23 @@ public class DebugDrawer implements Disposable {
     font.draw(batch, "O to zoom out, P to zoom in", cameraRight, camera5Y);
   }
 
-  public void drawInteractionZones(List<AbstractRectangle> interactions, List<NPC> npcs) {
+  public void drawDebugShapes(
+      List<AbstractRectangle> interactions, List<NPC> npcs, PathGraph nodes) {
     Gdx.gl.glEnable(GL20.GL_BLEND);
     Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
     debugRenderer.setProjectionMatrix(camera.combined);
 
     debugRenderer.begin(ShapeRenderer.ShapeType.Filled);
+
+    drawInteractionZones(interactions);
+    drawTalkCircles(npcs);
+    drawPathVertices(nodes);
+
+    debugRenderer.end();
+    Gdx.gl.glDisable(GL20.GL_BLEND);
+  }
+
+  private void drawInteractionZones(List<AbstractRectangle> interactions) {
     debugRenderer.setColor(1, 0, 0, 0.5f);
 
     for (AbstractRectangle intRectangle : interactions) {
@@ -84,14 +97,23 @@ public class DebugDrawer implements Disposable {
           rectangle.width / BoleroGame.UNIT,
           rectangle.height / BoleroGame.UNIT);
     }
+  }
+
+  private void drawTalkCircles(List<NPC> npcs) {
+    debugRenderer.setColor(0, 0, 1, 0.5f);
 
     for (NPC npc : npcs) {
       val talkCircle = npc.getTalkCircle();
       debugRenderer.circle(talkCircle.x, talkCircle.y, talkCircle.radius);
     }
+  }
 
-    debugRenderer.end();
-    Gdx.gl.glDisable(GL20.GL_BLEND);
+  private void drawPathVertices(PathGraph nodes) {
+    debugRenderer.setColor(0, 1, 0, 0.5f);
+
+    for (PathNode node : nodes.getNodes()) {
+      debugRenderer.circle(node.getX(), node.getY(), 1);
+    }
   }
 
   public void drawBox2DBodies(World world) {

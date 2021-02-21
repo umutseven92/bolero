@@ -1,6 +1,7 @@
 package com.bolero.game.characters;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.ai.pfa.indexed.IndexedAStarPathFinder;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -13,8 +14,10 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.bolero.game.BoleroGame;
+import com.bolero.game.data.PathNode;
 import com.bolero.game.data.SpriteSheetValues;
 import com.bolero.game.dtos.MovementDTO;
 import com.bolero.game.dtos.SizeDTO;
@@ -48,7 +51,7 @@ public abstract class AbstractCharacter implements Disposable {
 
   private CircleShape circle;
 
-  private List<Vector2> goals;
+  private Array<PathNode> goals;
   private int goalIndex;
   private Vector2 position;
 
@@ -96,7 +99,7 @@ public abstract class AbstractCharacter implements Disposable {
         size.getWidth() * DIALOG_SPRITE_SIZE_MULTIPLIER * BoleroGame.UNIT,
         size.getHeight() * DIALOG_SPRITE_SIZE_MULTIPLIER * BoleroGame.UNIT);
     body = createBody(box2DWorld, bodyType);
-    goals = new ArrayList<>();
+    goals = new Array<>();
     goalIndex = 0;
   }
 
@@ -154,28 +157,29 @@ public abstract class AbstractCharacter implements Disposable {
     }
 
     val goal = goals.get(goalIndex);
+
     if (goal != null && this.state != CharacterState.talking) {
       boolean xReached = false;
       boolean yReached = false;
 
-      if (MathUtils.isEqual(this.position.y, goal.y, 0.5f)) {
+      if (MathUtils.isEqual(this.position.y, goal.getX(), 0.5f)) {
         stopYMovement();
         yReached = true;
       }
 
-      if (MathUtils.isEqual(this.position.x, goal.x, 0.5f)) {
+      if (MathUtils.isEqual(this.position.x, goal.getX(), 0.5f)) {
         stopXMovement();
         xReached = true;
       }
 
       if (yReached && xReached) {
         goalIndex++;
-        if (goalIndex >= goals.size()) {
+        if (goalIndex >= goals.size) {
           goals.clear();
         }
       } else {
-        float impulseX = goal.x - this.position.x;
-        float impulseY = goal.y - this.position.y;
+        float impulseX = goal.getX() - this.position.x;
+        float impulseY = goal.getY() - this.position.y;
 
         if (impulseX > 0) {
           direction = Direction.right;
@@ -295,8 +299,8 @@ public abstract class AbstractCharacter implements Disposable {
     body.applyLinearImpulse(impulseX, impulseY, pos.x, pos.y, true);
   }
 
-  public void setGoals(List<Vector2> goals) {
-    this.goals = goals;
+  public void setGoals(Array<PathNode> nodes) {
+    this.goals = nodes;
     this.goalIndex = 0;
   }
 
