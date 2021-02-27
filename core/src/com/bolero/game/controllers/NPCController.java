@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.bolero.game.Clock;
 import com.bolero.game.ManhattanDistance;
@@ -23,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
 import lombok.val;
+import lombok.var;
 
 public class NPCController implements Disposable {
 
@@ -54,6 +56,7 @@ public class NPCController implements Disposable {
     npcs = mapper.map();
   }
 
+  // TODO: Getting triggered twice
   public void checkSchedules(Clock clock) {
     for (val npc : npcs) {
       for (val schedule : npc.getScheduleList().getSchedules()) {
@@ -65,24 +68,33 @@ public class NPCController implements Disposable {
                   "Schedule activated for NPC %s at %d:%d",
                   npc.getName(), schedule.getHour(), schedule.getMinute()));
 
-          val outPath = new DefaultGraphPath<PathNode>();
 
           // TODO: Error handling (null check)
           val npcNode = graph.getClosestNode(npc.getPosition());
-          val endGoalNode = graph.getClosestNode(schedule.getPositions().get(0));
 
-          val searchResult =
-              pathfinder.searchNodePath(npcNode, endGoalNode, new ManhattanDistance(), outPath);
+          val nodes = new Array<PathNode>();
 
-          if (searchResult) {
-            npc.setGoals(outPath.nodes);
-          } else {
-            Gdx.app.error(
-                NPCController.class.getName(),
-                String.format(
-                    "No path found for NPC %s's schedule at %d:%d!",
-                    npc.getName(), schedule.getHour(), schedule.getMinute()));
+          var startPos = npcNode;
+          for (val pos : schedule.getPositions()) {
+            val endGoalNode = graph.getClosestNode(pos);
+
+            val outPath = new DefaultGraphPath<PathNode>();
+            val searchResult =
+                pathfinder.searchNodePath(startPos, endGoalNode, new ManhattanDistance(), outPath);
+
+            if (searchResult) {
+              nodes.addAll(outPath.nodes);
+              startPos = endGoalNode;
+            } else {
+              Gdx.app.error(
+                  NPCController.class.getName(),
+                  String.format(
+                      "No path found for NPC %s's schedule at %d:%d!",
+                      npc.getName(), schedule.getHour(), schedule.getMinute()));
+            }
           }
+
+          npc.setGoals(nodes);
         }
       }
     }

@@ -31,7 +31,7 @@ public class PathMapper extends AbstractMapper implements Mapper<PathGraph> {
 
     int index = 0;
     for (int i = 0; i < numRows; i++) {
-      for (int j = 0; j < numCols; j++, index++) {
+      for (int j = 0; j < numCols; j++) {
         val cell = layer.getCell(i, j);
         if (cell != null) {
           nodes[i][j] =
@@ -42,6 +42,7 @@ public class PathMapper extends AbstractMapper implements Mapper<PathGraph> {
                   j * (layer.getTileHeight() / BoleroGame.UNIT)
                       + (layer.getTileHeight() / (BoleroGame.UNIT * 2)));
           indexedNodes.add(nodes[i][j]);
+          index++;
         }
       }
     }

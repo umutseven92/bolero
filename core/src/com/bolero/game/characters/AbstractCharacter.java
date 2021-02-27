@@ -1,7 +1,6 @@
 package com.bolero.game.characters;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.ai.pfa.indexed.IndexedAStarPathFinder;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -24,11 +23,10 @@ import com.bolero.game.dtos.SizeDTO;
 import com.bolero.game.enums.CharacterState;
 import com.bolero.game.enums.Direction;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.val;
 
 public abstract class AbstractCharacter implements Disposable {
+  private static final float FLOAT_TOLERANCE = 0.5f;
   private static final float DIALOG_SPRITE_SIZE_MULTIPLIER = 10f;
 
   private CharacterState state;
@@ -162,14 +160,31 @@ public abstract class AbstractCharacter implements Disposable {
       boolean xReached = false;
       boolean yReached = false;
 
-      if (MathUtils.isEqual(this.position.y, goal.getX(), 0.5f)) {
-        stopYMovement();
+      // TODO: Don't stop character if there is another goal
+      if (MathUtils.isEqual(this.position.y, goal.getY(), FLOAT_TOLERANCE)) {
         yReached = true;
+        if (goalIndex == goals.size - 1) {
+          stopYMovement();
+        } else {
+          val nextGoal = goals.get(goalIndex + 1);
+          // If next goal is in the same Y axis, stop Y movement
+          if (MathUtils.isEqual(goal.getY(), nextGoal.getY(), FLOAT_TOLERANCE)) {
+            stopYMovement();
+          }
+        }
       }
 
-      if (MathUtils.isEqual(this.position.x, goal.getX(), 0.5f)) {
-        stopXMovement();
+      if (MathUtils.isEqual(this.position.x, goal.getX(), FLOAT_TOLERANCE)) {
         xReached = true;
+        if (goalIndex == goals.size - 1) {
+          stopXMovement();
+        } else {
+          val nextGoal = goals.get(goalIndex + 1);
+          // If next goal is in the same X axis, stop X movement
+          if (MathUtils.isEqual(goal.getX(), nextGoal.getX(), FLOAT_TOLERANCE)) {
+            stopXMovement();
+          }
+        }
       }
 
       if (yReached && xReached) {
