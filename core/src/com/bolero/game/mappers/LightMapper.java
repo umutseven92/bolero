@@ -13,6 +13,7 @@ import com.bolero.game.data.ConeLightValues;
 import com.bolero.game.data.PointLightValues;
 import com.bolero.game.enums.LightTime;
 import com.bolero.game.enums.LightType;
+import com.bolero.game.exceptions.ConfigurationNotLoadedException;
 import com.bolero.game.exceptions.MissingPropertyException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,8 +30,9 @@ public class LightMapper extends AbstractMapper implements Mapper<List<LightCont
   }
 
   @Override
-  public List<LightContainer> map() throws MissingPropertyException {
-    val objects = super.getLayer(BoleroGame.LIGHT_LAYER);
+  public List<LightContainer> map()
+      throws MissingPropertyException, ConfigurationNotLoadedException {
+    val objects = super.getLayer(BoleroGame.config.getConfig().getMaps().getLayers().getLights());
 
     val lights = new ArrayList<LightContainer>();
 

@@ -46,8 +46,9 @@ npcs:
         choices:
           - textID: choice3 # Bye
     schedules:
-      - hour: 0
-        minute: 30
+      - time:
+          hour: 0
+          minute: 30
         nodes:
           - id: villager3s
           - id: villager4s

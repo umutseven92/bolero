@@ -7,11 +7,10 @@ import lombok.Data;
 
 @Data
 public class ScheduleDTO {
-  private int hour;
-  private int minute;
+  private TimeDTO time;
   private List<NodeDTO> nodes;
 
   public Schedule toSchedule(List<Vector2> positions) {
-    return new Schedule(positions, getHour(), getMinute());
+    return new Schedule(positions, time.getHour(), time.getMinute());
   }
 }

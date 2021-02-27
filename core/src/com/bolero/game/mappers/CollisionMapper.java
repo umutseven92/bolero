@@ -9,6 +9,7 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.Shape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.bolero.game.BoleroGame;
+import com.bolero.game.exceptions.ConfigurationNotLoadedException;
 import com.bolero.game.exceptions.MissingPropertyException;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,8 +24,9 @@ public class CollisionMapper extends AbstractMapper implements Mapper<List<Shape
   }
 
   @Override
-  public List<Shape> map() throws MissingPropertyException {
-    val objects = super.getLayer(BoleroGame.COL_LAYER);
+  public List<Shape> map() throws MissingPropertyException, ConfigurationNotLoadedException {
+    val objects =
+        super.getLayer(BoleroGame.config.getConfig().getMaps().getLayers().getCollision());
 
     val shapes = new ArrayList<Shape>();
 

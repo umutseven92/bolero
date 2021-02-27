@@ -8,6 +8,7 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.bolero.game.BoleroGame;
 import com.bolero.game.characters.NPC;
 import com.bolero.game.enums.SpawnType;
+import com.bolero.game.exceptions.ConfigurationNotLoadedException;
 import com.bolero.game.exceptions.MissingPropertyException;
 import com.bolero.game.loaders.NPCLoader;
 import com.bolero.game.managers.BundleManager;
@@ -29,13 +30,15 @@ public class NPCMapper extends AbstractMapper implements Mapper<List<NPC>> {
   }
 
   @Override
-  public List<NPC> map() throws MissingPropertyException, FileNotFoundException {
+  public List<NPC> map()
+      throws MissingPropertyException, FileNotFoundException, ConfigurationNotLoadedException {
     val file = Gdx.files.internal("config/npcs.yaml");
 
     val npcLoader = new NPCLoader();
     val npcsDTO = npcLoader.load(file);
 
-    val spawnObjects = super.getLayer(BoleroGame.SPAWN_LAYER);
+    val spawnObjects =
+        super.getLayer(BoleroGame.config.getConfig().getMaps().getLayers().getSpawn());
 
     val npcs = new ArrayList<NPC>();
 
@@ -57,7 +60,8 @@ public class NPCMapper extends AbstractMapper implements Mapper<List<NPC>> {
         val npcDTO = npcsDTO.getNpcDTOFromName(name);
 
         if (npcDTO.isPresent()) {
-          val scheduleObjects = super.getLayer(BoleroGame.SCHEDULE_LAYER);
+          val scheduleObjects =
+              super.getLayer(BoleroGame.config.getConfig().getMaps().getLayers().getSchedule());
 
           val scheduleMap = new HashMap<String, Vector2>();
 

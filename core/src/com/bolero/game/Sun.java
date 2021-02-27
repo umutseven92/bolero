@@ -21,9 +21,8 @@ public class Sun {
     this.rayHandler = rayHandler;
     this.clock = clock;
 
-    val speed = clock.getSpeed();
+    val speed = clock.getClockConfig().getSpeed();
 
-    // TODO: Check values for consistency
     nightLight = sunDTO.getNightLight();
     dayLight = sunDTO.getDayLight();
     dawnStart = sunDTO.getDawnStart() * speed;

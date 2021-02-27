@@ -2,6 +2,7 @@ package com.bolero.game.controllers;
 
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.math.Vector2;
+import com.bolero.game.exceptions.ConfigurationNotLoadedException;
 import com.bolero.game.exceptions.MissingPropertyException;
 import com.bolero.game.interactions.AbstractRectangle;
 import com.bolero.game.interactions.InspectRectangle;
@@ -23,7 +24,7 @@ public class InteractionController {
     mapper = new InteractionMapper(map);
   }
 
-  public void load() throws MissingPropertyException {
+  public void load() throws MissingPropertyException, ConfigurationNotLoadedException {
     val rectangles = mapper.map();
     transitionRectangles = rectangles.x;
     inspectRectangles = rectangles.y;

@@ -1,10 +1,10 @@
-package com.bolero.game;
+package com.bolero.game.dtos;
 
 import com.badlogic.gdx.Input;
 import lombok.Data;
 
 @Data
-public class Keys {
+public class KeysDTO {
   private String up;
   private String down;
   private String left;

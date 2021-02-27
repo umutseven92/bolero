@@ -9,6 +9,7 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
 import com.bolero.game.BoleroGame;
 import com.bolero.game.data.MapValues;
+import com.bolero.game.exceptions.ConfigurationNotLoadedException;
 import com.bolero.game.exceptions.MissingPropertyException;
 import com.bolero.game.mappers.CollisionMapper;
 import java.util.ArrayList;
@@ -27,12 +28,14 @@ public class CollisionController implements Disposable {
     shapes = new ArrayList<>();
   }
 
-  public void load(MapValues mapValues) throws MissingPropertyException {
+  public void load(MapValues mapValues)
+      throws MissingPropertyException, ConfigurationNotLoadedException {
     createWalls(mapValues);
     createCollisionsFromMap();
   }
 
-  private void createCollisionsFromMap() throws MissingPropertyException {
+  private void createCollisionsFromMap()
+      throws MissingPropertyException, ConfigurationNotLoadedException {
     List<Shape> collisionShapes = mapper.map();
     shapes.addAll(collisionShapes);
   }

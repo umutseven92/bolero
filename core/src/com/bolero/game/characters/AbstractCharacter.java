@@ -13,10 +13,9 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.World;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.bolero.game.BoleroGame;
-import com.bolero.game.data.PathNode;
+import com.bolero.game.data.Goal;
 import com.bolero.game.dtos.MovementDTO;
 import com.bolero.game.dtos.SizeDTO;
 import com.bolero.game.dtos.SpriteSheetDTO;
@@ -48,8 +47,7 @@ public abstract class AbstractCharacter implements Disposable {
 
   private CircleShape circle;
 
-  private Array<PathNode> goals;
-  private int goalIndex;
+  private Goal goal;
   private Vector2 position;
 
   public Vector2 getPosition() {
@@ -94,8 +92,6 @@ public abstract class AbstractCharacter implements Disposable {
         size.getWidth() * DIALOG_SPRITE_SIZE_MULTIPLIER * BoleroGame.UNIT,
         size.getHeight() * DIALOG_SPRITE_SIZE_MULTIPLIER * BoleroGame.UNIT);
     body = createBody(box2DWorld, bodyType);
-    goals = new Array<>();
-    goalIndex = 0;
   }
 
   private void loadAnimationsFromSpiteSheet(SpriteSheetValuesDTO ssValues) {
@@ -147,50 +143,50 @@ public abstract class AbstractCharacter implements Disposable {
   }
 
   private void handleSchedule() {
-    if (goals.isEmpty()) {
+    if (this.goal == null) {
       return;
     }
 
-    val goal = goals.get(goalIndex);
+    val currentGoal = goal.getCurrentGoal();
 
-    if (goal != null && this.state != CharacterState.talking) {
+    if (currentGoal != null && this.state != CharacterState.talking) {
       boolean xReached = false;
       boolean yReached = false;
 
-      if (MathUtils.isEqual(this.position.y, goal.getY(), FLOAT_TOLERANCE)) {
+      if (MathUtils.isEqual(this.position.y, currentGoal.getY(), FLOAT_TOLERANCE)) {
         yReached = true;
-        if (goalIndex == goals.size - 1) {
+        if (this.goal.onLastGoal()) {
           stopYMovement();
         } else {
-          val nextGoal = goals.get(goalIndex + 1);
+          val nextGoal = goal.getNextGoal();
           // If next goal is in the same Y axis, stop Y movement
-          if (MathUtils.isEqual(goal.getY(), nextGoal.getY(), FLOAT_TOLERANCE)) {
+          if (MathUtils.isEqual(currentGoal.getY(), nextGoal.getY(), FLOAT_TOLERANCE)) {
             stopYMovement();
           }
         }
       }
 
-      if (MathUtils.isEqual(this.position.x, goal.getX(), FLOAT_TOLERANCE)) {
+      if (MathUtils.isEqual(this.position.x, currentGoal.getX(), FLOAT_TOLERANCE)) {
         xReached = true;
-        if (goalIndex == goals.size - 1) {
+        if (this.goal.onLastGoal()) {
           stopXMovement();
         } else {
-          val nextGoal = goals.get(goalIndex + 1);
+          val nextGoal = goal.getNextGoal();
           // If next goal is in the same X axis, stop X movement
-          if (MathUtils.isEqual(goal.getX(), nextGoal.getX(), FLOAT_TOLERANCE)) {
+          if (MathUtils.isEqual(currentGoal.getX(), nextGoal.getX(), FLOAT_TOLERANCE)) {
             stopXMovement();
           }
         }
       }
 
       if (yReached && xReached) {
-        goalIndex++;
-        if (goalIndex >= goals.size) {
-          goals.clear();
+        this.goal.incrementGoal();
+        if (this.goal.isFinished()) {
+          this.goal = null;
         }
       } else {
-        float impulseX = goal.getX() - this.position.x;
-        float impulseY = goal.getY() - this.position.y;
+        float impulseX = currentGoal.getX() - this.position.x;
+        float impulseY = currentGoal.getY() - this.position.y;
 
         if (impulseX > 0) {
           direction = Direction.right;
@@ -310,9 +306,8 @@ public abstract class AbstractCharacter implements Disposable {
     body.applyLinearImpulse(impulseX, impulseY, pos.x, pos.y, true);
   }
 
-  public void setGoals(Array<PathNode> nodes) {
-    this.goals = nodes;
-    this.goalIndex = 0;
+  public void setGoal(Goal goal) {
+    this.goal = goal;
   }
 
   public void draw(SpriteBatch batch) {

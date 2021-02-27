@@ -13,7 +13,9 @@ import com.bolero.game.Clock;
 import com.bolero.game.ManhattanDistance;
 import com.bolero.game.PathGraph;
 import com.bolero.game.characters.NPC;
+import com.bolero.game.data.Goal;
 import com.bolero.game.data.PathNode;
+import com.bolero.game.exceptions.ConfigurationNotLoadedException;
 import com.bolero.game.exceptions.MissingPropertyException;
 import com.bolero.game.managers.BundleManager;
 import com.bolero.game.mappers.NPCMapper;
@@ -42,12 +44,7 @@ public class NPCController implements Disposable {
   }
 
   public void load(World world)
-      throws FileNotFoundException, MissingPropertyException {
-    loadNPCs(world);
-  }
-
-  private void loadNPCs(World world)
-      throws FileNotFoundException, MissingPropertyException {
+      throws FileNotFoundException, MissingPropertyException, ConfigurationNotLoadedException {
     val mapper = new NPCMapper(map, world, bundleManager);
     npcs = mapper.map();
   }
@@ -89,7 +86,7 @@ public class NPCController implements Disposable {
             }
           }
 
-          npc.setGoals(nodes);
+          npc.setGoal(new Goal(nodes));
         }
       }
     }

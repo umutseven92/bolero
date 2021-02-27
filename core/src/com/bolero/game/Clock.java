@@ -1,13 +1,16 @@
 package com.bolero.game;
 
+import com.bolero.game.dtos.ClockDTO;
 import com.bolero.game.managers.BundleManager;
 import lombok.Getter;
+import lombok.val;
+import lombok.var;
 
 public class Clock {
 
   private final String[] days;
 
-  @Getter private final int speed;
+  @Getter private final ClockDTO clockConfig;
   @Getter private String currentDay;
   @Getter private int currentHour;
   @Getter private int currentMinute;
@@ -15,10 +18,10 @@ public class Clock {
 
   private int dayIndex;
 
-  public Clock(BundleManager bundle, int speed) {
-    this.speed = speed;
+  public Clock(BundleManager bundle, ClockDTO clockConfig) {
+    this.clockConfig = clockConfig;
 
-    timestamp = 0;
+    timestamp = calculateInitialTimestamp();
     days =
         new String[] {
           bundle.getString("monday"),
@@ -30,18 +33,29 @@ public class Clock {
           bundle.getString("sunday")
         };
 
-    dayIndex = 0;
+    dayIndex = clockConfig.getStart().getDay();
     currentDay = days[dayIndex];
-    currentHour = 0;
-    currentMinute = 0;
+    currentHour = clockConfig.getStart().getTime().getHour();
+    currentMinute = clockConfig.getStart().getTime().getHour();
+  }
+
+  private long calculateInitialTimestamp() {
+    var ts = clockConfig.getSpeed() * clockConfig.getStart().getTime().getHour();
+    ts += clockConfig.getSpeed() * (clockConfig.getStart().getTime().getHour() / 60f);
+
+    return ts;
   }
 
   public void increment() {
+    val speed = clockConfig.getSpeed();
+
     this.timestamp += 1;
     if (this.timestamp >= speed * 24L) {
+      // A day has passed; reset timestamp.
       this.timestamp = 0;
       dayIndex++;
       if (dayIndex >= days.length) {
+        // A week has passed; reset back to monday.
         dayIndex = 0;
       }
       currentDay = days[dayIndex];

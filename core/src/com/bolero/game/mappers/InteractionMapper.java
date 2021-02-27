@@ -7,6 +7,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.bolero.game.BoleroGame;
 import com.bolero.game.data.Tuple;
 import com.bolero.game.enums.InteractionType;
+import com.bolero.game.exceptions.ConfigurationNotLoadedException;
 import com.bolero.game.exceptions.MissingPropertyException;
 import com.bolero.game.interactions.InspectRectangle;
 import com.bolero.game.interactions.TransitionRectangle;
@@ -24,8 +25,9 @@ public class InteractionMapper extends AbstractMapper
 
   @Override
   public Tuple<List<TransitionRectangle>, List<InspectRectangle>> map()
-      throws MissingPropertyException {
-    val objects = super.getLayer(BoleroGame.INT_LAYER);
+      throws MissingPropertyException, ConfigurationNotLoadedException {
+    val objects =
+        super.getLayer(BoleroGame.config.getConfig().getMaps().getLayers().getInteraction());
 
     val transitionRectangles = new ArrayList<TransitionRectangle>();
     val inspectRectangles = new ArrayList<InspectRectangle>();

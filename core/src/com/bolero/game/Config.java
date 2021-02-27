@@ -1,14 +1,28 @@
 package com.bolero.game;
 
-import com.bolero.game.dtos.ClockDTO;
-import com.bolero.game.dtos.SunDTO;
-import lombok.Data;
+import com.badlogic.gdx.Gdx;
+import com.bolero.game.dtos.ConfigDTO;
+import com.bolero.game.exceptions.ConfigurationNotLoadedException;
+import com.bolero.game.exceptions.InvalidConfigurationException;
+import com.bolero.game.loaders.ConfigLoader;
+import java.io.FileNotFoundException;
+import lombok.val;
 
-@Data
 public class Config {
-  private String initialMap;
-  private String mapsPath;
-  private Keys keys;
-  private SunDTO sun;
-  private ClockDTO clock;
+  private ConfigDTO config;
+
+  public void load() throws FileNotFoundException, InvalidConfigurationException {
+    val loader = new ConfigLoader();
+    val file = Gdx.files.internal("./config/game.yaml");
+
+    this.config = loader.load(file);
+  }
+
+  public ConfigDTO getConfig() throws ConfigurationNotLoadedException {
+    if (config == null) {
+      throw new ConfigurationNotLoadedException();
+    }
+
+    return config;
+  }
 }

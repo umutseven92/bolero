@@ -1,28 +1,21 @@
-# Bolero
+# Bolero Engine
 
 ## Features
 
-* Orthogonal movement
 * Box2D physics
-* Load map from Tiled
-    * Background layer
-    * Foreground layer
-    * Collision layer
-    * Spawn layer
-    * Interaction layer
+* Load tiles maps
 * NPCs
-    * NPC spawn points
-    * Talk to NPCs
-    * Simple schedule
+* NPC dialogue
+* NPC schedules
 * Sprite sheet animation
-* 2D Lighting
+* Lighting
 * Day / night cycle
-* Real time map updates during development
-* Read config from file
+* Hot reload
 
 ## Todo
 
-* Scenarios
-* Improved NPC AI
-* Screen sizes
+* Embed game logic into the engine
+* NPC transition through maps
+* Remember NPC position after transitions
+* Different screen sizes
 * Menus

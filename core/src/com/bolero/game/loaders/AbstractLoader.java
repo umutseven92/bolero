@@ -9,6 +9,9 @@ import org.yaml.snakeyaml.representer.Representer;
 
 public abstract class AbstractLoader {
   public <T> T load(FileHandle file, Constructor constructor) throws FileNotFoundException {
+    if (!file.exists()) {
+      throw new FileNotFoundException(String.format("%s not found!", file.path()));
+    }
     if (!file.extension().equals("yaml")) {
       throw new FileNotFoundException(
           String.format("%s has wrong file type, supported file types are: yaml", file.path()));

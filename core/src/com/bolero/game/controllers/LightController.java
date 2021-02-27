@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.Disposable;
 import com.bolero.game.LightContainer;
 import com.bolero.game.Sun;
 import com.bolero.game.enums.LightTime;
+import com.bolero.game.exceptions.ConfigurationNotLoadedException;
 import com.bolero.game.exceptions.MissingPropertyException;
 import com.bolero.game.mappers.LightMapper;
 import java.util.ArrayList;
@@ -25,7 +26,7 @@ public class LightController implements Disposable {
     mapper = new LightMapper(map, rayHandler);
   }
 
-  public void load() throws MissingPropertyException {
+  public void load() throws MissingPropertyException, ConfigurationNotLoadedException {
     lights = mapper.map();
   }
 

@@ -1,9 +1,22 @@
-initialMap: bolero
-mapsPath: maps/
+maps:
+  path: maps/ # Path to where bolero will look for maps in
+  initial: bolero # Initial map to load (without the extension)
+  layers: # Names of specific layers used by bolero
+    collision: Collision
+    spawn: Spawn
+    schedule: Schedule
+    interaction: Interaction
+    lights: Lights
+    path: Path
 clock:
+  start:
+    day: 1 # Which day to start the clock, 0 (monday) to 6 (sunday)
+    time:
+      hour: 8 # Which hour to start the clock in, 0 to 23
+      minute: 30 # Which minute to start to clock in, 0 to 59
   speed: 200 # How many milliseconds in real time it takes for one minute to pass in game
 sun:
-  nightLight: 0.2 # How bright is the night
+  nightLight: 0.3 # How bright is the night
   dayLight: 1 # How bright is the day
   dawnStart: 6 # What time does dawn start
   dawnEnd: 8 # What time does dawn end

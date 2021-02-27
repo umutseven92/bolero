@@ -12,7 +12,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.bolero.game.BoleroGame;
 import com.bolero.game.GameCamera;
-import com.bolero.game.Keys;
 import com.bolero.game.PathGraph;
 import com.bolero.game.Sun;
 import com.bolero.game.characters.NPC;
@@ -26,7 +25,9 @@ import com.bolero.game.data.MapValues;
 import com.bolero.game.drawers.DebugDrawer;
 import com.bolero.game.drawers.DialogDrawer;
 import com.bolero.game.drawers.InspectDrawer;
+import com.bolero.game.dtos.KeysDTO;
 import com.bolero.game.enums.CharacterState;
+import com.bolero.game.exceptions.ConfigurationNotLoadedException;
 import com.bolero.game.exceptions.MapperException;
 import com.bolero.game.exceptions.MissingPropertyException;
 import com.bolero.game.icons.ButtonIcon;
@@ -70,18 +71,18 @@ public class GameScreen implements Screen {
   private final String mapPath;
   private final String spawnPos;
 
-  private final Keys keys;
+  private final KeysDTO keys;
 
   private PathGraph pathNodes;
 
   public GameScreen(BoleroGame game, String name, String mapPath, String spawnPos)
-      throws MapperException, FileNotFoundException {
+      throws MapperException, FileNotFoundException, ConfigurationNotLoadedException {
     this.game = game;
     this.name = name;
 
     this.mapPath = mapPath;
     this.spawnPos = spawnPos;
-    this.keys = game.config.getKeys();
+    this.keys = BoleroGame.config.getConfig().getKeys();
 
     initializeAll();
   }
@@ -96,7 +97,8 @@ public class GameScreen implements Screen {
     mapController.load();
   }
 
-  private void initializeCollision() throws MissingPropertyException {
+  private void initializeCollision()
+      throws MissingPropertyException, ConfigurationNotLoadedException {
     Gdx.app.log(GameScreen.class.getName(), "Initializing collisions..");
 
     world = new World(Vector2.Zero, true);
@@ -105,21 +107,23 @@ public class GameScreen implements Screen {
     collisionController.load(mapValues);
   }
 
-  private void initializePaths() throws FileNotFoundException {
+  private void initializePaths() throws FileNotFoundException, ConfigurationNotLoadedException {
     Gdx.app.log(GameScreen.class.getName(), "Initializing paths..");
 
     val mapper = new PathMapper(map);
     this.pathNodes = mapper.map();
   }
 
-  private void initializeInteractions() throws MissingPropertyException {
+  private void initializeInteractions()
+      throws MissingPropertyException, ConfigurationNotLoadedException {
     Gdx.app.log(GameScreen.class.getName(), "Initializing interactions..");
 
     interactionController = new InteractionController(map);
     interactionController.load();
   }
 
-  private void initializeLights(boolean force) throws MissingPropertyException {
+  private void initializeLights(boolean force)
+      throws MissingPropertyException, ConfigurationNotLoadedException {
     Gdx.app.log(GameScreen.class.getName(), "Initializing sun & lights..");
 
     rayHandler = new RayHandler(world);
@@ -127,7 +131,7 @@ public class GameScreen implements Screen {
     rayHandler.setBlurNum(3);
 
     darkenAmount = 0f;
-    sun = new Sun(rayHandler, game.clock, game.config.getSun());
+    sun = new Sun(rayHandler, game.clock, BoleroGame.config.getConfig().getSun());
     sun.update(darkenAmount);
 
     lightController = new LightController(map, rayHandler, sun);
@@ -136,7 +140,8 @@ public class GameScreen implements Screen {
     lightController.update(force);
   }
 
-  private void initializeNPCs() throws FileNotFoundException, MissingPropertyException {
+  private void initializeNPCs()
+      throws FileNotFoundException, MissingPropertyException, ConfigurationNotLoadedException {
     Gdx.app.log(GameScreen.class.getName(), "Initializing NPCs..");
 
     npcController = new NPCController(map, game.getBundleController(), pathNodes);
@@ -150,7 +155,7 @@ public class GameScreen implements Screen {
     gameCamera.updatePosition(player.getPosition(), mapValues);
   }
 
-  private void initializePlayer() throws FileNotFoundException {
+  private void initializePlayer() throws FileNotFoundException, ConfigurationNotLoadedException {
     Gdx.app.log(GameScreen.class.getName(), "Initializing player..");
 
     setPlayerSpawnPoint(spawnPos);
@@ -169,11 +174,12 @@ public class GameScreen implements Screen {
   }
 
   // TODO: Parallelize these- watch out for order
-  private void initializeAll() throws FileNotFoundException, MissingPropertyException {
+  private void initializeAll()
+      throws FileNotFoundException, MissingPropertyException, ConfigurationNotLoadedException {
     initializeMap();
     initializeCollision();
     initializeInteractions();
-    initializeLights(false);
+    initializeLights(true);
     initializePaths();
     initializeNPCs();
     initializePlayer();
@@ -181,15 +187,18 @@ public class GameScreen implements Screen {
     initializeDrawers();
   }
 
-  private void reInitialize() throws MissingPropertyException {
+  private void reInitialize() throws MissingPropertyException, ConfigurationNotLoadedException {
     initializeMap();
     initializeInteractions();
     initializeLights(true);
   }
 
-  private void setPlayerSpawnPoint(String name) {
+  private void setPlayerSpawnPoint(String name) throws ConfigurationNotLoadedException {
     MapObject playerSpawnObject =
-        map.getLayers().get(BoleroGame.SPAWN_LAYER).getObjects().get(name);
+        map.getLayers()
+            .get(BoleroGame.config.getConfig().getMaps().getLayers().getSpawn())
+            .getObjects()
+            .get(name);
 
     final MapProperties props = playerSpawnObject.getProperties();
 
