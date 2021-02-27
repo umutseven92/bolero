@@ -7,7 +7,6 @@ import com.badlogic.gdx.utils.Array;
 import com.bolero.game.BoleroGame;
 import com.bolero.game.PathGraph;
 import com.bolero.game.data.PathNode;
-import com.bolero.game.exceptions.FileFormatException;
 import java.io.FileNotFoundException;
 import lombok.val;
 
@@ -20,7 +19,7 @@ public class PathMapper extends AbstractMapper implements Mapper<PathGraph> {
   }
 
   @Override
-  public PathGraph map() throws FileNotFoundException, FileFormatException {
+  public PathGraph map() throws FileNotFoundException {
     val layer = (TiledMapTileLayer) map.getLayers().get(BoleroGame.PATH_LAYER);
 
     final int numRows = layer.getWidth();

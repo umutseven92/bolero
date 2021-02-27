@@ -17,9 +17,10 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.bolero.game.BoleroGame;
 import com.bolero.game.data.PathNode;
-import com.bolero.game.data.SpriteSheetValues;
 import com.bolero.game.dtos.MovementDTO;
 import com.bolero.game.dtos.SizeDTO;
+import com.bolero.game.dtos.SpriteSheetDTO;
+import com.bolero.game.dtos.SpriteSheetValuesDTO;
 import com.bolero.game.enums.CharacterState;
 import com.bolero.game.enums.Direction;
 import java.io.FileNotFoundException;
@@ -31,8 +32,6 @@ public abstract class AbstractCharacter implements Disposable {
 
   private CharacterState state;
   private Direction direction;
-
-  private final SpriteSheetValues ssValues;
 
   private Animation<TextureRegion> walkAnimation;
   private Animation<TextureRegion> idleAnimation;
@@ -70,8 +69,7 @@ public abstract class AbstractCharacter implements Disposable {
       World box2DWorld,
       SizeDTO sizeDTO,
       MovementDTO movementDTO,
-      String texturePath,
-      SpriteSheetValues ssValues,
+      SpriteSheetDTO ssDTO,
       BodyDef.BodyType bodyType)
       throws FileNotFoundException {
     this.size = sizeDTO;
@@ -79,16 +77,15 @@ public abstract class AbstractCharacter implements Disposable {
     this.position = position;
     this.direction = Direction.right;
     this.state = CharacterState.idle;
-    val file = Gdx.files.internal(texturePath);
+    val file = Gdx.files.internal(ssDTO.getPath());
 
     if (!file.exists()) {
-      throw new FileNotFoundException(String.format("%s does not exist.", texturePath));
+      throw new FileNotFoundException(String.format("%s does not exist.", ssDTO.getPath()));
     }
 
     this.spriteSheet = new Texture(file);
-    this.ssValues = ssValues;
 
-    loadAnimationsFromSpiteSheet();
+    loadAnimationsFromSpiteSheet(ssDTO.getValues());
 
     this.sprite = new Sprite();
     this.dialogSprite = new Sprite();
@@ -101,7 +98,7 @@ public abstract class AbstractCharacter implements Disposable {
     goalIndex = 0;
   }
 
-  private void loadAnimationsFromSpiteSheet() {
+  private void loadAnimationsFromSpiteSheet(SpriteSheetValuesDTO ssValues) {
     TextureRegion[][] textureMatrix =
         TextureRegion.split(
             spriteSheet,
@@ -160,7 +157,6 @@ public abstract class AbstractCharacter implements Disposable {
       boolean xReached = false;
       boolean yReached = false;
 
-      // TODO: Don't stop character if there is another goal
       if (MathUtils.isEqual(this.position.y, goal.getY(), FLOAT_TOLERANCE)) {
         yReached = true;
         if (goalIndex == goals.size - 1) {

@@ -8,7 +8,7 @@ import lombok.Data;
 
 @Data
 public class PlayerDTO {
-  private String spriteSheet;
+  private SpriteSheetDTO spriteSheet;
   private SizeDTO size;
   private MovementDTO movement;
 

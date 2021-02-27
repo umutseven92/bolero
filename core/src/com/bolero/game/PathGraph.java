@@ -9,7 +9,7 @@ import lombok.Getter;
 import lombok.val;
 
 public class PathGraph implements IndexedGraph<PathNode> {
-  private final float TOLERANCE = 5;
+  private static final float TOLERANCE = 5f;
 
   @Getter private final Array<PathNode> nodes;
 
@@ -32,13 +32,15 @@ public class PathGraph implements IndexedGraph<PathNode> {
     return fromNode.getConnections();
   }
 
-  public PathNode getClosestNode(Vector2 position) {
+  public PathNode getClosestNode(Vector2 position) throws Exception {
     for (val node : nodes) {
       if (position.dst(node.getX(), node.getY()) <= TOLERANCE) {
         return node;
       }
     }
 
-    return null;
+    throw new Exception(
+        String.format(
+            "There are no nodes close enough (<= %f) to %s!", TOLERANCE, position.toString()));
   }
 }

@@ -3,8 +3,8 @@ package loader;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.bolero.game.dtos.PlayerDTO;
-import com.bolero.game.exceptions.FileFormatException;
 import com.bolero.game.loaders.PlayerLoader;
+import java.io.FileNotFoundException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,7 +20,7 @@ public class PlayerLoaderTests {
   }
 
   @Test
-  public void canLoadPlayer() throws FileFormatException {
+  public void canLoadPlayer() throws FileNotFoundException {
     PlayerLoader loader = new PlayerLoader();
     PlayerDTO playerDTO = loader.load(fileHandle);
 

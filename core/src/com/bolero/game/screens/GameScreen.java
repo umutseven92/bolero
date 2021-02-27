@@ -23,22 +23,18 @@ import com.bolero.game.controllers.LightController;
 import com.bolero.game.controllers.MapController;
 import com.bolero.game.controllers.NPCController;
 import com.bolero.game.data.MapValues;
-import com.bolero.game.data.PathNode;
 import com.bolero.game.drawers.DebugDrawer;
 import com.bolero.game.drawers.DialogDrawer;
 import com.bolero.game.drawers.InspectDrawer;
 import com.bolero.game.enums.CharacterState;
-import com.bolero.game.exceptions.FileFormatException;
 import com.bolero.game.exceptions.MapperException;
 import com.bolero.game.exceptions.MissingPropertyException;
-import com.bolero.game.exceptions.NPCDoesNotExistException;
 import com.bolero.game.icons.ButtonIcon;
 import com.bolero.game.interactions.InspectRectangle;
 import com.bolero.game.interactions.TransitionRectangle;
 import com.bolero.game.mappers.PathMapper;
 import com.bolero.game.mappers.PlayerMapper;
 import java.io.FileNotFoundException;
-import java.util.List;
 import lombok.val;
 
 public class GameScreen implements Screen {
@@ -79,7 +75,7 @@ public class GameScreen implements Screen {
   private PathGraph pathNodes;
 
   public GameScreen(BoleroGame game, String name, String mapPath, String spawnPos)
-      throws MapperException, FileNotFoundException, FileFormatException {
+      throws MapperException, FileNotFoundException {
     this.game = game;
     this.name = name;
 
@@ -109,7 +105,7 @@ public class GameScreen implements Screen {
     collisionController.load(mapValues);
   }
 
-  private void initializePaths() throws FileNotFoundException, FileFormatException {
+  private void initializePaths() throws FileNotFoundException {
     Gdx.app.log(GameScreen.class.getName(), "Initializing paths..");
 
     val mapper = new PathMapper(map);
@@ -124,25 +120,23 @@ public class GameScreen implements Screen {
   }
 
   private void initializeLights(boolean force) throws MissingPropertyException {
-    Gdx.app.log(GameScreen.class.getName(), "Initializing lights..");
+    Gdx.app.log(GameScreen.class.getName(), "Initializing sun & lights..");
 
     rayHandler = new RayHandler(world);
 
     rayHandler.setBlurNum(3);
 
     darkenAmount = 0f;
-    sun = new Sun(rayHandler, game.clock);
+    sun = new Sun(rayHandler, game.clock, game.config.getSun());
     sun.update(darkenAmount);
 
-    lightController = new LightController(map, rayHandler, game.clock);
+    lightController = new LightController(map, rayHandler, sun);
     lightController.load();
 
     lightController.update(force);
   }
 
-  private void initializeNPCs()
-      throws FileNotFoundException, MissingPropertyException, NPCDoesNotExistException,
-          FileFormatException {
+  private void initializeNPCs() throws FileNotFoundException, MissingPropertyException {
     Gdx.app.log(GameScreen.class.getName(), "Initializing NPCs..");
 
     npcController = new NPCController(map, game.getBundleController(), pathNodes);
@@ -156,7 +150,7 @@ public class GameScreen implements Screen {
     gameCamera.updatePosition(player.getPosition(), mapValues);
   }
 
-  private void initializePlayer() throws FileNotFoundException, FileFormatException {
+  private void initializePlayer() throws FileNotFoundException {
     Gdx.app.log(GameScreen.class.getName(), "Initializing player..");
 
     setPlayerSpawnPoint(spawnPos);
@@ -175,9 +169,7 @@ public class GameScreen implements Screen {
   }
 
   // TODO: Parallelize these- watch out for order
-  private void initializeAll()
-      throws FileNotFoundException, MissingPropertyException, NPCDoesNotExistException,
-          FileFormatException {
+  private void initializeAll() throws FileNotFoundException, MissingPropertyException {
     initializeMap();
     initializeCollision();
     initializeInteractions();
@@ -219,7 +211,14 @@ public class GameScreen implements Screen {
     val transitionRectangle = interactionController.checkIfInInteractionRectangle(playerPosPixels);
     val inspectRectangle = interactionController.checkIfInInspectRectangle(playerPosPixels);
 
-    npcController.checkSchedules(game.clock);
+    try {
+      npcController.checkSchedules(game.clock);
+    } catch (Exception e) {
+      Gdx.app.error(GameScreen.class.getName(), e.toString(), e);
+      e.printStackTrace();
+      System.exit(1);
+    }
+
     NPC npc = npcController.checkIfNearNPC(playerPos);
 
     handleMiscInput();

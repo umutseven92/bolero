@@ -5,7 +5,6 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.bolero.game.characters.NPC;
 import com.bolero.game.dialog.Dialog;
 import com.bolero.game.dialog.DialogTree;
-import com.bolero.game.exceptions.FileFormatException;
 import com.bolero.game.managers.BundleManager;
 import com.bolero.game.schedule.Schedule;
 import com.bolero.game.schedule.ScheduleList;
@@ -19,9 +18,9 @@ import lombok.Data;
 public class NpcDTO {
   private String name;
   private String spawn;
-  private String spriteSheet;
   private List<ScheduleDTO> schedules = new ArrayList<>();
   private List<DialogDTO> dialogs = new ArrayList<>();
+  private SpriteSheetDTO spriteSheet;
   private SizeDTO size;
   private MovementDTO movement;
 

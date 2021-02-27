@@ -1,5 +1,14 @@
 initialMap: bolero
 mapsPath: maps/
+clock:
+  speed: 200 # How many milliseconds in real time it takes for one minute to pass in game
+sun:
+  nightLight: 0.2 # How bright is the night
+  dayLight: 1 # How bright is the day
+  dawnStart: 6 # What time does dawn start
+  dawnEnd: 8 # What time does dawn end
+  duskStart: 18 # What time does dusk start
+  duskEnd: 20 # What time does dusk end
 keys:
   up: W
   down: S

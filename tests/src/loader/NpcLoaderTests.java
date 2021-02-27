@@ -2,13 +2,13 @@ package loader;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
-import com.bolero.game.loaders.NPCLoader;
 import com.bolero.game.dtos.ChoiceDTO;
 import com.bolero.game.dtos.DialogDTO;
 import com.bolero.game.dtos.NpcDTO;
 import com.bolero.game.dtos.NpcsDTO;
 import com.bolero.game.dtos.ScheduleDTO;
-import com.bolero.game.exceptions.FileFormatException;
+import com.bolero.game.loaders.NPCLoader;
+import java.io.FileNotFoundException;
 import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
@@ -26,7 +26,7 @@ public class NpcLoaderTests {
   }
 
   @Test
-  public void canLoadNpcs() throws FileFormatException {
+  public void canLoadNpcs() throws FileNotFoundException {
     NPCLoader loader = new NPCLoader();
     NpcsDTO npcsDTO = loader.load(fileHandle);
 

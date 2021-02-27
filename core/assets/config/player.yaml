@@ -1,4 +1,10 @@
-spriteSheet: images/player.png
+spriteSheet:
+  path: images/player.png
+  values:
+    rows: 10
+    cols: 10
+    idleRow: 5
+    walkRow: 7
 movement:
   speed: 0.7
   maxVelocity: 5.5

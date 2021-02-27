@@ -28,11 +28,6 @@ public class BoleroGame extends Game {
   public static final String LIGHT_LAYER = "Lights";
   public static final String PATH_LAYER = "Path";
   public static final String SPAWN_INITIAL_OBJ = "initial";
-  public static final int DAWN_START = 6;
-  public static final int DAWN_END = 8;
-
-  public static final int DUSK_START = 18;
-  public static final int DUSK_END = 20;
 
   public Config config;
   public SpriteBatch batch;
@@ -59,12 +54,12 @@ public class BoleroGame extends Game {
     hudBatch = new SpriteBatch();
     font = new BitmapFont();
 
-    clock = new Clock(bundleManager);
-
     screens = new HashMap<>();
     screenPool = new ArrayList<>();
 
     loadConfig();
+
+    clock = new Clock(bundleManager, config.getClock().getSpeed());
     loadMaps();
     loadRoute(this.config.getInitialMap(), SPAWN_INITIAL_OBJ);
   }

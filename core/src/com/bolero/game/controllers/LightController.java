@@ -3,9 +3,8 @@ package com.bolero.game.controllers;
 import box2dLight.RayHandler;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.utils.Disposable;
-import com.bolero.game.BoleroGame;
-import com.bolero.game.Clock;
 import com.bolero.game.LightContainer;
+import com.bolero.game.Sun;
 import com.bolero.game.enums.LightTime;
 import com.bolero.game.exceptions.MissingPropertyException;
 import com.bolero.game.mappers.LightMapper;
@@ -15,13 +14,13 @@ import lombok.val;
 
 public class LightController implements Disposable {
 
-  private final Clock clock;
+  private final Sun sun;
   private List<LightContainer> lights;
   private boolean previousNight;
   private final LightMapper mapper;
 
-  public LightController(TiledMap map, RayHandler rayHandler, Clock clock) {
-    this.clock = clock;
+  public LightController(TiledMap map, RayHandler rayHandler, Sun sun) {
+    this.sun = sun;
     lights = new ArrayList<>();
     mapper = new LightMapper(map, rayHandler);
   }
@@ -31,19 +30,7 @@ public class LightController implements Disposable {
   }
 
   public void update(Boolean force) {
-    long timestamp = this.clock.getTimestamp();
-    int ratio = Clock.RATIO;
-
-    boolean night;
-
-    //noinspection RedundantIfStatement
-    if (timestamp >= BoleroGame.DUSK_START * ratio || timestamp < BoleroGame.DAWN_END * ratio) {
-      // NIGHT
-      night = true;
-    } else {
-      // DAY
-      night = false;
-    }
+    boolean night = sun.isNight();
 
     // To prevent unnecessary updates
     if (force || night != previousNight) {

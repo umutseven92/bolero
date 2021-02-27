@@ -1,11 +1,20 @@
 npcs:
   - name: Wizard
-    spawn: wizard1
-    spriteSheet: images/npc.png
+    spawn: wizard1 # The spawn point object name in the map
+    spriteSheet:
+      &wizardSS
+      path: images/npc.png # Path to the spritesheet within /assets
+      values:
+        rows: 10 # How many rows ss has
+        cols: 10 # How many columns ss has
+        idleRow: 5 # Which row is the idle animation
+        walkRow: 7 # Which row is the walk animation
     movement:
+      &wizardMovement
       speed: 0.5
       maxVelocity: 5
     size:
+      &wizardSize
       height: 2.5
       width: 2.7
     dialogs:
@@ -26,13 +35,12 @@ npcs:
             next: *dialog2
   - name: Villager
     spawn: villager1
-    spriteSheet: images/npc.png
+    spriteSheet:
+      *wizardSS
     movement:
-      speed: 0.5
-      maxVelocity: 5
+      *wizardMovement
     size:
-      height: 2.5
-      width: 2.7
+      *wizardSize
     dialogs:
       - textID: dialog4
         choices:

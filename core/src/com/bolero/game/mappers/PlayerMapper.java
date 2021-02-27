@@ -5,8 +5,6 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.bolero.game.characters.Player;
-import com.bolero.game.exceptions.FileFormatException;
-import com.bolero.game.exceptions.MissingPropertyException;
 import com.bolero.game.loaders.PlayerLoader;
 import java.io.FileNotFoundException;
 import lombok.val;
@@ -22,7 +20,7 @@ public class PlayerMapper extends AbstractMapper implements Mapper<Player> {
   }
 
   @Override
-  public Player map() throws FileNotFoundException, FileFormatException {
+  public Player map() throws FileNotFoundException {
     val file = Gdx.files.internal("config/player.yaml");
 
     val playerLoader = new PlayerLoader();

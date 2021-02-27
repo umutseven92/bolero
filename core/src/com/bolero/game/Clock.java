@@ -5,12 +5,9 @@ import lombok.Getter;
 
 public class Clock {
 
-  // Determines how much real time (in ms) needs to pass for one hour to pass in game
-  public static final int RATIO = 200;
-  private static final int STEP = 1;
-
   private final String[] days;
 
+  @Getter private final int speed;
   @Getter private String currentDay;
   @Getter private int currentHour;
   @Getter private int currentMinute;
@@ -18,9 +15,10 @@ public class Clock {
 
   private int dayIndex;
 
-  public Clock(BundleManager bundle) {
-    timestamp = 0;
+  public Clock(BundleManager bundle, int speed) {
+    this.speed = speed;
 
+    timestamp = 0;
     days =
         new String[] {
           bundle.getString("monday"),
@@ -39,8 +37,8 @@ public class Clock {
   }
 
   public void increment() {
-    this.timestamp += STEP;
-    if (this.timestamp >= RATIO * 24) {
+    this.timestamp += 1;
+    if (this.timestamp >= speed * 24L) {
       this.timestamp = 0;
       dayIndex++;
       if (dayIndex >= days.length) {
@@ -49,7 +47,7 @@ public class Clock {
       currentDay = days[dayIndex];
     }
 
-    currentHour = (int) timestamp / RATIO;
-    currentMinute = (int) ((timestamp / (RATIO / 60f)) % 60f);
+    currentHour = (int) timestamp / speed;
+    currentMinute = (int) ((timestamp / (speed / 60f)) % 60f);
   }
 }

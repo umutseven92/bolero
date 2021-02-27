@@ -1,50 +1,74 @@
 package com.bolero.game;
 
 import box2dLight.RayHandler;
+import com.bolero.game.dtos.SunDTO;
+import lombok.val;
 
 public class Sun {
-  private static final float NIGHT_LIGHT = 0.3f;
-  private static final float DAY_LIGHT = 1f;
-
   private final RayHandler rayHandler;
   private final Clock clock;
 
+  private final float nightLight;
+  private final float dayLight;
+  private final float dawnStart;
+  private final float dawnEnd;
+  private final float duskStart;
+  private final float duskEnd;
+
   private float previousAlpha;
 
-  public Sun(RayHandler rayHandler, Clock clock) {
+  public Sun(RayHandler rayHandler, Clock clock, SunDTO sunDTO) {
     this.rayHandler = rayHandler;
     this.clock = clock;
+
+    val speed = clock.getSpeed();
+
+    // TODO: Check values for consistency
+    nightLight = sunDTO.getNightLight();
+    dayLight = sunDTO.getDayLight();
+    dawnStart = sunDTO.getDawnStart() * speed;
+    dawnEnd = sunDTO.getDawnEnd() * speed;
+    duskStart = sunDTO.getDuskStart() * speed;
+    duskEnd = sunDTO.getDuskEnd() * speed;
+  }
+
+  public boolean isNight() {
+    long timestamp = this.clock.getTimestamp();
+    return timestamp >= duskEnd || timestamp < dawnStart;
+  }
+
+  public boolean isDay() {
+    long timestamp = this.clock.getTimestamp();
+    return timestamp >= dawnEnd && timestamp < duskStart;
+  }
+
+  public boolean isDawn() {
+    long timestamp = this.clock.getTimestamp();
+    return timestamp >= dawnStart && timestamp < dawnEnd;
   }
 
   public void update(float darkenAmount) {
     long timestamp = this.clock.getTimestamp();
-    int ratio = Clock.RATIO;
 
     float alpha;
-    if (timestamp >= BoleroGame.DUSK_END * ratio || timestamp < BoleroGame.DAWN_START * ratio) {
+    if (isNight()) {
       // NIGHT
-      alpha = NIGHT_LIGHT;
-    } else if (timestamp >= BoleroGame.DAWN_END * ratio
-        && timestamp < BoleroGame.DUSK_START * ratio) {
+      alpha = nightLight;
+    } else if (isDay()) {
       // DAY
-      alpha = DAY_LIGHT;
-    } else if (timestamp >= BoleroGame.DAWN_START * ratio
-        && timestamp < BoleroGame.DAWN_END * ratio) {
+      alpha = dayLight;
+    } else if (isDawn()) {
       // DAWN
       // Represented as a linear function (y = mx + c), with x being alpha and y being the
       // timestamp.
-      float m =
-          ((BoleroGame.DAWN_END * ratio) - (BoleroGame.DAWN_START * ratio))
-              / (DAY_LIGHT - NIGHT_LIGHT);
-      float c = (BoleroGame.DAWN_START * ratio) - (m * NIGHT_LIGHT);
+      float m = ((dawnEnd) - (dawnStart)) / (dayLight - nightLight);
+      float c = (dawnStart) - (m * nightLight);
       alpha = (timestamp - c) / m;
     } else {
       // DUSK
       // Similar to dawn, but goes from DAY to NIGHT.
-      float m =
-          ((BoleroGame.DUSK_END * ratio) - (BoleroGame.DUSK_START * ratio))
-              / (NIGHT_LIGHT - DAY_LIGHT);
-      float c = (BoleroGame.DUSK_START * ratio) - (m * DAY_LIGHT);
+      float m = ((duskEnd) - (duskStart)) / (nightLight - dayLight);
+      float c = (duskStart) - (m * dayLight);
       alpha = (timestamp - c) / m;
     }
 

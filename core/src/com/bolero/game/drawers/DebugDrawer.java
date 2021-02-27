@@ -52,7 +52,7 @@ public class DebugDrawer implements Disposable {
     font.draw(
         batch,
         String.format(
-            "Time: %d:%d, %s",
+            "Time: %02d:%02d, %s",
             clock.getCurrentHour(), clock.getCurrentMinute(), clock.getCurrentDay()),
         cameraLeft,
         camera4Y);

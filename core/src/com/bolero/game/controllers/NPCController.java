@@ -14,9 +14,7 @@ import com.bolero.game.ManhattanDistance;
 import com.bolero.game.PathGraph;
 import com.bolero.game.characters.NPC;
 import com.bolero.game.data.PathNode;
-import com.bolero.game.exceptions.FileFormatException;
 import com.bolero.game.exceptions.MissingPropertyException;
-import com.bolero.game.exceptions.NPCDoesNotExistException;
 import com.bolero.game.managers.BundleManager;
 import com.bolero.game.mappers.NPCMapper;
 import java.io.FileNotFoundException;
@@ -44,20 +42,18 @@ public class NPCController implements Disposable {
   }
 
   public void load(World world)
-      throws FileNotFoundException, MissingPropertyException, NPCDoesNotExistException,
-          FileFormatException {
+      throws FileNotFoundException, MissingPropertyException {
     loadNPCs(world);
   }
 
   private void loadNPCs(World world)
-      throws FileNotFoundException, MissingPropertyException, NPCDoesNotExistException,
-          FileFormatException {
+      throws FileNotFoundException, MissingPropertyException {
     val mapper = new NPCMapper(map, world, bundleManager);
     npcs = mapper.map();
   }
 
   // TODO: Getting triggered twice
-  public void checkSchedules(Clock clock) {
+  public void checkSchedules(Clock clock) throws Exception {
     for (val npc : npcs) {
       for (val schedule : npc.getScheduleList().getSchedules()) {
         if (clock.getCurrentHour() == schedule.getHour()
@@ -68,13 +64,12 @@ public class NPCController implements Disposable {
                   "Schedule activated for NPC %s at %d:%d",
                   npc.getName(), schedule.getHour(), schedule.getMinute()));
 
-
-          // TODO: Error handling (null check)
           val npcNode = graph.getClosestNode(npc.getPosition());
 
           val nodes = new Array<PathNode>();
 
           var startPos = npcNode;
+
           for (val pos : schedule.getPositions()) {
             val endGoalNode = graph.getClosestNode(pos);
 
