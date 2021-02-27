@@ -1,20 +1,22 @@
 package com.bolero.game.icons;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Disposable;
 import com.bolero.game.characters.Player;
+import com.bolero.game.exceptions.ConfigurationNotLoadedException;
+import lombok.val;
 
-public class ButtonIcon implements Disposable {
+public class InteractIcon implements InteractButtonImage, Disposable {
   private final Texture texture;
   private final Sprite sprite;
   private final Player player;
 
-  public ButtonIcon(Player player) {
+  public InteractIcon(Player player) throws ConfigurationNotLoadedException {
     this.player = player;
-    this.texture = new Texture(Gdx.files.internal("buttons/green-E.png"));
+    val keyfile = getInteractButtonImage();
+    this.texture = new Texture(keyfile);
     this.sprite = new Sprite(texture);
     sprite.setSize(1.2f, 1);
   }

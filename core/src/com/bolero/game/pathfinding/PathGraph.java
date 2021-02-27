@@ -1,4 +1,4 @@
-package com.bolero.game;
+package com.bolero.game.pathfinding;
 
 import com.badlogic.gdx.ai.pfa.Connection;
 import com.badlogic.gdx.ai.pfa.indexed.IndexedGraph;

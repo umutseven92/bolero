@@ -23,6 +23,8 @@ import com.bolero.game.dtos.SpriteSheetValuesDTO;
 import com.bolero.game.enums.CharacterState;
 import com.bolero.game.enums.Direction;
 import java.io.FileNotFoundException;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.val;
 
 public abstract class AbstractCharacter implements Disposable {
@@ -47,7 +49,7 @@ public abstract class AbstractCharacter implements Disposable {
 
   private CircleShape circle;
 
-  private Goal goal;
+  @Getter @Setter private Goal goal;
   private Vector2 position;
 
   public Vector2 getPosition() {
@@ -306,9 +308,6 @@ public abstract class AbstractCharacter implements Disposable {
     body.applyLinearImpulse(impulseX, impulseY, pos.x, pos.y, true);
   }
 
-  public void setGoal(Goal goal) {
-    this.goal = goal;
-  }
 
   public void draw(SpriteBatch batch) {
     animationTime += Gdx.graphics.getDeltaTime();

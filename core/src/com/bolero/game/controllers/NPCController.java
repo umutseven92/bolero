@@ -10,8 +10,6 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.bolero.game.Clock;
-import com.bolero.game.ManhattanDistance;
-import com.bolero.game.PathGraph;
 import com.bolero.game.characters.NPC;
 import com.bolero.game.data.Goal;
 import com.bolero.game.data.PathNode;
@@ -19,6 +17,9 @@ import com.bolero.game.exceptions.ConfigurationNotLoadedException;
 import com.bolero.game.exceptions.MissingPropertyException;
 import com.bolero.game.managers.BundleManager;
 import com.bolero.game.mappers.NPCMapper;
+import com.bolero.game.pathfinding.ManhattanDistance;
+import com.bolero.game.pathfinding.PathGraph;
+import com.bolero.game.schedule.Schedule;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,12 +50,26 @@ public class NPCController implements Disposable {
     npcs = mapper.map();
   }
 
-  // TODO: Getting triggered twice
+  private boolean scheduleAlreadyTriggered(NPC npc, Schedule schedule) {
+    val goal = npc.getGoal();
+
+    if (goal == null) {
+      return false;
+    }
+
+    return schedule.getHour() == goal.getHour() && schedule.getMinute() == goal.getMinute();
+  }
+
   public void checkSchedules(Clock clock) throws Exception {
     for (val npc : npcs) {
       for (val schedule : npc.getScheduleList().getSchedules()) {
         if (clock.getCurrentHour() == schedule.getHour()
             && clock.getCurrentMinute() == schedule.getMinute()) {
+
+          if (scheduleAlreadyTriggered(npc, schedule)) {
+            continue;
+          }
+
           Gdx.app.log(
               NPCController.class.getName(),
               String.format(
@@ -86,7 +101,7 @@ public class NPCController implements Disposable {
             }
           }
 
-          npc.setGoal(new Goal(nodes));
+          npc.setGoal(new Goal(nodes, schedule.getHour(), schedule.getMinute()));
         }
       }
     }

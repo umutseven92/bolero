@@ -4,7 +4,11 @@ import com.badlogic.gdx.utils.Array;
 import lombok.Getter;
 
 public class Goal {
+
   private int goalIndex;
+
+  @Getter private final int hour;
+  @Getter private final int minute;
   @Getter private boolean finished;
   @Getter private final Array<PathNode> steps;
   @Getter private PathNode currentGoal;
@@ -30,10 +34,12 @@ public class Goal {
     return null;
   }
 
-  public Goal(Array<PathNode> steps) {
+  public Goal(Array<PathNode> steps, int hour, int minute) {
     this.finished = false;
     this.goalIndex = 0;
     this.currentGoal = steps.get(goalIndex);
     this.steps = steps;
+    this.hour = hour;
+    this.minute = minute;
   }
 }

@@ -12,7 +12,7 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
 import com.bolero.game.BoleroGame;
 import com.bolero.game.Clock;
-import com.bolero.game.PathGraph;
+import com.bolero.game.pathfinding.PathGraph;
 import com.bolero.game.characters.NPC;
 import com.bolero.game.characters.Player;
 import com.bolero.game.data.PathNode;

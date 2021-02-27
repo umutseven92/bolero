@@ -12,7 +12,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.bolero.game.BoleroGame;
 import com.bolero.game.GameCamera;
-import com.bolero.game.PathGraph;
 import com.bolero.game.Sun;
 import com.bolero.game.characters.NPC;
 import com.bolero.game.characters.Player;
@@ -30,11 +29,12 @@ import com.bolero.game.enums.CharacterState;
 import com.bolero.game.exceptions.ConfigurationNotLoadedException;
 import com.bolero.game.exceptions.MapperException;
 import com.bolero.game.exceptions.MissingPropertyException;
-import com.bolero.game.icons.ButtonIcon;
+import com.bolero.game.icons.InteractIcon;
 import com.bolero.game.interactions.InspectRectangle;
 import com.bolero.game.interactions.TransitionRectangle;
 import com.bolero.game.mappers.PathMapper;
 import com.bolero.game.mappers.PlayerMapper;
+import com.bolero.game.pathfinding.PathGraph;
 import java.io.FileNotFoundException;
 import lombok.val;
 
@@ -47,7 +47,7 @@ public class GameScreen implements Screen {
   private TiledMap map;
 
   private Player player;
-  private ButtonIcon eButtonIcon;
+  private InteractIcon interactIcon;
 
   private MapValues mapValues;
 
@@ -162,10 +162,10 @@ public class GameScreen implements Screen {
 
     val mapper = new PlayerMapper(map, world, playerSpawnPosition);
     player = mapper.map();
-    eButtonIcon = new ButtonIcon(player);
+    interactIcon = new InteractIcon(player);
   }
 
-  private void initializeDrawers() {
+  private void initializeDrawers() throws ConfigurationNotLoadedException {
     Gdx.app.log(GameScreen.class.getName(), "Initializing drawers..");
 
     debugDrawer = new DebugDrawer(gameCamera.getCamera());
@@ -263,7 +263,7 @@ public class GameScreen implements Screen {
             || (npc != null && npc.hasDialog()))
         && player.getState() != CharacterState.inspecting
         && player.getState() != CharacterState.talking) {
-      eButtonIcon.draw(game.batch);
+      interactIcon.draw(game.batch);
     }
 
     game.batch.end();
@@ -465,7 +465,7 @@ public class GameScreen implements Screen {
     collisionController.dispose();
     mapController.dispose();
     debugDrawer.dispose();
-    eButtonIcon.dispose();
+    interactIcon.dispose();
     npcController.dispose();
     inspectDrawer.dispose();
     lightController.dispose();

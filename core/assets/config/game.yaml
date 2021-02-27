@@ -27,7 +27,7 @@ keys:
   down: S
   left: A
   right: D
-  interact: E
+  interact: Y
   reload: R
   debug: H
   zoomIn: P

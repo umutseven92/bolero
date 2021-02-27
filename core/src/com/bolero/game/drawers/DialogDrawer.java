@@ -1,7 +1,6 @@
 package com.bolero.game.drawers;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -16,9 +15,11 @@ import com.badlogic.gdx.utils.Disposable;
 import com.bolero.game.characters.NPC;
 import com.bolero.game.characters.Player;
 import com.bolero.game.dialog.Dialog;
+import com.bolero.game.exceptions.ConfigurationNotLoadedException;
+import com.bolero.game.icons.InteractButtonImage;
 import lombok.val;
 
-public class DialogDrawer extends AbstractDrawer implements Disposable {
+public class DialogDrawer extends AbstractDrawer implements Disposable, InteractButtonImage {
   private static final float SLIDE_SPEED = 5f;
   private static final String CHOICE_PREFIX = "-> ";
 
@@ -49,7 +50,8 @@ public class DialogDrawer extends AbstractDrawer implements Disposable {
     return activated;
   }
 
-  public DialogDrawer(Player player, OrthographicCamera camera) {
+  public DialogDrawer(Player player, OrthographicCamera camera)
+      throws ConfigurationNotLoadedException {
     super();
     this.batch = new SpriteBatch();
     this.activated = false;
@@ -63,7 +65,8 @@ public class DialogDrawer extends AbstractDrawer implements Disposable {
 
     this.playerSprite.setPosition(playerPosX, spriteY);
 
-    buttonTexture = new Texture(Gdx.files.internal("buttons/green-E.png"));
+    val file = getInteractButtonImage();
+    buttonTexture = new Texture(file);
     val buttonImage = new Image(buttonTexture);
 
     table = new Table();
@@ -143,19 +146,17 @@ public class DialogDrawer extends AbstractDrawer implements Disposable {
   }
 
   public void checkForInput() {
-    if (Gdx.input.isKeyJustPressed(Input.Keys.W) || Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
+    if (Gdx.input.isKeyJustPressed(keys.getUpInput())) {
       if (activeIndex > 0) {
         activeIndex--;
         setActiveIndex(activeIndex);
       }
-    } else if (Gdx.input.isKeyJustPressed(Input.Keys.S)
-        || Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
+    } else if (Gdx.input.isKeyJustPressed(keys.getDownInput())) {
       if (activeIndex < choiceGroup.getChildren().size - 1) {
         activeIndex++;
         setActiveIndex(activeIndex);
       }
-    } else if (Gdx.input.isKeyJustPressed(Input.Keys.E)
-        || Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
+    } else if (Gdx.input.isKeyJustPressed(keys.getInteractInput())) {
       val leadTo = currentDialog.getChoices().get(activeIndex).getNext();
       if (leadTo == null) {
         quit();
