@@ -3,7 +3,6 @@ package com.bolero.game.data;
 import com.badlogic.gdx.graphics.Color;
 import com.bolero.game.enums.LightTime;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
 public abstract class AbstractLightValues {

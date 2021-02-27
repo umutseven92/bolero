@@ -15,7 +15,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.utils.Disposable;
 import com.bolero.game.characters.NPC;
 import com.bolero.game.characters.Player;
-import com.bolero.game.dialog.Choice;
 import com.bolero.game.dialog.Dialog;
 import lombok.val;
 
