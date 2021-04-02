@@ -10,7 +10,7 @@ public class DesktopLauncher {
     LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
     config.title = "Bolero";
     config.foregroundFPS = 60;
-    config.width = 800;
+    config.width = 860;
     config.height = 640;
     config.forceExit = true;
     new LwjglApplication(new BoleroGame(), config);

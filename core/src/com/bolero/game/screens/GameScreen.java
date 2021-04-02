@@ -443,10 +443,12 @@ public class GameScreen implements Screen {
   }
 
   @Override
-  public void show() {}
+  public void resize(int width, int height) {
+    gameCamera.setViewPort(width, height);
+  }
 
   @Override
-  public void resize(int width, int height) {}
+  public void show() {}
 
   @Override
   public void pause() {}
