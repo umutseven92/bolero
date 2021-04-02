@@ -93,8 +93,8 @@ public class NpcLoaderTests {
 
     ScheduleDTO villagerSchedule = villager.getSchedules().get(0);
 
-    Assert.assertEquals(villagerSchedule.getHour(), 0);
-    Assert.assertEquals(villagerSchedule.getMinute(), 30);
+    Assert.assertEquals(villagerSchedule.getTime().getHour(), 0);
+    Assert.assertEquals(villagerSchedule.getTime().getMinute(), 30);
 
     Assert.assertEquals(villagerSchedule.getNodes().size(), 2);
     Assert.assertEquals(villagerSchedule.getNodes().get(0).getId(), "villager1s");

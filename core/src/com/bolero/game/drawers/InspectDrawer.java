@@ -1,45 +1,42 @@
 package com.bolero.game.drawers;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Disposable;
 import com.bolero.game.exceptions.ConfigurationNotLoadedException;
 import com.bolero.game.icons.InteractButtonImage;
+import com.bolero.game.managers.BundleManager;
 import lombok.val;
 
 public class InspectDrawer extends AbstractDrawer implements Disposable, InteractButtonImage {
-  private final Table table;
   private final Texture buttonTexture;
-  private final Label textLabel;
+  private final Label contentLabel; // Label for the main content text
 
-  public InspectDrawer() throws ConfigurationNotLoadedException {
+  public InspectDrawer(BundleManager bundleManager) throws ConfigurationNotLoadedException {
     super();
     val file = getInteractButtonImage();
     buttonTexture = new Texture(file);
     val buttonImage = new Image(buttonTexture);
 
-    table = new Table();
-    table.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+    contentLabel = new Label("", uiSkin);
+    val continueLabel = new Label(bundleManager.getString("continue"), uiSkin);
+
+    contentLabel.setWrap(true);
+
     table.bottom();
-    table.padBottom(Gdx.graphics.getHeight() / 10f);
-
-    textLabel = new Label("", uiSkin);
-    val label2 = new Label("to continue", uiSkin);
-
-    textLabel.setWrap(true);
-    table.add(textLabel).width(Gdx.graphics.getWidth() / 1.2f);
+    table.padBottom(20);
+    table.padRight(20);
+    table.padLeft(20);
+    table.add(contentLabel).expandX().left();
     table.row();
     table.add(buttonImage).right();
-    table.add(label2).right();
+    table.add(continueLabel).right();
   }
 
-  public void draw(SpriteBatch batch, String text) {
-    textLabel.setText(text);
-    table.draw(batch, 1f);
+  public void draw(String text) {
+    contentLabel.setText(text);
+    super.draw();
   }
 
   @Override

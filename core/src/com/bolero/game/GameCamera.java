@@ -30,10 +30,6 @@ public class GameCamera {
     camera.viewportHeight = height / 32f;
   }
 
-  private float convertToViewport(float pixels) {
-    return pixels / (BoleroGame.UNIT * 2);
-  }
-
   public void updatePosition(Vector2 position, MapValues mapValues) {
     camera.position.x = position.x;
     camera.position.y = position.y;

@@ -169,7 +169,7 @@ public class GameScreen implements Screen {
     Gdx.app.log(GameScreen.class.getName(), "Initializing drawers..");
 
     debugDrawer = new DebugDrawer(gameCamera.getCamera());
-    inspectDrawer = new InspectDrawer();
+    inspectDrawer = new InspectDrawer(game.getBundleController());
     dialogDrawer = new DialogDrawer(player, gameCamera.getCamera());
   }
 
@@ -308,8 +308,6 @@ public class GameScreen implements Screen {
     game.hudBatch.begin();
     if (game.debugMode) {
       debugDrawer.drawDebugInfo(
-          game.font,
-          game.hudBatch,
           player,
           game.currentScreen.name,
           gameCamera.getCamera().zoom,
@@ -400,7 +398,7 @@ public class GameScreen implements Screen {
   private void drawInspection(InspectRectangle rectangle) {
     String text = game.getBundleController().getString(rectangle.getStringID());
     game.hudBatch.begin();
-    inspectDrawer.draw(game.hudBatch, text);
+    inspectDrawer.draw(text);
     game.hudBatch.end();
   }
 
@@ -445,6 +443,7 @@ public class GameScreen implements Screen {
   @Override
   public void resize(int width, int height) {
     gameCamera.setViewPort(width, height);
+    debugDrawer.init(gameCamera.getCamera());
   }
 
   @Override
