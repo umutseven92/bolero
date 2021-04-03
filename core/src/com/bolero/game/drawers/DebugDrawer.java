@@ -44,6 +44,10 @@ public class DebugDrawer extends AbstractDrawer implements Disposable {
     playerStateLabel = new Label("", uiSkin);
     clockLabel = new Label("", uiSkin);
     zoomLevelLabel = new Label("", uiSkin);
+  }
+
+  public void init(Camera camera) {
+    super.initTable();
 
     table.top();
 
@@ -55,9 +59,7 @@ public class DebugDrawer extends AbstractDrawer implements Disposable {
     table.add(playerStateLabel).expandX().right();
     table.row();
     table.add(zoomLevelLabel).expandX().left();
-  }
 
-  public void init(Camera camera) {
     this.camera = camera;
   }
 
@@ -127,8 +129,8 @@ public class DebugDrawer extends AbstractDrawer implements Disposable {
 
   @Override
   public void dispose() {
+    super.dispose();
     debugRenderer.dispose();
     box2DDebugRenderer.dispose();
-    stage.dispose();
   }
 }

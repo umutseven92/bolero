@@ -2,147 +2,115 @@ package com.bolero.game.drawers;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
+import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
 import com.badlogic.gdx.utils.Disposable;
 import com.bolero.game.characters.NPC;
 import com.bolero.game.characters.Player;
 import com.bolero.game.dialog.Dialog;
 import com.bolero.game.exceptions.ConfigurationNotLoadedException;
 import com.bolero.game.icons.InteractButtonImage;
+import com.bolero.game.managers.BundleManager;
 import lombok.val;
 
 public class DialogDrawer extends AbstractDrawer implements Disposable, InteractButtonImage {
-  private static final float SLIDE_SPEED = 5f;
   private static final String CHOICE_PREFIX = "-> ";
 
-  private final SpriteBatch batch;
-  private final Table table;
   private final Texture buttonTexture;
   private final Label nameLabel;
   private final Label textLabel;
-  private final VerticalGroup choiceGroup;
-  private final Sprite playerSprite;
+  private final Label buttonLabel;
+  private final Image playerImage;
+  private final Image buttonImage;
 
-  private final float npcPosXGoal;
-  private final float playerPosXGoal;
-  private final float spriteY;
-
-  private float npcPosX;
-  private float playerPosX;
+  private Image npcImage;
+  private VerticalGroup choiceGroup;
+  private Dialog currentDialog;
+  private NPC npc;
 
   private boolean activated;
-  private NPC npc;
-  private Sprite npcSprite;
-
-  private Dialog currentDialog;
-
   private int activeIndex;
 
   public boolean isActivated() {
     return activated;
   }
 
-  public DialogDrawer(Player player, OrthographicCamera camera)
+  public DialogDrawer(Player player, BundleManager bundleManager)
       throws ConfigurationNotLoadedException {
     super();
-    this.batch = new SpriteBatch();
     this.activated = false;
-    this.playerSprite = player.getDialogSprite();
-    this.spriteY = Gdx.graphics.getHeight() / 5f;
-
-    this.npcPosXGoal = camera.viewportWidth / 2f;
-
-    this.playerPosXGoal = Gdx.graphics.getWidth() - this.playerSprite.getWidth();
-    this.playerPosX = playerPosXGoal + 10f;
-
-    this.playerSprite.setPosition(playerPosX, spriteY);
+    Sprite playerSprite = player.getDialogSprite();
 
     val file = getInteractButtonImage();
     buttonTexture = new Texture(file);
-    val buttonImage = new Image(buttonTexture);
+    buttonImage = new Image(buttonTexture);
+    playerImage = new Image(new SpriteDrawable(playerSprite));
 
-    table = new Table();
-    table.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-    table.bottom();
-    table.padBottom(Gdx.graphics.getHeight() / 10f);
-
+    npcImage = new Image();
     nameLabel = new Label("", uiSkin);
     textLabel = new Label("", uiSkin);
-    val buttonLabel = new Label("to choose", uiSkin);
+    buttonLabel = new Label(bundleManager.getString("choose"), uiSkin);
 
     textLabel.setWrap(true);
-    table.add(nameLabel).width(Gdx.graphics.getWidth() / 1.2f);
+  }
+
+  public void init(int width) {
+    super.initTable();
+
+    table.bottom();
+    table.padBottom(20);
+    table.padRight(20);
+    table.padLeft(20);
+    table.add(npcImage).expandX().center();
+
+    table.add(playerImage).expandX().center();
+
     table.row();
-    table.add(textLabel).width(Gdx.graphics.getWidth() / 1.2f);
+    table.add(nameLabel).colspan(2).expandX().left();
+    table.row();
+    table.add(textLabel).colspan(2).width(width - 100).left();
     table.row();
 
     choiceGroup = new VerticalGroup();
     choiceGroup.left();
     choiceGroup.columnLeft();
 
-    table.add(choiceGroup).width(Gdx.graphics.getWidth() / 1.2f);
+    table.add(choiceGroup).expandX().left();
 
-    table.add(buttonImage).right();
-    table.add(buttonLabel).right();
+    table.row();
+    Table buttonTable = new Table();
+
+    buttonTable.add(buttonImage).expandX().right();
+    buttonTable.add(buttonLabel).right();
+    table.add(buttonTable).colspan(2).expandX().right();
+
+    if (currentDialog != null) {
+      resetButtons();
+    }
   }
 
   public void activate(NPC npc) {
     this.activated = true;
 
-    this.npcSprite = npc.getDialogSprite();
-    this.npcPosX = npcPosXGoal - 100f;
-    this.npcSprite.setPosition(npcPosX, spriteY);
-    this.playerPosX = playerPosXGoal + 100f;
+    Sprite npcSprite = npc.getDialogSprite();
+    npcImage = new Image(new SpriteDrawable(npcSprite));
 
     this.npc = npc;
     this.currentDialog = npc.getDialogTree().getInitialDialog();
-
-    resetButtons();
+    init(Gdx.graphics.getWidth());
   }
 
-  public void drawCharacters() {
-    if (npcPosX <= npcPosXGoal) {
-      npcPosX += SLIDE_SPEED;
-      this.npcSprite.setX(npcPosX);
-    }
-
-    if (playerPosX > playerPosXGoal) {
-      playerPosX -= SLIDE_SPEED;
-      this.playerSprite.setX(playerPosX);
-    }
-
-    this.batch.begin();
-
-    // NPC sprite during dialog should always face right.
-    if (npcSprite.isFlipX()) {
-      npcSprite.flip(true, false);
-    }
-
-    // Player sprite during dialog should always face left.
-    if (!playerSprite.isFlipX()) {
-      playerSprite.flip(true, false);
-    }
-
-    this.npcSprite.draw(batch);
-    this.playerSprite.draw(batch);
-
-    this.batch.end();
-  }
-
-  public void drawUI(SpriteBatch hudBatch) {
-
+  public void draw() {
     nameLabel.setText(npc.getName() + ":");
     textLabel.setText(currentDialog.getText());
 
-    table.draw(hudBatch, 1f);
+    super.draw();
   }
 
   public void checkForInput() {

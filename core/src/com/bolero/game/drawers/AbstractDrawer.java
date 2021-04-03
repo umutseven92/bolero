@@ -12,20 +12,18 @@ import com.bolero.game.exceptions.ConfigurationNotLoadedException;
 public abstract class AbstractDrawer implements Disposable {
   protected final Skin uiSkin;
   protected final KeysDTO keys;
-  protected final Stage stage;
-  protected final Table table;
+  protected Stage stage;
+  protected Table table;
 
   public AbstractDrawer() throws ConfigurationNotLoadedException {
-    this(false);
-  }
-
-  public AbstractDrawer(boolean debug) throws ConfigurationNotLoadedException {
     keys = BoleroGame.config.getConfig().getKeys();
     uiSkin = new Skin(Gdx.files.internal("ui/uiskin.json"));
-    stage = new Stage();
+  }
 
+  protected void initTable() {
+    stage = new Stage();
     table = new Table();
-    table.setDebug(debug);
+    table.setDebug(false);
     table.setFillParent(true);
     stage.addActor(table);
   }

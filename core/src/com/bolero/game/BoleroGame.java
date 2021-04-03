@@ -28,7 +28,6 @@ public class BoleroGame extends Game {
   public static Config config;
 
   public SpriteBatch batch;
-  public SpriteBatch hudBatch;
   public BitmapFont font;
 
   public Boolean debugMode = false;
@@ -49,7 +48,6 @@ public class BoleroGame extends Game {
     bundleManager = new BundleManager();
 
     batch = new SpriteBatch();
-    hudBatch = new SpriteBatch();
     font = new BitmapFont();
 
     screens = new HashMap<>();
@@ -113,7 +111,6 @@ public class BoleroGame extends Game {
   @Override
   public void dispose() {
     batch.dispose();
-    hudBatch.dispose();
     font.dispose();
 
     for (GameScreen screen : screenPool) {

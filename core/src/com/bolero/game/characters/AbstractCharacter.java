@@ -308,7 +308,6 @@ public abstract class AbstractCharacter implements Disposable {
     body.applyLinearImpulse(impulseX, impulseY, pos.x, pos.y, true);
   }
 
-
   public void draw(SpriteBatch batch) {
     animationTime += Gdx.graphics.getDeltaTime();
 

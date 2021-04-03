@@ -12,23 +12,29 @@ import lombok.val;
 public class InspectDrawer extends AbstractDrawer implements Disposable, InteractButtonImage {
   private final Texture buttonTexture;
   private final Label contentLabel; // Label for the main content text
+  private final Label continueLabel;
+
+  private final Image buttonImage;
 
   public InspectDrawer(BundleManager bundleManager) throws ConfigurationNotLoadedException {
     super();
     val file = getInteractButtonImage();
     buttonTexture = new Texture(file);
-    val buttonImage = new Image(buttonTexture);
+    buttonImage = new Image(buttonTexture);
 
     contentLabel = new Label("", uiSkin);
-    val continueLabel = new Label(bundleManager.getString("continue"), uiSkin);
+    continueLabel = new Label(bundleManager.getString("continue"), uiSkin);
 
     contentLabel.setWrap(true);
+  }
 
+  public void init(int width) {
+    super.initTable();
     table.bottom();
     table.padBottom(20);
     table.padRight(20);
     table.padLeft(20);
-    table.add(contentLabel).expandX().left();
+    table.add(contentLabel).width(width - 100).left();
     table.row();
     table.add(buttonImage).right();
     table.add(continueLabel).right();
