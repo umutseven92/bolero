@@ -3,71 +3,78 @@ package com.bolero.game.drawers;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.Disposable;
 import com.bolero.game.BoleroGame;
 import com.bolero.game.Clock;
-import com.bolero.game.pathfinding.PathGraph;
 import com.bolero.game.characters.NPC;
 import com.bolero.game.characters.Player;
 import com.bolero.game.data.PathNode;
+import com.bolero.game.exceptions.ConfigurationNotLoadedException;
 import com.bolero.game.interactions.AbstractRectangle;
+import com.bolero.game.pathfinding.PathGraph;
 import java.util.List;
 import lombok.val;
 
-public class DebugDrawer implements Disposable {
+public class DebugDrawer extends AbstractDrawer implements Disposable {
   private final ShapeRenderer debugRenderer;
   private final Box2DDebugRenderer box2DDebugRenderer;
 
-  private final Camera camera;
+  private Camera camera;
 
-  public DebugDrawer(Camera camera) {
+  private final Label mapLabel;
+  private final Label playerPosLabel;
+  private final Label playerStateLabel;
+  private final Label clockLabel;
+  private final Label zoomLevelLabel;
+
+  public DebugDrawer(Camera camera) throws ConfigurationNotLoadedException {
+    super();
     this.camera = camera;
 
     debugRenderer = new ShapeRenderer();
     box2DDebugRenderer = new Box2DDebugRenderer();
+
+    mapLabel = new Label("", uiSkin);
+    playerPosLabel = new Label("", uiSkin);
+    playerStateLabel = new Label("", uiSkin);
+    clockLabel = new Label("", uiSkin);
+    zoomLevelLabel = new Label("", uiSkin);
   }
 
-  public void drawDebugInfo(
-      BitmapFont font,
-      SpriteBatch batch,
-      Player player,
-      String mapName,
-      float zoomLevel,
-      Clock clock) {
-    float cameraRight = Gdx.graphics.getWidth() - BoleroGame.UNIT * 15;
-    float cameraLeft = BoleroGame.UNIT * 2;
-    float cameraY = Gdx.graphics.getHeight() - BoleroGame.UNIT * 2;
-    float camera3Y = Gdx.graphics.getHeight() - BoleroGame.UNIT * 3;
-    float camera4Y = Gdx.graphics.getHeight() - BoleroGame.UNIT * 4;
-    float camera5Y = Gdx.graphics.getHeight() - BoleroGame.UNIT * 5;
+  public void init(Camera camera) {
+    super.initTable();
 
-    font.draw(batch, "Map: " + mapName, cameraLeft, cameraY);
-    font.draw(batch, "Player State: " + player.getState(), cameraLeft, camera3Y);
-    font.draw(
-        batch,
+    table.top();
+
+    table.pad(20);
+    table.add(mapLabel).expandX().left();
+    table.add(playerPosLabel).expandX().right();
+    table.row();
+    table.add(clockLabel).expandX().left();
+    table.add(playerStateLabel).expandX().right();
+    table.row();
+    table.add(zoomLevelLabel).expandX().left();
+
+    this.camera = camera;
+  }
+
+  public void drawDebugInfo(Player player, String mapName, float zoomLevel, Clock clock) {
+    mapLabel.setText(String.format("Map: %s", mapName));
+    playerPosLabel.setText(
+        String.format("Player Pos: %f, %f", player.getPosition().x, player.getPosition().y));
+    playerStateLabel.setText(String.format("Player State: %s", player.getState().toString()));
+    clockLabel.setText(
         String.format(
             "Time: %02d:%02d, %s",
-            clock.getCurrentHour(), clock.getCurrentMinute(), clock.getCurrentDay()),
-        cameraLeft,
-        camera4Y);
-    font.draw(
-        batch,
-        "Player Pos: " + player.getPosition().x + ", " + player.getPosition().y,
-        cameraRight,
-        cameraY);
-    font.draw(
-        batch,
-        "Camera Pos: " + camera.position.x + ", " + camera.position.y,
-        cameraRight,
-        camera3Y);
-    font.draw(batch, "Zoom Level: " + zoomLevel, cameraRight, camera4Y);
-    font.draw(batch, "O to zoom out, P to zoom in", cameraRight, camera5Y);
+            clock.getCurrentHour(), clock.getCurrentMinute(), clock.getCurrentDay()));
+    zoomLevelLabel.setText(String.format("Zoom Level: %s", zoomLevel));
+
+    super.draw();
   }
 
   public void drawDebugShapes(
@@ -122,6 +129,7 @@ public class DebugDrawer implements Disposable {
 
   @Override
   public void dispose() {
+    super.dispose();
     debugRenderer.dispose();
     box2DDebugRenderer.dispose();
   }

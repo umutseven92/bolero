@@ -1,5 +1,6 @@
 package com.bolero.game;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -14,10 +15,18 @@ public class GameCamera {
   public GameCamera() {
     camera = new OrthographicCamera();
 
-    camera.setToOrtho(false, 30, 20);
+    float width = Gdx.graphics.getWidth();
+    float height = Gdx.graphics.getHeight();
+
+    camera.setToOrtho(false, width / 28.6f, height / 32f);
 
     camera.update();
     zoomTarget = camera.zoom;
+  }
+
+  public void setViewPort(int width, int height) {
+    camera.viewportWidth = width / 28.6f;
+    camera.viewportHeight = height / 32f;
   }
 
   public void updatePosition(Vector2 position, MapValues mapValues) {

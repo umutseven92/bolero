@@ -1,45 +1,48 @@
 package com.bolero.game.drawers;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Disposable;
 import com.bolero.game.exceptions.ConfigurationNotLoadedException;
 import com.bolero.game.icons.InteractButtonImage;
+import com.bolero.game.managers.BundleManager;
 import lombok.val;
 
 public class InspectDrawer extends AbstractDrawer implements Disposable, InteractButtonImage {
-  private final Table table;
   private final Texture buttonTexture;
-  private final Label textLabel;
+  private final Label contentLabel; // Label for the main content text
+  private final Label continueLabel;
 
-  public InspectDrawer() throws ConfigurationNotLoadedException {
+  private final Image buttonImage;
+
+  public InspectDrawer(BundleManager bundleManager) throws ConfigurationNotLoadedException {
     super();
     val file = getInteractButtonImage();
     buttonTexture = new Texture(file);
-    val buttonImage = new Image(buttonTexture);
+    buttonImage = new Image(buttonTexture);
 
-    table = new Table();
-    table.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-    table.bottom();
-    table.padBottom(Gdx.graphics.getHeight() / 10f);
+    contentLabel = new Label("", uiSkin);
+    continueLabel = new Label(bundleManager.getString("continue"), uiSkin);
 
-    textLabel = new Label("", uiSkin);
-    val label2 = new Label("to continue", uiSkin);
-
-    textLabel.setWrap(true);
-    table.add(textLabel).width(Gdx.graphics.getWidth() / 1.2f);
-    table.row();
-    table.add(buttonImage).right();
-    table.add(label2).right();
+    contentLabel.setWrap(true);
   }
 
-  public void draw(SpriteBatch batch, String text) {
-    textLabel.setText(text);
-    table.draw(batch, 1f);
+  public void init(int width) {
+    super.initTable();
+    table.bottom();
+    table.padBottom(20);
+    table.padRight(20);
+    table.padLeft(20);
+    table.add(contentLabel).width(width - 100).left();
+    table.row();
+    table.add(buttonImage).right();
+    table.add(continueLabel).right();
+  }
+
+  public void draw(String text) {
+    contentLabel.setText(text);
+    super.draw();
   }
 
   @Override

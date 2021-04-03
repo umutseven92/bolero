@@ -5,9 +5,9 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.utils.Array;
 import com.bolero.game.BoleroGame;
-import com.bolero.game.pathfinding.PathGraph;
 import com.bolero.game.data.PathNode;
 import com.bolero.game.exceptions.ConfigurationNotLoadedException;
+import com.bolero.game.pathfinding.PathGraph;
 import java.io.FileNotFoundException;
 import lombok.val;
 

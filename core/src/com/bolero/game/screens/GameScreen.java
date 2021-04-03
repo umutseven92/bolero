@@ -169,8 +169,8 @@ public class GameScreen implements Screen {
     Gdx.app.log(GameScreen.class.getName(), "Initializing drawers..");
 
     debugDrawer = new DebugDrawer(gameCamera.getCamera());
-    inspectDrawer = new InspectDrawer();
-    dialogDrawer = new DialogDrawer(player, gameCamera.getCamera());
+    inspectDrawer = new InspectDrawer(game.getBundleController());
+    dialogDrawer = new DialogDrawer(player, game.getBundleController());
   }
 
   // TODO: Parallelize these- watch out for order
@@ -305,17 +305,10 @@ public class GameScreen implements Screen {
   }
 
   private void drawHUD() {
-    game.hudBatch.begin();
     if (game.debugMode) {
       debugDrawer.drawDebugInfo(
-          game.font,
-          game.hudBatch,
-          player,
-          game.currentScreen.name,
-          gameCamera.getCamera().zoom,
-          game.clock);
+          player, game.currentScreen.name, gameCamera.getCamera().zoom, game.clock);
     }
-    game.hudBatch.end();
   }
 
   private void handleMiscInput() {
@@ -399,9 +392,7 @@ public class GameScreen implements Screen {
 
   private void drawInspection(InspectRectangle rectangle) {
     String text = game.getBundleController().getString(rectangle.getStringID());
-    game.hudBatch.begin();
-    inspectDrawer.draw(game.hudBatch, text);
-    game.hudBatch.end();
+    inspectDrawer.draw(text);
   }
 
   private void talkToNPC(NPC npc) {
@@ -424,11 +415,7 @@ public class GameScreen implements Screen {
   }
 
   private void drawDialog() {
-    dialogDrawer.drawCharacters();
-
-    game.hudBatch.begin();
-    dialogDrawer.drawUI(game.hudBatch);
-    game.hudBatch.end();
+    dialogDrawer.draw();
   }
 
   private void reloadMap() {
@@ -443,10 +430,15 @@ public class GameScreen implements Screen {
   }
 
   @Override
-  public void show() {}
+  public void resize(int width, int height) {
+    gameCamera.setViewPort(width, height);
+    inspectDrawer.init(width);
+    debugDrawer.init(gameCamera.getCamera());
+    dialogDrawer.init(width);
+  }
 
   @Override
-  public void resize(int width, int height) {}
+  public void show() {}
 
   @Override
   public void pause() {}
