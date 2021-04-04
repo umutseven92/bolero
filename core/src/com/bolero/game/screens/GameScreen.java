@@ -3,7 +3,9 @@ package com.bolero.game.screens;
 import box2dLight.RayHandler;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.MapProperties;
 import com.badlogic.gdx.maps.tiled.TiledMap;
@@ -24,6 +26,7 @@ import com.bolero.game.data.MapValues;
 import com.bolero.game.drawers.DebugDrawer;
 import com.bolero.game.drawers.DialogDrawer;
 import com.bolero.game.drawers.InspectDrawer;
+import com.bolero.game.drawers.PauseDrawer;
 import com.bolero.game.dtos.KeysDTO;
 import com.bolero.game.enums.CharacterState;
 import com.bolero.game.exceptions.ConfigurationNotLoadedException;
@@ -55,9 +58,11 @@ public class GameScreen implements Screen {
   private InteractionController interactionController;
   private LightController lightController;
 
+  private final ShapeRenderer darkenRenderer;
   private DebugDrawer debugDrawer;
   private DialogDrawer dialogDrawer;
   private InspectDrawer inspectDrawer;
+  private PauseDrawer pauseDrawer;
   private Vector2 playerSpawnPosition;
   private float accumulator = 0;
 
@@ -66,7 +71,6 @@ public class GameScreen implements Screen {
   private RayHandler rayHandler;
 
   private Sun sun;
-  private float darkenAmount;
 
   private final String mapPath;
   private final String spawnPos;
@@ -74,6 +78,8 @@ public class GameScreen implements Screen {
   private final KeysDTO keys;
 
   private PathGraph pathNodes;
+  private boolean paused;
+  private boolean darken;
 
   public GameScreen(BoleroGame game, String name, String mapPath, String spawnPos)
       throws MapperException, FileNotFoundException, ConfigurationNotLoadedException {
@@ -83,7 +89,9 @@ public class GameScreen implements Screen {
     this.mapPath = mapPath;
     this.spawnPos = spawnPos;
     this.keys = BoleroGame.config.getConfig().getKeys();
-
+    this.paused = false;
+    this.darken = false;
+    darkenRenderer = new ShapeRenderer();
     initializeAll();
   }
 
@@ -130,9 +138,8 @@ public class GameScreen implements Screen {
 
     rayHandler.setBlurNum(3);
 
-    darkenAmount = 0f;
     sun = new Sun(rayHandler, game.clock, BoleroGame.config.getConfig().getSun());
-    sun.update(darkenAmount);
+    sun.update();
 
     lightController = new LightController(map, rayHandler, sun);
     lightController.load();
@@ -171,6 +178,7 @@ public class GameScreen implements Screen {
     debugDrawer = new DebugDrawer(gameCamera.getCamera());
     inspectDrawer = new InspectDrawer(game.getBundleController());
     dialogDrawer = new DialogDrawer(player, game.getBundleController());
+    pauseDrawer = new PauseDrawer(game.getBundleController());
   }
 
   // TODO: Parallelize these- watch out for order
@@ -220,30 +228,37 @@ public class GameScreen implements Screen {
     val transitionRectangle = interactionController.checkIfInInteractionRectangle(playerPosPixels);
     val inspectRectangle = interactionController.checkIfInInspectRectangle(playerPosPixels);
 
-    try {
-      npcController.checkSchedules(game.clock);
-    } catch (Exception e) {
-      Gdx.app.error(GameScreen.class.getName(), e.toString(), e);
-      e.printStackTrace();
-      System.exit(1);
-    }
+    NPC npc = null;
 
-    NPC npc = npcController.checkIfNearNPC(playerPos);
+    if (!paused) {
+
+      try {
+        npcController.checkSchedules(game.clock);
+      } catch (Exception e) {
+        Gdx.app.error(GameScreen.class.getName(), e.toString(), e);
+        e.printStackTrace();
+        System.exit(1);
+      }
+
+      npc = npcController.checkIfNearNPC(playerPos);
+
+      if (player.getState() != CharacterState.inspecting
+          && player.getState() != CharacterState.talking) {
+        handleMovementInput();
+      }
+
+      if (player.getState() == CharacterState.talking) {
+        dialogDrawer.checkForInput();
+      }
+
+      player.setPosition();
+      npcController.setPositions();
+      gameCamera.update(player.getPosition(), mapValues, delta);
+    } else {
+      pauseDrawer.checkForInput();
+    }
 
     handleMiscInput();
-
-    if (player.getState() != CharacterState.inspecting
-        && player.getState() != CharacterState.talking) {
-      handleMovementInput();
-    }
-
-    if (player.getState() == CharacterState.talking) {
-      dialogDrawer.checkForInput();
-    }
-
-    player.setPosition();
-    npcController.setPositions();
-    gameCamera.update(player.getPosition(), mapValues, delta);
 
     mapController.setView(gameCamera.getCamera());
     mapController.drawBackground();
@@ -275,18 +290,36 @@ public class GameScreen implements Screen {
 
     drawHUD();
 
+    if (darken) {
+      // Darken screen before menus.
+      darkenScreen();
+    }
+
     if (player.getState() == CharacterState.inspecting && inspectRectangle != null) {
-      drawInspection(inspectRectangle);
+      drawInspection();
     } else if (player.getState() == CharacterState.talking) {
       drawDialog();
     }
-
-    handleInteractionInput(transitionRectangle, inspectRectangle, npc);
     if (game.debugMode) {
       debugDrawer.drawBox2DBodies(world);
     }
 
-    doPhysicsStep(delta);
+    if (!paused) {
+      handleInteractionInput(transitionRectangle, inspectRectangle, npc);
+      doPhysicsStep(delta);
+    } else {
+      handlePauseInput();
+    }
+  }
+
+  private void darkenScreen() {
+    Gdx.gl.glEnable(GL20.GL_BLEND);
+    Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+    darkenRenderer.begin(ShapeRenderer.ShapeType.Filled);
+    darkenRenderer.setColor(new Color(0, 0, 0, 0.5f));
+    darkenRenderer.rect(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+    darkenRenderer.end();
+    Gdx.gl.glDisable(GL20.GL_BLEND);
   }
 
   private void doPhysicsStep(float deltaTime) {
@@ -298,7 +331,7 @@ public class GameScreen implements Screen {
     while (accumulator >= TIME_STEP) {
       world.step(TIME_STEP, 6, 2);
       game.clock.increment();
-      sun.update(darkenAmount);
+      sun.update();
       lightController.update();
       accumulator -= TIME_STEP;
     }
@@ -308,6 +341,10 @@ public class GameScreen implements Screen {
     if (game.debugMode) {
       debugDrawer.drawDebugInfo(
           player, game.currentScreen.name, gameCamera.getCamera().zoom, game.clock);
+    }
+
+    if (paused) {
+      pauseDrawer.draw();
     }
   }
 
@@ -329,8 +366,9 @@ public class GameScreen implements Screen {
       }
     }
 
-    if (Gdx.input.isKeyJustPressed(keys.getQuitInput())) {
-      Gdx.app.exit();
+    if (Gdx.input.isKeyJustPressed(keys.getPauseInput())) {
+      paused = !paused;
+      darken = !darken;
     }
   }
 
@@ -370,9 +408,17 @@ public class GameScreen implements Screen {
     if (interactionPressed && transitionRectangle != null) {
       handleTransition(transitionRectangle);
     } else if (interactionPressed && inspectRectangle != null) {
-      inspect();
+      inspect(inspectRectangle);
     } else if (interactionPressed && npc != null && npc.hasDialog()) {
       talkToNPC(npc);
+    }
+  }
+
+  private void handlePauseInput() {
+    boolean interactionPressed = Gdx.input.isKeyJustPressed(keys.getInteractInput());
+    if (interactionPressed && paused) {
+      paused = false;
+      darken = !darken;
     }
   }
 
@@ -380,8 +426,10 @@ public class GameScreen implements Screen {
     game.loadRoute(rectangle.getMapName(), rectangle.getSpawnName());
   }
 
-  private void inspect() {
+  private void inspect(InspectRectangle inspectRectangle) {
+    darken = !darken;
     if (player.getState() != CharacterState.inspecting) {
+      inspectDrawer.activate(inspectRectangle);
       gameCamera.zoomIn(0.2f);
       player.startInspecting();
     } else {
@@ -390,9 +438,8 @@ public class GameScreen implements Screen {
     }
   }
 
-  private void drawInspection(InspectRectangle rectangle) {
-    String text = game.getBundleController().getString(rectangle.getStringID());
-    inspectDrawer.draw(text);
+  private void drawInspection() {
+    inspectDrawer.draw();
   }
 
   private void talkToNPC(NPC npc) {
@@ -400,14 +447,13 @@ public class GameScreen implements Screen {
       return;
     }
 
+    darken = !darken;
     if (player.getState() != CharacterState.talking) {
-      darkenAmount = 0.2f;
       dialogDrawer.activate(npc);
       gameCamera.zoomIn(0.2f);
       player.startTalking();
       npc.startTalking();
     } else {
-      darkenAmount = 0f;
       gameCamera.zoomOut(0.2f);
       player.stopTalking();
       npc.stopTalking();
@@ -435,6 +481,7 @@ public class GameScreen implements Screen {
     inspectDrawer.init(width);
     debugDrawer.init(gameCamera.getCamera());
     dialogDrawer.init(width);
+    pauseDrawer.init();
   }
 
   @Override

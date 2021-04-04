@@ -46,7 +46,7 @@ public class Sun {
     return timestamp >= dawnStart && timestamp < dawnEnd;
   }
 
-  public void update(float darkenAmount) {
+  public void update() {
     long timestamp = this.clock.getTimestamp();
 
     float alpha;
@@ -70,8 +70,6 @@ public class Sun {
       float c = (duskStart) - (m * dayLight);
       alpha = (timestamp - c) / m;
     }
-
-    alpha -= darkenAmount;
 
     // To prevent unnecessary updates
     if (alpha != previousAlpha) {

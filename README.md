@@ -14,8 +14,9 @@
 
 ## Todo
 
-* Embed game logic into the engine
-* NPC transition through maps
-* Remember NPC position after transitions
-* Different screen sizes
 * Menus
+* Remember NPC position after transitions (e.g. persistent NPCs)
+* Shadow during the day (from the sun)
+* Loading screen
+* NPC transition through maps
+* Embed game logic into the engine

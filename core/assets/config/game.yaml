@@ -32,4 +32,4 @@ keys:
   debug: H
   zoomIn: P
   zoomOut: O
-  quit: Q
+  pause: Escape

@@ -6,6 +6,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.Disposable;
 import com.bolero.game.exceptions.ConfigurationNotLoadedException;
 import com.bolero.game.icons.InteractButtonImage;
+import com.bolero.game.interactions.InspectRectangle;
 import com.bolero.game.managers.BundleManager;
 import lombok.val;
 
@@ -15,9 +16,11 @@ public class InspectDrawer extends AbstractDrawer implements Disposable, Interac
   private final Label continueLabel;
 
   private final Image buttonImage;
+  private final BundleManager bundleManager;
 
   public InspectDrawer(BundleManager bundleManager) throws ConfigurationNotLoadedException {
     super();
+    this.bundleManager = bundleManager;
     val file = getInteractButtonImage();
     buttonTexture = new Texture(file);
     buttonImage = new Image(buttonTexture);
@@ -40,9 +43,10 @@ public class InspectDrawer extends AbstractDrawer implements Disposable, Interac
     table.add(continueLabel).right();
   }
 
-  public void draw(String text) {
+  public void activate(InspectRectangle inspectRectangle) {
+    super.activate();
+    val text = bundleManager.getString(inspectRectangle.getStringID());
     contentLabel.setText(text);
-    super.draw();
   }
 
   @Override

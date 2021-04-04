@@ -8,16 +8,28 @@ import com.badlogic.gdx.utils.Disposable;
 import com.bolero.game.BoleroGame;
 import com.bolero.game.dtos.KeysDTO;
 import com.bolero.game.exceptions.ConfigurationNotLoadedException;
+import lombok.Getter;
+import lombok.Setter;
 
 public abstract class AbstractDrawer implements Disposable {
   protected final Skin uiSkin;
   protected final KeysDTO keys;
   protected Stage stage;
   protected Table table;
+  @Getter private boolean activated;
 
   public AbstractDrawer() throws ConfigurationNotLoadedException {
+    this.activated = false;
     keys = BoleroGame.config.getConfig().getKeys();
     uiSkin = new Skin(Gdx.files.internal("ui/uiskin.json"));
+  }
+
+  protected void activate() {
+    this.activated = true;
+  }
+
+  protected void deactivate() {
+    this.activated = false;
   }
 
   protected void initTable() {
@@ -28,7 +40,7 @@ public abstract class AbstractDrawer implements Disposable {
     stage.addActor(table);
   }
 
-  protected void draw() {
+  public void draw() {
     stage.draw();
   }
 

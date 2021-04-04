@@ -14,7 +14,7 @@ public class KeysDTO {
   private String debug;
   private String zoomIn;
   private String zoomOut;
-  private String quit;
+  private String pause;
 
   public int getUpInput() {
     return Input.Keys.valueOf(up);
@@ -52,7 +52,7 @@ public class KeysDTO {
     return Input.Keys.valueOf(zoomOut);
   }
 
-  public int getQuitInput() {
-    return Input.Keys.valueOf(quit);
+  public int getPauseInput() {
+    return Input.Keys.valueOf(pause);
   }
 }

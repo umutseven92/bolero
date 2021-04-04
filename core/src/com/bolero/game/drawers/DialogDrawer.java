@@ -1,14 +1,11 @@
 package com.bolero.game.drawers;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
 import com.badlogic.gdx.utils.Disposable;
 import com.bolero.game.characters.NPC;
@@ -19,8 +16,7 @@ import com.bolero.game.icons.InteractButtonImage;
 import com.bolero.game.managers.BundleManager;
 import lombok.val;
 
-public class DialogDrawer extends AbstractDrawer implements Disposable, InteractButtonImage {
-  private static final String CHOICE_PREFIX = "-> ";
+public class DialogDrawer extends AbstractChoiceDrawer implements Disposable, InteractButtonImage {
 
   private final Texture buttonTexture;
   private final Label nameLabel;
@@ -30,21 +26,13 @@ public class DialogDrawer extends AbstractDrawer implements Disposable, Interact
   private final Image buttonImage;
 
   private Image npcImage;
-  private VerticalGroup choiceGroup;
   private Dialog currentDialog;
-  private NPC npc;
-
-  private boolean activated;
-  private int activeIndex;
-
-  public boolean isActivated() {
-    return activated;
-  }
 
   public DialogDrawer(Player player, BundleManager bundleManager)
       throws ConfigurationNotLoadedException {
     super();
-    this.activated = false;
+    super.setOnSubmit(this::submit);
+
     Sprite playerSprite = player.getDialogSprite();
 
     val file = getInteractButtonImage();
@@ -77,7 +65,6 @@ public class DialogDrawer extends AbstractDrawer implements Disposable, Interact
     table.add(textLabel).colspan(2).width(width - 100).left();
     table.row();
 
-    choiceGroup = new VerticalGroup();
     choiceGroup.left();
     choiceGroup.columnLeft();
 
@@ -96,72 +83,31 @@ public class DialogDrawer extends AbstractDrawer implements Disposable, Interact
   }
 
   public void activate(NPC npc) {
-    this.activated = true;
+    super.activate();
 
     Sprite npcSprite = npc.getDialogSprite();
-    npcImage = new Image(new SpriteDrawable(npcSprite));
-
-    this.npc = npc;
+    this.npcImage = new Image(new SpriteDrawable(npcSprite));
     this.currentDialog = npc.getDialogTree().getInitialDialog();
-    init(Gdx.graphics.getWidth());
-  }
 
-  public void draw() {
     nameLabel.setText(npc.getName() + ":");
     textLabel.setText(currentDialog.getText());
 
-    super.draw();
+    init(Gdx.graphics.getWidth());
   }
 
-  public void checkForInput() {
-    if (Gdx.input.isKeyJustPressed(keys.getUpInput())) {
-      if (activeIndex > 0) {
-        activeIndex--;
-        setActiveIndex(activeIndex);
-      }
-    } else if (Gdx.input.isKeyJustPressed(keys.getDownInput())) {
-      if (activeIndex < choiceGroup.getChildren().size - 1) {
-        activeIndex++;
-        setActiveIndex(activeIndex);
-      }
-    } else if (Gdx.input.isKeyJustPressed(keys.getInteractInput())) {
-      val leadTo = currentDialog.getChoices().get(activeIndex).getNext();
-      if (leadTo == null) {
-        quit();
-      } else {
-        currentDialog = leadTo;
+  private void submit(int activeIndex) {
+    val leadTo = currentDialog.getChoices().get(activeIndex).getNext();
+    if (leadTo == null) {
+      quit();
+    } else {
+      currentDialog = leadTo;
 
-        resetButtons();
-      }
+      resetButtons();
     }
   }
 
   private void quit() {
-    this.activated = false;
-  }
-
-  private void setActiveIndex(int index) {
-    activeIndex = index;
-    choiceGroup.getChildren().forEach(this::clearChoice);
-
-    choose(index);
-  }
-
-  private void clearChoice(Actor choice) {
-    val label = (Label) choice;
-    val text = label.getText().toString();
-    if (text.startsWith(CHOICE_PREFIX)) {
-      label.setText(text.substring(CHOICE_PREFIX.length()));
-    }
-    choice.setColor(Color.WHITE);
-  }
-
-  private void choose(int index) {
-    val chosen = (Label) choiceGroup.getChildren().get(index);
-    chosen.setColor(Color.YELLOW);
-    val text = chosen.getText().toString();
-
-    chosen.setText(CHOICE_PREFIX + text);
+    super.deactivate();
   }
 
   private void resetButtons() {
@@ -173,7 +119,7 @@ public class DialogDrawer extends AbstractDrawer implements Disposable, Interact
     }
 
     choiceGroup.invalidate();
-    setActiveIndex(0);
+    super.setActiveIndex(0);
   }
 
   @Override
