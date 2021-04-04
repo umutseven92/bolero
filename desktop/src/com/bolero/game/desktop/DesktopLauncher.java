@@ -11,7 +11,6 @@ public class DesktopLauncher {
     LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
     config.title = "Bolero";
 
-    // TODO: Attribute the designer (https://www.flaticon.com/packs/dia-de-muertos-3)
     config.addIcon("icons/guitar-128.png", FileType.Internal);
     config.addIcon("icons/guitar-32.png", FileType.Internal);
     config.addIcon("icons/guitar-16.png", FileType.Internal);
