@@ -14,6 +14,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.bolero.game.BoleroGame;
 import com.bolero.game.GameCamera;
+import com.bolero.game.Sparkle;
 import com.bolero.game.Sun;
 import com.bolero.game.characters.NPC;
 import com.bolero.game.characters.Player;
@@ -39,6 +40,8 @@ import com.bolero.game.mappers.PathMapper;
 import com.bolero.game.mappers.PlayerMapper;
 import com.bolero.game.pathfinding.PathGraph;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.val;
 
 public class GameScreen implements Screen {
@@ -81,6 +84,9 @@ public class GameScreen implements Screen {
   private boolean paused;
   private boolean darken;
 
+  // TODO: Refactor this
+  private final List<Sparkle> sparkles;
+
   public GameScreen(BoleroGame game, String name, String mapPath, String spawnPos)
       throws MapperException, FileNotFoundException, ConfigurationNotLoadedException {
     this.game = game;
@@ -93,6 +99,12 @@ public class GameScreen implements Screen {
     this.darken = false;
     darkenRenderer = new ShapeRenderer();
     initializeAll();
+
+    sparkles = new ArrayList<>();
+    for (val interact : interactionController.getAllRectangles()) {
+      val sparkle = new Sparkle(interact.getOrigin(), new Vector2(1, 1));
+      sparkles.add(sparkle);
+    }
   }
 
   private void initializeMap() {
@@ -169,6 +181,7 @@ public class GameScreen implements Screen {
 
     val mapper = new PlayerMapper(map, world, playerSpawnPosition);
     player = mapper.map();
+
     interactIcon = new InteractIcon(player);
   }
 
@@ -270,6 +283,10 @@ public class GameScreen implements Screen {
 
     game.batch.setProjectionMatrix(gameCamera.getCamera().combined);
     game.batch.begin();
+
+    for (val sparkle: sparkles) {
+      sparkle.draw(game.batch);
+    }
     player.draw(game.batch);
     npcController.drawNPCs(game.batch);
 
@@ -288,13 +305,12 @@ public class GameScreen implements Screen {
     rayHandler.setCombinedMatrix(gameCamera.getCamera());
     rayHandler.updateAndRender();
 
-    drawHUD();
-
     if (darken) {
       // Darken screen before menus.
       darkenScreen();
     }
 
+    drawHUD();
     if (player.getState() == CharacterState.inspecting && inspectRectangle != null) {
       drawInspection();
     } else if (player.getState() == CharacterState.talking) {

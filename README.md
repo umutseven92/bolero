@@ -27,4 +27,4 @@
 * [Animated Rogue by Calciumtrice](https://opengameart.org/content/animated-rogue)
 * [Animated Wizard by Calciumtrice](https://opengameart.org/content/animated-wizard)
 * [Día de muertos by Freepik](https://www.flaticon.com/packs/dia-de-muertos-3)
-
+* [Sparkles by Julien](https://opengameart.org/content/sparkles)
