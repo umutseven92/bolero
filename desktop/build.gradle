@@ -5,6 +5,15 @@ sourceSets.main.resources.srcDirs = ["../core/assets"]
 project.ext.mainClassName = "com.bolero.game.desktop.DesktopLauncher"
 project.ext.assetsDir = new File("../core/assets")
 
+dependencies {
+    implementation project(":core")
+    api "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
+    api "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
+    api "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop"
+    api "com.badlogicgames.gdx:gdx-controllers-desktop:$gdxVersion"
+    api "com.badlogicgames.gdx:gdx-controllers-platform:$gdxVersion:natives-desktop"
+}
+
 task run(dependsOn: classes, type: JavaExec) {
     main = project.mainClassName
     classpath = sourceSets.main.runtimeClasspath
@@ -31,7 +40,4 @@ task dist(type: Jar) {
     with jar
 }
 
-
 dist.dependsOn classes
-
-eclipse.project.name = appName + "-desktop"

@@ -11,11 +11,9 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.bolero.game.BoleroGame;
 import com.bolero.game.exceptions.ConfigurationNotLoadedException;
 import com.bolero.game.exceptions.MissingPropertyException;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.val;
 
-public class CollisionMapper extends AbstractMapper implements Mapper<List<Shape>> {
+public class CollisionMapper extends AbstractMapper implements Mapper<Void> {
   private final World world;
 
   public CollisionMapper(TiledMap map, World world) {
@@ -24,7 +22,7 @@ public class CollisionMapper extends AbstractMapper implements Mapper<List<Shape
   }
 
   @Override
-  public List<Shape> map() throws MissingPropertyException, ConfigurationNotLoadedException {
+  public Void map() throws MissingPropertyException, ConfigurationNotLoadedException {
     val objects =
         super.getLayer(BoleroGame.config.getConfig().getMaps().getLayers().getCollision());
 
@@ -45,7 +43,7 @@ public class CollisionMapper extends AbstractMapper implements Mapper<List<Shape
       shape.dispose();
     }
 
-    return new ArrayList<>();
+    return null; // Needed because of Void
   }
 
   private Shape getShapeFromRectangle(Rectangle rectangle) {

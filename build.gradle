@@ -8,14 +8,9 @@ buildscript {
         jcenter()
         google()
     }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:3.4.0'
-        classpath "com.badlogicgames.gdx:gdx-ai:1.8.2"
-    }
 }
 
 allprojects {
-    apply plugin: "eclipse"
     apply plugin: "idea"
 
     version = '1.0'
@@ -42,47 +37,12 @@ allprojects {
 project(":desktop") {
     apply plugin: "java-library"
 
-    dependencies {
-        implementation project(":core")
-        api "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
-        api "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
-        api "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop"
-        api "com.badlogicgames.gdx:gdx-controllers-desktop:$gdxVersion"
-        api "com.badlogicgames.gdx:gdx-controllers-platform:$gdxVersion:natives-desktop"
-    }
 }
 
 project(":core") {
     apply plugin: "java-library"
-
-    dependencies {
-        api "com.badlogicgames.gdx:gdx:$gdxVersion"
-        api "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
-        api "com.badlogicgames.gdx:gdx-controllers:$gdxVersion"
-        compile "com.badlogicgames.gdx:gdx-ai:$aiVersion"
-        compileOnly "org.projectlombok:lombok:$lombokVersion"
-        annotationProcessor "org.projectlombok:lombok:$lombokVersion"
-    }
 }
 
 project(":tests") {
-    apply plugin: "java"
-
-    sourceSets.test.java.srcDirs = ["src/"]
-
-    dependencies {
-        compile project(":core")
-
-        compile "junit:junit:4.+"
-        compile "org.mockito:mockito-all:1.9.+"
-
-        compile "com.badlogicgames.gdx:gdx-backend-headless:$gdxVersion"
-        compile "com.badlogicgames.gdx:gdx:$gdxVersion"
-        testCompile 'junit:junit:4.+'
-        testCompile "org.mockito:mockito-all:1.9.+"
-
-        testCompile "com.badlogicgames.gdx:gdx-backend-headless:$gdxVersion"
-        testCompile "com.badlogicgames.gdx:gdx:$gdxVersion"
-        testCompile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
-    }
+    apply plugin: "java-library"
 }

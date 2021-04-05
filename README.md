@@ -14,6 +14,7 @@
 
 ## Todo
 
+* Fix choppy camera movement
 * Remember NPC position after transitions (e.g. persistent NPCs)
 * Sound & music
 * Shadow during the day (from the sun)
