@@ -7,8 +7,9 @@ public class TransitionRectangle extends AbstractRectangle {
   @Getter private final String mapName;
   @Getter private final String spawnName;
 
-  public TransitionRectangle(String mapName, String spawnName, Rectangle rectangle) {
-    super(rectangle);
+  public TransitionRectangle(
+      String mapName, String spawnName, Rectangle rectangle, boolean hidden) {
+    super(rectangle, hidden);
     this.mapName = mapName;
     this.spawnName = spawnName;
   }

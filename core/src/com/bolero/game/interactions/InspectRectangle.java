@@ -7,8 +7,8 @@ public class InspectRectangle extends AbstractRectangle {
 
   @Getter private final String stringID;
 
-  public InspectRectangle(Rectangle rectangle, String stringID) {
-    super(rectangle);
+  public InspectRectangle(Rectangle rectangle, String stringID, boolean hidden) {
+    super(rectangle, hidden);
     this.stringID = stringID;
   }
 }

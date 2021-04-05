@@ -24,7 +24,7 @@ public class PlayerLoaderTests {
     PlayerLoader loader = new PlayerLoader();
     PlayerDTO playerDTO = loader.load(fileHandle);
 
-    Assert.assertEquals(playerDTO.getSpriteSheet(), "player.png");
+    Assert.assertEquals(playerDTO.getSpriteSheet().getPath(), "images/player.png");
 
     Assert.assertEquals(playerDTO.getSize().getHeight(), 2.5f, 0.01f);
     Assert.assertEquals(playerDTO.getSize().getWidth(), 2.7f, 0.01f);

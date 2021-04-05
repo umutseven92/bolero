@@ -28,13 +28,10 @@ public class CollisionMapper extends AbstractMapper implements Mapper<List<Shape
     val objects =
         super.getLayer(BoleroGame.config.getConfig().getMaps().getLayers().getCollision());
 
-    val shapes = new ArrayList<Shape>();
-
     for (val object : objects) {
       val rectangle = ((RectangleMapObject) object).getRectangle();
 
       val shape = getShapeFromRectangle(rectangle);
-      shapes.add(shape);
 
       val center = getTransformedCenterForRectangle(rectangle);
 
@@ -44,9 +41,11 @@ public class CollisionMapper extends AbstractMapper implements Mapper<List<Shape
       body.createFixture(shape, 0.0f);
 
       body.setTransform(center, 0);
+
+      shape.dispose();
     }
 
-    return shapes;
+    return new ArrayList<>();
   }
 
   private Shape getShapeFromRectangle(Rectangle rectangle) {

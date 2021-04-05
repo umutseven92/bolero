@@ -14,7 +14,7 @@ public class PauseDrawer extends AbstractChoiceDrawer implements Disposable, Int
   private final ArrayList<Label> choices;
 
   public PauseDrawer(BundleManager bundleManager) throws ConfigurationNotLoadedException {
-    super();
+    super(false);
     super.setOnSubmit(this::submit);
     val cont = new Label(bundleManager.getString("continue"), uiSkin);
     val quit = new Label(bundleManager.getString("quit"), uiSkin);

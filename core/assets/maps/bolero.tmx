@@ -776,7 +776,7 @@
    <point/>
   </object>
  </objectgroup>
- <objectgroup color="#0aff0000" id="5" name="Collision">
+ <objectgroup color="#0aff0000" id="5" name="Collision" locked="1">
   <object id="4" x="507.975" y="512" width="108.025" height="126"/>
   <object id="5" x="617" y="512" width="103" height="36.1756"/>
   <object id="9" x="911" y="512" width="97" height="152"/>
@@ -825,7 +825,7 @@
   <object id="160" x="1279" y="0" width="23" height="25"/>
   <object id="161" x="1302" y="0" width="22" height="14"/>
  </objectgroup>
- <objectgroup color="#00ff00" id="7" name="Interaction" locked="1">
+ <objectgroup color="#00ff00" id="7" name="Interaction">
   <object id="35" name="house1" type="transition" x="960" y="664" width="32" height="32">
    <properties>
     <property name="map_id" value="house1"/>
@@ -838,6 +838,7 @@
   </object>
   <object id="55" name="locked_door" type="inspect" x="1072" y="672" width="31" height="41">
    <properties>
+    <property name="hidden" type="bool" value="true"/>
     <property name="string_id" value="locked"/>
    </properties>
   </object>

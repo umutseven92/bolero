@@ -2,7 +2,13 @@
 npcs:
   - name: Wizard
     spawn: wizard1
-    spriteSheet: npc.png
+    spriteSheet:
+      path: images/wizard.png
+      values:
+        rows: 10
+        cols: 10
+        idleRow: 5
+        walkRow: 7
     movement:
       speed: 0.5
       maxVelocity: 5
@@ -27,7 +33,13 @@ npcs:
             next: *dialog2
   - name: Villager
     spawn: villager1
-    spriteSheet: npc.png
+    spriteSheet:
+      path: images/villager.png
+      values:
+        rows: 10
+        cols: 10
+        idleRow: 5
+        walkRow: 7
     movement:
       speed: 1
       maxVelocity: 7
@@ -35,8 +47,9 @@ npcs:
       height: 3.2
       width: 3
     schedules:
-      - hour: 0
-        minute: 30
+      - time:
+          hour: 0
+          minute: 30
         nodes:
           - id: villager1s
           - id: villager2s

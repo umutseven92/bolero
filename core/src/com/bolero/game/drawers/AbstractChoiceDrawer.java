@@ -18,7 +18,11 @@ public abstract class AbstractChoiceDrawer extends AbstractDrawer {
   @Setter Consumer<Integer> onSubmit;
 
   public AbstractChoiceDrawer() throws ConfigurationNotLoadedException {
-    super();
+    this(false);
+  }
+
+  public AbstractChoiceDrawer(boolean debug) throws ConfigurationNotLoadedException {
+    super(debug);
   }
 
   @Override

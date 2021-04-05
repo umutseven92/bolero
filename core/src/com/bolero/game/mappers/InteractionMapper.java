@@ -42,15 +42,17 @@ public class InteractionMapper extends AbstractMapper
 
       val interactionType = InteractionType.valueOf(type);
 
+      val hidden = props.get("hidden", false, Boolean.class);
+
       switch (interactionType) {
         case transition:
           super.checkMissingProperties(props, Collections.singletonList("map_id"));
-          val transitionRectangle = generateTransitionRectangle(rectangle, props);
+          val transitionRectangle = generateTransitionRectangle(rectangle, hidden, props);
           transitionRectangles.add(transitionRectangle);
           break;
         case inspect:
           super.checkMissingProperties(props, Collections.singletonList("string_id"));
-          val inspectRectangle = generateInspectRectangle(rectangle, props);
+          val inspectRectangle = generateInspectRectangle(rectangle, hidden, props);
           inspectRectangles.add(inspectRectangle);
           break;
       }
@@ -60,19 +62,20 @@ public class InteractionMapper extends AbstractMapper
   }
 
   private TransitionRectangle generateTransitionRectangle(
-      Rectangle rectangle, MapProperties props) {
+      Rectangle rectangle, boolean hidden, MapProperties props) {
 
     val mapName = props.get("map_id", String.class);
 
     val spawnProperty = props.get("spawn_id", String.class);
     val spawnName = spawnProperty == null ? BoleroGame.SPAWN_INITIAL_OBJ : spawnProperty;
 
-    return new TransitionRectangle(mapName, spawnName, rectangle);
+    return new TransitionRectangle(mapName, spawnName, rectangle, hidden);
   }
 
-  private InspectRectangle generateInspectRectangle(Rectangle rectangle, MapProperties props) {
+  private InspectRectangle generateInspectRectangle(
+      Rectangle rectangle, boolean hidden, MapProperties props) {
     val stringID = props.get("string_id", String.class);
 
-    return new InspectRectangle(rectangle, stringID);
+    return new InspectRectangle(rectangle, stringID, hidden);
   }
 }

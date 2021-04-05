@@ -41,8 +41,8 @@ public class NpcLoaderTests {
     Assert.assertEquals(wizard.getSpawn(), "wizard1");
     Assert.assertEquals(villager.getSpawn(), "villager1");
 
-    Assert.assertEquals(wizard.getSpriteSheet(), "npc.png");
-    Assert.assertEquals(villager.getSpriteSheet(), "npc.png");
+    Assert.assertEquals(wizard.getSpriteSheet().getPath(), "images/wizard.png");
+    Assert.assertEquals(villager.getSpriteSheet().getPath(), "images/villager.png");
 
     Assert.assertEquals(wizard.getSize().getHeight(), 2.5f, 0.01f);
     Assert.assertEquals(wizard.getSize().getWidth(), 2.7f, 0.01f);

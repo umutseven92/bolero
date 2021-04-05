@@ -9,16 +9,22 @@ import com.bolero.game.BoleroGame;
 import com.bolero.game.dtos.KeysDTO;
 import com.bolero.game.exceptions.ConfigurationNotLoadedException;
 import lombok.Getter;
-import lombok.Setter;
 
 public abstract class AbstractDrawer implements Disposable {
+  private final boolean debug;
   protected final Skin uiSkin;
   protected final KeysDTO keys;
+
   protected Stage stage;
   protected Table table;
   @Getter private boolean activated;
 
   public AbstractDrawer() throws ConfigurationNotLoadedException {
+    this(false);
+  }
+
+  public AbstractDrawer(boolean debug) throws ConfigurationNotLoadedException {
+    this.debug = debug;
     this.activated = false;
     keys = BoleroGame.config.getConfig().getKeys();
     uiSkin = new Skin(Gdx.files.internal("ui/uiskin.json"));
@@ -35,7 +41,7 @@ public abstract class AbstractDrawer implements Disposable {
   protected void initTable() {
     stage = new Stage();
     table = new Table();
-    table.setDebug(false);
+    table.setDebug(debug);
     table.setFillParent(true);
     stage.addActor(table);
   }

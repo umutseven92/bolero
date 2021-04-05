@@ -4,7 +4,6 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
-import com.badlogic.gdx.physics.box2d.Shape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
 import com.bolero.game.BoleroGame;
@@ -12,20 +11,16 @@ import com.bolero.game.data.MapValues;
 import com.bolero.game.exceptions.ConfigurationNotLoadedException;
 import com.bolero.game.exceptions.MissingPropertyException;
 import com.bolero.game.mappers.CollisionMapper;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.val;
 
 public class CollisionController implements Disposable {
   private final World world;
-  private final ArrayList<Shape> shapes;
 
   private final CollisionMapper mapper;
 
   public CollisionController(World world, TiledMap map) {
     this.world = world;
     mapper = new CollisionMapper(map, world);
-    shapes = new ArrayList<>();
   }
 
   public void load(MapValues mapValues)
@@ -36,8 +31,7 @@ public class CollisionController implements Disposable {
 
   private void createCollisionsFromMap()
       throws MissingPropertyException, ConfigurationNotLoadedException {
-    List<Shape> collisionShapes = mapper.map();
-    shapes.addAll(collisionShapes);
+    mapper.map();
   }
 
   private void createWalls(MapValues mapValues) {
@@ -47,12 +41,8 @@ public class CollisionController implements Disposable {
     val verticalMapWall = new PolygonShape();
     verticalMapWall.setAsBox(1, mapValues.getMapHeightUnit());
 
-    shapes.add(verticalMapWall);
-
     val horizontalMapWall = new PolygonShape();
     horizontalMapWall.setAsBox(mapValues.getMapWidthUnit(), 1);
-
-    shapes.add(verticalMapWall);
 
     val eastWallDef = new BodyDef();
     eastWallDef.position.set(
@@ -74,12 +64,11 @@ public class CollisionController implements Disposable {
     world.createBody(westWallDef).createFixture(verticalMapWall, 0.0f);
     world.createBody(northWallDef).createFixture(horizontalMapWall, 0.0f);
     world.createBody(southWallDef).createFixture(horizontalMapWall, 0.0f);
+
+    verticalMapWall.dispose();
+    horizontalMapWall.dispose();
   }
 
   @Override
-  public void dispose() {
-    for (Shape shape : shapes) {
-      shape.dispose();
-    }
-  }
+  public void dispose() {}
 }

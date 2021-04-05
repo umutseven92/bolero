@@ -14,7 +14,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.bolero.game.BoleroGame;
 import com.bolero.game.GameCamera;
-import com.bolero.game.Sparkle;
 import com.bolero.game.Sun;
 import com.bolero.game.characters.NPC;
 import com.bolero.game.characters.Player;
@@ -39,6 +38,8 @@ import com.bolero.game.interactions.TransitionRectangle;
 import com.bolero.game.mappers.PathMapper;
 import com.bolero.game.mappers.PlayerMapper;
 import com.bolero.game.pathfinding.PathGraph;
+import com.bolero.game.sprite_elements.AbstractSpriteElement;
+import com.bolero.game.sprite_elements.Sparkle;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
@@ -84,8 +85,7 @@ public class GameScreen implements Screen {
   private boolean paused;
   private boolean darken;
 
-  // TODO: Refactor this
-  private final List<Sparkle> sparkles;
+  private List<AbstractSpriteElement> spriteElements;
 
   public GameScreen(BoleroGame game, String name, String mapPath, String spawnPos)
       throws MapperException, FileNotFoundException, ConfigurationNotLoadedException {
@@ -99,12 +99,6 @@ public class GameScreen implements Screen {
     this.darken = false;
     darkenRenderer = new ShapeRenderer();
     initializeAll();
-
-    sparkles = new ArrayList<>();
-    for (val interact : interactionController.getAllRectangles()) {
-      val sparkle = new Sparkle(interact.getOrigin(), new Vector2(1, 1));
-      sparkles.add(sparkle);
-    }
   }
 
   private void initializeMap() {
@@ -117,6 +111,7 @@ public class GameScreen implements Screen {
     mapController.load();
   }
 
+  // Depends on initializeMap
   private void initializeCollision()
       throws MissingPropertyException, ConfigurationNotLoadedException {
     Gdx.app.log(GameScreen.class.getName(), "Initializing collisions..");
@@ -127,6 +122,7 @@ public class GameScreen implements Screen {
     collisionController.load(mapValues);
   }
 
+  // Depends on initializeMap
   private void initializePaths() throws FileNotFoundException, ConfigurationNotLoadedException {
     Gdx.app.log(GameScreen.class.getName(), "Initializing paths..");
 
@@ -134,6 +130,7 @@ public class GameScreen implements Screen {
     this.pathNodes = mapper.map();
   }
 
+  // Depends on initializeMap
   private void initializeInteractions()
       throws MissingPropertyException, ConfigurationNotLoadedException {
     Gdx.app.log(GameScreen.class.getName(), "Initializing interactions..");
@@ -142,6 +139,7 @@ public class GameScreen implements Screen {
     interactionController.load();
   }
 
+  // Depends on initializeCollision, initializeMap
   private void initializeLights(boolean force)
       throws MissingPropertyException, ConfigurationNotLoadedException {
     Gdx.app.log(GameScreen.class.getName(), "Initializing sun & lights..");
@@ -159,6 +157,7 @@ public class GameScreen implements Screen {
     lightController.update(force);
   }
 
+  // Depends on initializeCollision, initializeMap
   private void initializeNPCs()
       throws FileNotFoundException, MissingPropertyException, ConfigurationNotLoadedException {
     Gdx.app.log(GameScreen.class.getName(), "Initializing NPCs..");
@@ -167,6 +166,7 @@ public class GameScreen implements Screen {
     npcController.load(world);
   }
 
+  // Depends on initializePlayer
   private void initializeCamera() {
     Gdx.app.log(GameScreen.class.getName(), "Initializing camera..");
 
@@ -174,6 +174,7 @@ public class GameScreen implements Screen {
     gameCamera.updatePosition(player.getPosition(), mapValues);
   }
 
+  // Depends on initializeCollision, initializeMap
   private void initializePlayer() throws FileNotFoundException, ConfigurationNotLoadedException {
     Gdx.app.log(GameScreen.class.getName(), "Initializing player..");
 
@@ -185,6 +186,7 @@ public class GameScreen implements Screen {
     interactIcon = new InteractIcon(player);
   }
 
+  // Depends on initializeCamera, initializePlayer
   private void initializeDrawers() throws ConfigurationNotLoadedException {
     Gdx.app.log(GameScreen.class.getName(), "Initializing drawers..");
 
@@ -192,6 +194,22 @@ public class GameScreen implements Screen {
     inspectDrawer = new InspectDrawer(game.getBundleController());
     dialogDrawer = new DialogDrawer(player, game.getBundleController());
     pauseDrawer = new PauseDrawer(game.getBundleController());
+  }
+
+  // Depends on initializeInteractions
+  private void initializeSpriteElements() throws FileNotFoundException {
+    Gdx.app.log(GameScreen.class.getName(), "Initializing sprite elements..");
+    spriteElements = new ArrayList<>();
+
+    // Initialize sparkles for interactions
+    for (val interact : interactionController.getAllRectangles()) {
+      if (interact.getHidden()) {
+        // Do not sparkle hidden interaction rectangles.
+        continue;
+      }
+      val sparkle = new Sparkle(interact.getOrigin());
+      spriteElements.add(sparkle);
+    }
   }
 
   // TODO: Parallelize these- watch out for order
@@ -206,6 +224,7 @@ public class GameScreen implements Screen {
     initializePlayer();
     initializeCamera();
     initializeDrawers();
+    initializeSpriteElements();
   }
 
   private void reInitialize() throws MissingPropertyException, ConfigurationNotLoadedException {
@@ -228,55 +247,16 @@ public class GameScreen implements Screen {
             (float) props.get("x") / BoleroGame.UNIT, (float) props.get("y") / BoleroGame.UNIT);
   }
 
-  @Override
-  public void render(float delta) {
+  private void draw(boolean canInteract, boolean inspecting, boolean talking) {
     Gdx.gl.glClearColor(0, 0, 0f, 1);
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-    val playerPos = new Vector2(player.getPosition().x, player.getPosition().y);
-    val playerPosPixels =
-        new Vector2(
-            player.getPosition().x * BoleroGame.UNIT, player.getPosition().y * BoleroGame.UNIT);
-
-    val transitionRectangle = interactionController.checkIfInInteractionRectangle(playerPosPixels);
-    val inspectRectangle = interactionController.checkIfInInspectRectangle(playerPosPixels);
-
-    NPC npc = null;
-
-    if (!paused) {
-
-      try {
-        npcController.checkSchedules(game.clock);
-      } catch (Exception e) {
-        Gdx.app.error(GameScreen.class.getName(), e.toString(), e);
-        e.printStackTrace();
-        System.exit(1);
-      }
-
-      npc = npcController.checkIfNearNPC(playerPos);
-
-      if (player.getState() != CharacterState.inspecting
-          && player.getState() != CharacterState.talking) {
-        handleMovementInput();
-      }
-
-      if (player.getState() == CharacterState.talking) {
-        dialogDrawer.checkForInput();
-      }
-
-      player.setPosition();
-      npcController.setPositions();
-      gameCamera.update(player.getPosition(), mapValues, delta);
-    } else {
-      pauseDrawer.checkForInput();
-    }
-
-    handleMiscInput();
-
+    // 1. Draw background
     mapController.setView(gameCamera.getCamera());
     mapController.drawBackground();
 
     if (game.debugMode) {
+      // 2. Draw debug shapes (if in debug mode)
       debugDrawer.drawDebugShapes(
           interactionController.getAllRectangles(), npcController.getNpcs(), pathNodes);
     }
@@ -284,48 +264,116 @@ public class GameScreen implements Screen {
     game.batch.setProjectionMatrix(gameCamera.getCamera().combined);
     game.batch.begin();
 
-    for (val sparkle: sparkles) {
-      sparkle.draw(game.batch);
+    // 3. Draw sprite elements
+    for (val element : spriteElements) {
+      element.draw(game.batch);
     }
+
+    // 4. Draw players
     player.draw(game.batch);
+
+    // 5. Draw NPCs
     npcController.drawNPCs(game.batch);
 
-    if ((transitionRectangle != null
-            || inspectRectangle != null
-            || (npc != null && npc.hasDialog()))
-        && player.getState() != CharacterState.inspecting
-        && player.getState() != CharacterState.talking) {
+    if (canInteract) {
+      // 6. Draw interact button icon
       interactIcon.draw(game.batch);
     }
 
     game.batch.end();
 
+    // 7. Draw foreground
     mapController.drawForeground();
 
-    rayHandler.setCombinedMatrix(gameCamera.getCamera());
-    rayHandler.updateAndRender();
-
-    if (darken) {
-      // Darken screen before menus.
-      darkenScreen();
-    }
-
-    drawHUD();
-    if (player.getState() == CharacterState.inspecting && inspectRectangle != null) {
-      drawInspection();
-    } else if (player.getState() == CharacterState.talking) {
-      drawDialog();
-    }
+    // 8. Draw collision shapes (if in debug mode)
     if (game.debugMode) {
       debugDrawer.drawBox2DBodies(world);
     }
 
+    // 9. Draw lights
+    rayHandler.setCombinedMatrix(gameCamera.getCamera());
+    rayHandler.updateAndRender();
+
+    // 10. Dim the screen (if in menus)
+    if (darken) {
+      darkenScreen();
+    }
+
+    if (game.debugMode) {
+      // 11. Draw debug information (if in debug mode)
+      debugDrawer.drawDebugInfo(
+          player, game.currentScreen.name, gameCamera.getCamera().zoom, game.clock);
+    }
+
+    // 12. Draw inspect or dialog menus (if inspecting or talking)
+    if (inspecting) {
+      inspectDrawer.draw();
+    } else if (talking) {
+      dialogDrawer.draw();
+    }
+
+    // 13. Draw pause menu
+    if (paused) {
+      pauseDrawer.draw();
+    }
+  }
+
+  @Override
+  public void render(float delta) {
+    val playerPosPixels = player.getPosition().cpy().scl(BoleroGame.UNIT);
+    val transitionRectangle = interactionController.checkIfInInteractionRectangle(playerPosPixels);
+    val inspectRectangle = interactionController.checkIfInInspectRectangle(playerPosPixels);
+
+    if (!paused) {
+      gameStep(delta);
+    } else {
+      pauseDrawer.checkForInput();
+    }
+
+    NPC npc = npcController.checkIfNearNPC(player.getPosition());
+
+    val canInteract =
+        (transitionRectangle != null
+                || inspectRectangle != null
+                || (npc != null && npc.hasDialog()))
+            && player.getState() != CharacterState.inspecting
+            && player.getState() != CharacterState.talking;
+    val inspecting = player.getState() == CharacterState.inspecting && inspectRectangle != null;
+    val talking = player.getState() == CharacterState.talking;
+
+    this.draw(canInteract, inspecting, talking);
+
+    handlePauseInput();
+
     if (!paused) {
       handleInteractionInput(transitionRectangle, inspectRectangle, npc);
-      doPhysicsStep(delta);
-    } else {
-      handlePauseInput();
+      physicsStep(delta);
     }
+  }
+
+  private void gameStep(float delta) {
+    try {
+      npcController.checkSchedules(game.clock);
+    } catch (Exception e) {
+      Gdx.app.error(GameScreen.class.getName(), e.toString(), e);
+      e.printStackTrace();
+      System.exit(1);
+    }
+
+    if (player.getState() != CharacterState.inspecting
+        && player.getState() != CharacterState.talking) {
+      handleMovementInput();
+    }
+
+    if (player.getState() == CharacterState.talking) {
+      dialogDrawer.checkForInput();
+    }
+
+    handleMiscInput();
+
+    player.setPosition();
+    npcController.setPositions();
+    gameCamera.update(player.getPosition(), mapValues, delta);
   }
 
   private void darkenScreen() {
@@ -338,7 +386,7 @@ public class GameScreen implements Screen {
     Gdx.gl.glDisable(GL20.GL_BLEND);
   }
 
-  private void doPhysicsStep(float deltaTime) {
+  private void physicsStep(float deltaTime) {
     // Fixed time step from https://gafferongames.com/post/fix_your_timestep/
     // Max frame time to avoid spiral of death on slow devices
     float frameTime = Math.min(deltaTime, 0.25f);
@@ -350,17 +398,6 @@ public class GameScreen implements Screen {
       sun.update();
       lightController.update();
       accumulator -= TIME_STEP;
-    }
-  }
-
-  private void drawHUD() {
-    if (game.debugMode) {
-      debugDrawer.drawDebugInfo(
-          player, game.currentScreen.name, gameCamera.getCamera().zoom, game.clock);
-    }
-
-    if (paused) {
-      pauseDrawer.draw();
     }
   }
 
@@ -380,11 +417,6 @@ public class GameScreen implements Screen {
       if (Gdx.input.isKeyJustPressed(keys.getZoomOutInput())) {
         gameCamera.zoomInInstant(0.3f);
       }
-    }
-
-    if (Gdx.input.isKeyJustPressed(keys.getPauseInput())) {
-      paused = !paused;
-      darken = !darken;
     }
   }
 
@@ -432,9 +464,10 @@ public class GameScreen implements Screen {
 
   private void handlePauseInput() {
     boolean interactionPressed = Gdx.input.isKeyJustPressed(keys.getInteractInput());
-    if (interactionPressed && paused) {
-      paused = false;
-      darken = !darken;
+    boolean pausePressed = Gdx.input.isKeyJustPressed(keys.getPauseInput());
+
+    if (pausePressed || (interactionPressed && paused)) {
+      pauseGame();
     }
   }
 
@@ -442,7 +475,21 @@ public class GameScreen implements Screen {
     game.loadRoute(rectangle.getMapName(), rectangle.getSpawnName());
   }
 
+  private void pauseGame() {
+    if (pauseDrawer.isActivated()) {
+      // Still paused.
+      return;
+    }
+
+    darken = !darken;
+    paused = !paused;
+  }
+
   private void inspect(InspectRectangle inspectRectangle) {
+    // Inspect menus only have one input, and only one inspect menu can be active at one time,
+    // so no need to check whether we are still inspecting.
+    // Interact button can either open or close the inspect menu; no other interactions are
+    // possible.
     darken = !darken;
     if (player.getState() != CharacterState.inspecting) {
       inspectDrawer.activate(inspectRectangle);
@@ -454,12 +501,9 @@ public class GameScreen implements Screen {
     }
   }
 
-  private void drawInspection() {
-    inspectDrawer.draw();
-  }
-
   private void talkToNPC(NPC npc) {
     if (dialogDrawer.isActivated()) {
+      // Still in dialog.
       return;
     }
 
@@ -474,10 +518,6 @@ public class GameScreen implements Screen {
       player.stopTalking();
       npc.stopTalking();
     }
-  }
-
-  private void drawDialog() {
-    dialogDrawer.draw();
   }
 
   private void reloadMap() {
@@ -514,16 +554,17 @@ public class GameScreen implements Screen {
 
   @Override
   public void dispose() {
-    map.dispose();
-    world.dispose();
-    player.dispose();
-    collisionController.dispose();
-    mapController.dispose();
-    debugDrawer.dispose();
     interactIcon.dispose();
-    npcController.dispose();
+    dialogDrawer.dispose();
+    pauseDrawer.dispose();
+    debugDrawer.dispose();
     inspectDrawer.dispose();
+    collisionController.dispose();
+    player.dispose();
+    mapController.dispose();
+    npcController.dispose();
     lightController.dispose();
-    rayHandler.dispose();
+    world.dispose();
+    map.dispose();
   }
 }
