@@ -10,7 +10,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.4.0'
-        classpath "com.badlogicgames.gdx:gdx-ai:1.8.1"
+        classpath "com.badlogicgames.gdx:gdx-ai:1.8.2"
     }
 }
 
@@ -26,6 +26,7 @@ allprojects {
         box2DLightsVersion = '1.5'
         ashleyVersion = '1.7.3'
         aiVersion = '1.8.2'
+        lombokVersion = '1.18.8'
     }
 
     repositories {
@@ -58,9 +59,9 @@ project(":core") {
         api "com.badlogicgames.gdx:gdx:$gdxVersion"
         api "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
         api "com.badlogicgames.gdx:gdx-controllers:$gdxVersion"
-        compile "com.badlogicgames.gdx:gdx-ai:1.8.1"
-        compileOnly "org.projectlombok:lombok:1.18.8"
-        annotationProcessor 'org.projectlombok:lombok:1.18.8'
+        compile "com.badlogicgames.gdx:gdx-ai:$aiVersion"
+        compileOnly "org.projectlombok:lombok:$lombokVersion"
+        annotationProcessor "org.projectlombok:lombok:$lombokVersion"
     }
 }
 
