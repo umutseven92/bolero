@@ -22,12 +22,13 @@ import com.bolero.game.dtos.SpriteSheetDTO;
 import com.bolero.game.dtos.SpriteSheetValuesDTO;
 import com.bolero.game.enums.CharacterState;
 import com.bolero.game.enums.Direction;
+import com.bolero.game.mixins.FileLoader;
 import java.io.FileNotFoundException;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.val;
 
-public abstract class AbstractCharacter implements Disposable {
+public abstract class AbstractCharacter implements Disposable, FileLoader {
   private static final float FLOAT_TOLERANCE = 0.5f;
   private static final float DIALOG_SPRITE_SIZE_MULTIPLIER = 10f;
 
@@ -36,7 +37,6 @@ public abstract class AbstractCharacter implements Disposable {
 
   private Animation<TextureRegion> walkAnimation;
   private Animation<TextureRegion> idleAnimation;
-
   private final Texture spriteSheet;
   private final SizeDTO size;
   private final MovementDTO movement;
@@ -77,13 +77,7 @@ public abstract class AbstractCharacter implements Disposable {
     this.position = position;
     this.direction = Direction.right;
     this.state = CharacterState.idle;
-    val file = Gdx.files.internal(ssDTO.getPath());
-
-    if (!file.exists()) {
-      throw new FileNotFoundException(String.format("%s does not exist.", ssDTO.getPath()));
-    }
-
-    this.spriteSheet = new Texture(file);
+    this.spriteSheet = new Texture(getFile(ssDTO.getPath()));
 
     loadAnimationsFromSpiteSheet(ssDTO.getValues());
 

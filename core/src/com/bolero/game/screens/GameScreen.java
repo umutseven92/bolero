@@ -99,9 +99,10 @@ public class GameScreen implements Screen {
     this.darken = false;
     darkenRenderer = new ShapeRenderer();
     initializeAll();
+    mapController.playMusic();
   }
 
-  private void initializeMap() {
+  private void initializeMap() throws FileNotFoundException {
     Gdx.app.log(GameScreen.class.getName(), "Initializing map..");
 
     map = new TmxMapLoader().load(mapPath);
@@ -132,7 +133,7 @@ public class GameScreen implements Screen {
 
   // Depends on initializeMap
   private void initializeInteractions()
-      throws MissingPropertyException, ConfigurationNotLoadedException {
+      throws MissingPropertyException, ConfigurationNotLoadedException, FileNotFoundException {
     Gdx.app.log(GameScreen.class.getName(), "Initializing interactions..");
 
     interactionController = new InteractionController(map);
@@ -227,12 +228,14 @@ public class GameScreen implements Screen {
     initializeSpriteElements();
   }
 
-  private void reInitialize() throws MissingPropertyException, ConfigurationNotLoadedException {
+  private void reInitialize()
+      throws MissingPropertyException, ConfigurationNotLoadedException, FileNotFoundException {
     initializeMap();
     initializeInteractions();
     initializeLights(true);
   }
 
+  // TODO: Refactor this into MapController
   private void setPlayerSpawnPoint(String name) throws ConfigurationNotLoadedException {
     MapObject playerSpawnObject =
         map.getLayers()
@@ -372,6 +375,7 @@ public class GameScreen implements Screen {
     handleMiscInput();
 
     player.setPosition();
+    mapController.playWalkSound(player.getPosition(), delta);
     npcController.setPositions();
     gameCamera.update(player.getPosition(), mapValues, delta);
   }
@@ -472,6 +476,7 @@ public class GameScreen implements Screen {
   }
 
   private void handleTransition(TransitionRectangle rectangle) {
+    interactionController.playTransitionSound();
     game.loadRoute(rectangle.getMapName(), rectangle.getSpawnName());
   }
 
@@ -481,6 +486,7 @@ public class GameScreen implements Screen {
       return;
     }
 
+    mapController.toggleMusic();
     darken = !darken;
     paused = !paused;
   }
@@ -492,6 +498,8 @@ public class GameScreen implements Screen {
     // possible.
     darken = !darken;
     if (player.getState() != CharacterState.inspecting) {
+      interactionController.playInspectSound(inspectRectangle);
+
       inspectDrawer.activate(inspectRectangle);
       gameCamera.zoomIn(0.2f);
       player.startInspecting();
@@ -544,13 +552,17 @@ public class GameScreen implements Screen {
   public void show() {}
 
   @Override
-  public void pause() {}
+  public void pause() {
+    pauseGame();
+  }
 
   @Override
   public void resume() {}
 
   @Override
-  public void hide() {}
+  public void hide() {
+    pauseGame();
+  }
 
   @Override
   public void dispose() {
@@ -559,6 +571,7 @@ public class GameScreen implements Screen {
     pauseDrawer.dispose();
     debugDrawer.dispose();
     inspectDrawer.dispose();
+    interactionController.dispose();
     collisionController.dispose();
     player.dispose();
     mapController.dispose();

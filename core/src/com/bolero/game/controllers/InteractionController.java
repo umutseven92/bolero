@@ -1,30 +1,60 @@
 package com.bolero.game.controllers;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Disposable;
 import com.bolero.game.exceptions.ConfigurationNotLoadedException;
 import com.bolero.game.exceptions.MissingPropertyException;
 import com.bolero.game.interactions.AbstractRectangle;
 import com.bolero.game.interactions.InspectRectangle;
 import com.bolero.game.interactions.TransitionRectangle;
 import com.bolero.game.mappers.InteractionMapper;
+import com.bolero.game.mixins.FileLoader;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.val;
 
-public class InteractionController {
+public class InteractionController implements Disposable, FileLoader {
   private List<TransitionRectangle> transitionRectangles;
   private List<InspectRectangle> inspectRectangles;
 
   private final InteractionMapper mapper;
 
-  public InteractionController(TiledMap map) {
+  private final Sound transitionSound;
+  private Sound inspectSound;
+
+  public InteractionController(TiledMap map) throws FileNotFoundException {
     transitionRectangles = new ArrayList<>();
     inspectRectangles = new ArrayList<>();
     mapper = new InteractionMapper(map);
+
+    // This is static for now- same sound effect for every transition.
+    val soundPath = "sound_effects/door_open.ogg";
+    val file = getFile(soundPath);
+    transitionSound = Gdx.audio.newSound(file);
   }
 
-  public void load() throws MissingPropertyException, ConfigurationNotLoadedException {
+  public void playTransitionSound() {
+    transitionSound.play();
+  }
+
+  public void playInspectSound(InspectRectangle inspectRectangle) {
+    // Each inspection can have a different sound effect, so we load the sound effect each time.
+    val file = inspectRectangle.getSoundFile();
+
+    if (file == null) {
+      return;
+    }
+
+    inspectSound = Gdx.audio.newSound(file);
+    inspectSound.play();
+  }
+
+  public void load()
+      throws MissingPropertyException, ConfigurationNotLoadedException, FileNotFoundException {
     val rectangles = mapper.map();
     transitionRectangles = rectangles.x;
     inspectRectangles = rectangles.y;
@@ -55,5 +85,13 @@ public class InteractionController {
     }
 
     return null;
+  }
+
+  @Override
+  public void dispose() {
+    transitionSound.dispose();
+    if (inspectSound != null) {
+      inspectSound.dispose();
+    }
   }
 }

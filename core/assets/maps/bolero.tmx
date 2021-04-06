@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.4" tiledversion="1.4.3" orientation="orthogonal" renderorder="right-down" width="50" height="50" tilewidth="32" tileheight="32" infinite="0" nextlayerid="14" nextobjectid="162">
+ <properties>
+  <property name="music" value="forest.mp3"/>
+ </properties>
  <tileset firstgid="1" source="../tilesets/walls,ground,decorative.tsx"/>
  <tileset firstgid="1025" source="../tilesets/houses.tsx"/>
  <layer id="1" name="Grass" width="50" height="50" locked="1">
   <properties>
    <property name="foreground" type="bool" value="false"/>
+   <property name="walk_sound" value="grass.ogg"/>
   </properties>
   <data encoding="csv">
 576,542,575,574,608,544,576,543,606,574,606,606,574,542,607,544,576,575,576,544,606,607,576,542,608,543,606,607,543,607,544,544,544,544,607,544,543,575,543,544,576,574,576,544,574,544,607,544,575,574,
@@ -62,6 +66,7 @@
  <layer id="2" name="Background" width="50" height="50" locked="1">
   <properties>
    <property name="foreground" type="bool" value="false"/>
+   <property name="walk_sound" value="road.ogg"/>
   </properties>
   <data encoding="csv">
 0,0,538,539,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,824,824,824,824,824,824,824,824,824,824,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,570,571,0,0,0,
@@ -839,6 +844,7 @@
   <object id="55" name="locked_door" type="inspect" x="1072" y="672" width="31" height="41">
    <properties>
     <property name="hidden" type="bool" value="true"/>
+    <property name="sound" value="locked.ogg"/>
     <property name="string_id" value="locked"/>
    </properties>
   </object>

@@ -11,13 +11,15 @@ import com.bolero.game.exceptions.ConfigurationNotLoadedException;
 import com.bolero.game.exceptions.MissingPropertyException;
 import com.bolero.game.interactions.InspectRectangle;
 import com.bolero.game.interactions.TransitionRectangle;
+import com.bolero.game.mixins.FileLoader;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import lombok.val;
 
 public class InteractionMapper extends AbstractMapper
-    implements Mapper<Tuple<List<TransitionRectangle>, List<InspectRectangle>>> {
+    implements Mapper<Tuple<List<TransitionRectangle>, List<InspectRectangle>>>, FileLoader {
 
   public InteractionMapper(TiledMap map) {
     super(map);
@@ -25,7 +27,7 @@ public class InteractionMapper extends AbstractMapper
 
   @Override
   public Tuple<List<TransitionRectangle>, List<InspectRectangle>> map()
-      throws MissingPropertyException, ConfigurationNotLoadedException {
+      throws MissingPropertyException, ConfigurationNotLoadedException, FileNotFoundException {
     val objects =
         super.getLayer(BoleroGame.config.getConfig().getMaps().getLayers().getInteraction());
 
@@ -39,7 +41,6 @@ public class InteractionMapper extends AbstractMapper
       super.checkMissingProperties(props, Collections.singletonList("type"));
 
       val type = props.get("type", String.class);
-
       val interactionType = InteractionType.valueOf(type);
 
       val hidden = props.get("hidden", false, Boolean.class);
@@ -48,11 +49,19 @@ public class InteractionMapper extends AbstractMapper
         case transition:
           super.checkMissingProperties(props, Collections.singletonList("map_id"));
           val transitionRectangle = generateTransitionRectangle(rectangle, hidden, props);
+
           transitionRectangles.add(transitionRectangle);
           break;
         case inspect:
           super.checkMissingProperties(props, Collections.singletonList("string_id"));
           val inspectRectangle = generateInspectRectangle(rectangle, hidden, props);
+
+          val sound = props.get("sound", String.class);
+          if (sound != null) {
+            val fullPath = String.format("sound_effects/%s", sound);
+            val file = getFile(fullPath);
+            inspectRectangle.setSoundFile(file);
+          }
           inspectRectangles.add(inspectRectangle);
           break;
       }

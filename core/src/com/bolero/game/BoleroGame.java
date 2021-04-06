@@ -23,6 +23,7 @@ public class BoleroGame extends Game {
   private BundleManager bundleManager;
 
   public static final float UNIT = 16f;
+  public static final float TILE_SIZE = 32f;
   public static final String SPAWN_INITIAL_OBJ = "initial";
 
   public static Config config;
