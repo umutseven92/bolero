@@ -24,7 +24,7 @@ public class CollisionMapper extends AbstractMapper implements Mapper<Void> {
   @Override
   public Void map() throws MissingPropertyException, ConfigurationNotLoadedException {
     val objects =
-        super.getLayer(BoleroGame.config.getConfig().getMaps().getLayers().getCollision());
+        super.getLayer(BoleroGame.getConfig().getMaps().getLayers().getCollision());
 
     for (val object : objects) {
       val rectangle = ((RectangleMapObject) object).getRectangle();

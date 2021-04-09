@@ -23,14 +23,18 @@ import com.bolero.game.dtos.SpriteSheetValuesDTO;
 import com.bolero.game.enums.CharacterState;
 import com.bolero.game.enums.Direction;
 import com.bolero.game.mixins.FileLoader;
+import com.bolero.game.mixins.SmoothMovement;
 import java.io.FileNotFoundException;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.val;
 
-public abstract class AbstractCharacter implements Disposable, FileLoader {
+public abstract class AbstractCharacter implements Disposable, FileLoader, SmoothMovement {
   private static final float FLOAT_TOLERANCE = 0.5f;
   private static final float DIALOG_SPRITE_SIZE_MULTIPLIER = 10f;
+
+  // How fast the sprite catches up to the body.
+  private static final float SPRITE_SPEED = 0.2f;
 
   private CharacterState state;
   private Direction direction;
@@ -47,13 +51,10 @@ public abstract class AbstractCharacter implements Disposable, FileLoader {
   protected final Body body;
   private float animationTime;
 
-  private CircleShape circle;
-
   @Getter @Setter private Goal goal;
-  private Vector2 position;
 
   public Vector2 getPosition() {
-    return position;
+    return this.body.getPosition();
   }
 
   public CharacterState getState() {
@@ -74,7 +75,6 @@ public abstract class AbstractCharacter implements Disposable, FileLoader {
       throws FileNotFoundException {
     this.size = sizeDTO;
     this.movement = movementDTO;
-    this.position = position;
     this.direction = Direction.right;
     this.state = CharacterState.idle;
     this.spriteSheet = new Texture(getFile(ssDTO.getPath()));
@@ -87,7 +87,7 @@ public abstract class AbstractCharacter implements Disposable, FileLoader {
     dialogSprite.setSize(
         size.getWidth() * DIALOG_SPRITE_SIZE_MULTIPLIER * BoleroGame.UNIT,
         size.getHeight() * DIALOG_SPRITE_SIZE_MULTIPLIER * BoleroGame.UNIT);
-    body = createBody(box2DWorld, bodyType);
+    body = createBody(box2DWorld, bodyType, position);
   }
 
   private void loadAnimationsFromSpiteSheet(SpriteSheetValuesDTO ssValues) {
@@ -131,9 +131,18 @@ public abstract class AbstractCharacter implements Disposable, FileLoader {
   }
 
   public void setPosition() {
-    this.position = this.body.getPosition();
+    // Smoothly set the next position; good for movement.
+    val nextPosTuple =
+        getSmoothMovement(
+            SPRITE_SPEED,
+            this.body.getPosition(),
+            new Vector2(this.sprite.getX(), this.sprite.getY()));
+
+    // Center the sprite inside the body.
+    val w = this.size.getWidth() / nextPosTuple.y;
+    val h = this.size.getHeight() / nextPosTuple.y;
     this.sprite.setPosition(
-        this.position.x - this.size.getWidth() / 2, this.position.y - this.size.getHeight() / 2);
+        nextPosTuple.x.x - (w / BoleroGame.UNIT), nextPosTuple.x.y - (h / BoleroGame.UNIT));
 
     handleSchedule();
   }
@@ -149,7 +158,7 @@ public abstract class AbstractCharacter implements Disposable, FileLoader {
       boolean xReached = false;
       boolean yReached = false;
 
-      if (MathUtils.isEqual(this.position.y, currentGoal.getY(), FLOAT_TOLERANCE)) {
+      if (MathUtils.isEqual(this.body.getPosition().y, currentGoal.getY(), FLOAT_TOLERANCE)) {
         yReached = true;
         if (this.goal.onLastGoal()) {
           stopYMovement();
@@ -162,7 +171,7 @@ public abstract class AbstractCharacter implements Disposable, FileLoader {
         }
       }
 
-      if (MathUtils.isEqual(this.position.x, currentGoal.getX(), FLOAT_TOLERANCE)) {
+      if (MathUtils.isEqual(this.body.getPosition().x, currentGoal.getX(), FLOAT_TOLERANCE)) {
         xReached = true;
         if (this.goal.onLastGoal()) {
           stopXMovement();
@@ -181,8 +190,8 @@ public abstract class AbstractCharacter implements Disposable, FileLoader {
           this.goal = null;
         }
       } else {
-        float impulseX = currentGoal.getX() - this.position.x;
-        float impulseY = currentGoal.getY() - this.position.y;
+        float impulseX = currentGoal.getX() - this.body.getPosition().x;
+        float impulseY = currentGoal.getY() - this.body.getPosition().y;
 
         if (impulseX > 0) {
           direction = Direction.right;
@@ -209,13 +218,14 @@ public abstract class AbstractCharacter implements Disposable, FileLoader {
     }
   }
 
-  private Body createBody(World world, BodyDef.BodyType bodyType) {
+  private Body createBody(World world, BodyDef.BodyType bodyType, Vector2 initialPosition) {
     val bodyDef = new BodyDef();
     bodyDef.type = bodyType;
-    bodyDef.position.set(position.x + size.getWidth() / 2, position.y + size.getHeight() / 2);
+    bodyDef.position.set(
+        initialPosition.x + size.getWidth() / 2, initialPosition.y + size.getHeight() / 2);
     val body = world.createBody(bodyDef);
 
-    circle = new CircleShape();
+    val circle = new CircleShape();
     circle.setRadius(1);
 
     val fixtureDef = new FixtureDef();
@@ -229,6 +239,7 @@ public abstract class AbstractCharacter implements Disposable, FileLoader {
     fixtureDef.filter.groupIndex = -1;
     body.createFixture(fixtureDef);
 
+    circle.dispose();
     return body;
   }
 
@@ -333,6 +344,5 @@ public abstract class AbstractCharacter implements Disposable, FileLoader {
   @Override
   public void dispose() {
     spriteSheet.dispose();
-    circle.dispose();
   }
 }

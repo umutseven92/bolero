@@ -3,45 +3,43 @@ package com.bolero.game;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.bolero.game.exceptions.ConfigurationNotLoadedException;
+import com.bolero.game.dtos.ConfigDTO;
 import com.bolero.game.exceptions.InvalidConfigurationException;
+import com.bolero.game.loaders.ConfigLoader;
 import com.bolero.game.managers.BundleManager;
 import com.bolero.game.screens.GameScreen;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import lombok.SneakyThrows;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.val;
 
-// TODO: Refactor the public fields
 public class BoleroGame extends Game {
-
-  private ArrayList<GameScreen> screenPool;
-  private HashMap<String, String> screens;
-  private BundleManager bundleManager;
-
   public static final float UNIT = 16f;
   public static final float TILE_SIZE = 32f;
   public static final String SPAWN_INITIAL_OBJ = "initial";
 
-  public static Config config;
+  private ArrayList<GameScreen> screenPool;
+  private HashMap<String, String> screens;
+  @Getter private BundleManager bundleManager;
 
-  public SpriteBatch batch;
-  public BitmapFont font;
+  @Getter private static ConfigDTO config;
 
-  public Boolean debugMode = false;
+  @Getter private SpriteBatch batch;
 
-  public GameScreen currentScreen;
+  @Getter private GameScreen currentScreen;
 
-  public Clock clock;
+  /* Thing that should be persistent across all screens;
+   * 1) Clock
+   * 2) NPC controllers (NPC's should continue their schedules off-screen)
+   * 3) Player
+   * 4) Debug mode
+   */
+  @Getter private Clock clock;
+  @Getter @Setter private Boolean debugMode = false;
 
-  public BundleManager getBundleController() {
-    return bundleManager;
-  }
-
-  @SneakyThrows(ConfigurationNotLoadedException.class)
   @Override
   public void create() {
     Gdx.app.setLogLevel(Application.LOG_DEBUG);
@@ -49,24 +47,28 @@ public class BoleroGame extends Game {
     bundleManager = new BundleManager();
 
     batch = new SpriteBatch();
-    font = new BitmapFont();
 
     screens = new HashMap<>();
     screenPool = new ArrayList<>();
 
-    config = new Config();
-
     try {
-      config.load();
+      config = loadConfig();
     } catch (FileNotFoundException | InvalidConfigurationException e) {
       Gdx.app.error(GameScreen.class.getName(), e.toString(), e);
       e.printStackTrace();
       System.exit(1);
     }
 
-    clock = new Clock(bundleManager, config.getConfig().getClock());
-    loadMaps(config.getConfig().getMaps().getPath());
-    loadRoute(config.getConfig().getMaps().getInitial(), SPAWN_INITIAL_OBJ);
+    clock = new Clock(bundleManager, config.getClock());
+    loadMaps(config.getMaps().getPath());
+    loadRoute(config.getMaps().getInitial(), SPAWN_INITIAL_OBJ);
+  }
+
+  private ConfigDTO loadConfig() throws FileNotFoundException, InvalidConfigurationException {
+    val loader = new ConfigLoader();
+    val file = Gdx.files.internal("./config/game.yaml");
+
+    return loader.load(file);
   }
 
   public void loadMaps(String mapPath) {
@@ -83,7 +85,7 @@ public class BoleroGame extends Game {
     GameScreen toLoad = null;
 
     try {
-      Gdx.app.log(GameScreen.class.getName(), String.format("Loading map %s", screenName));
+      Gdx.app.log(GameScreen.class.getName(), String.format("Loading route %s", screenName));
 
       if (!screens.containsKey(screenName)) {
         throw new Exception(String.format("Screen %s does not exist in screens.", screenName));
@@ -112,7 +114,6 @@ public class BoleroGame extends Game {
   @Override
   public void dispose() {
     batch.dispose();
-    font.dispose();
 
     for (GameScreen screen : screenPool) {
       screen.dispose();

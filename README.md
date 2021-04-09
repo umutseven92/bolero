@@ -14,17 +14,26 @@
 
 ## Todo
 
-* Fix choppy camera movement
+### Features
+
 * Remember NPC position after transitions (e.g. persistent NPCs)
-* Sound & music
+* Documentation update
 * Shadow during the day (from the sun)
 * Loading screen
 * NPC transition through maps
+* Gamepad support
+* Inventory
 * Embed game logic into the engine
+
+### Bugs
+
+* Characters & camera slide to target initially
+* House map bugs out in fullscreen when player is on the right side
 
 ## Assets Used
 
 ### Art
+
 * [RPG Worlds Town by Szadi art](https://szadiart.itch.io/rpg-worlds-town)
 * [RPG Worlds Houses and Interiors by Szadi art](https://szadiart.itch.io/rpg-worlds-houses-and-interiors)
 * [Animated Rogue by Calciumtrice](https://opengameart.org/content/animated-rogue)
@@ -33,7 +42,9 @@
 * [Sparkles by Julien](https://opengameart.org/content/sparkles)
 
 ### Music
+
 * [Forest Ambience by TinyWorlds](https://opengameart.org/content/forest-ambience)
 
 ### Sound Effects
+
 * [50 RPG sound effects by Kenney](https://opengameart.org/content/50-rpg-sound-effects)

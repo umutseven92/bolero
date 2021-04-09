@@ -10,7 +10,7 @@ import lombok.var;
 public interface InteractButtonImage {
 
   default FileHandle getInteractButtonImage() throws ConfigurationNotLoadedException {
-    val key = BoleroGame.config.getConfig().getKeys().getInteract();
+    val key = BoleroGame.getConfig().getKeys().getInteract();
     var keyfile = Gdx.files.internal(String.format("buttons/green-%s.png", key));
 
     if (!keyfile.exists()) {

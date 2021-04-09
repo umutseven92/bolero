@@ -12,10 +12,6 @@ public class Config {
   private ConfigDTO config;
 
   public void load() throws FileNotFoundException, InvalidConfigurationException {
-    val loader = new ConfigLoader();
-    val file = Gdx.files.internal("./config/game.yaml");
-
-    this.config = loader.load(file);
   }
 
   public ConfigDTO getConfig() throws ConfigurationNotLoadedException {

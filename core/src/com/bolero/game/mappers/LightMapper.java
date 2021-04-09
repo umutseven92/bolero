@@ -32,7 +32,7 @@ public class LightMapper extends AbstractMapper implements Mapper<List<LightCont
   @Override
   public List<LightContainer> map()
       throws MissingPropertyException, ConfigurationNotLoadedException {
-    val objects = super.getLayer(BoleroGame.config.getConfig().getMaps().getLayers().getLights());
+    val objects = super.getLayer(BoleroGame.getConfig().getMaps().getLayers().getLights());
 
     val lights = new ArrayList<LightContainer>();
 

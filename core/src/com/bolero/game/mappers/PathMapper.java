@@ -23,7 +23,7 @@ public class PathMapper extends AbstractMapper implements Mapper<PathGraph> {
   public PathGraph map() throws FileNotFoundException, ConfigurationNotLoadedException {
     val layer =
         (TiledMapTileLayer)
-            map.getLayers().get(BoleroGame.config.getConfig().getMaps().getLayers().getPath());
+            map.getLayers().get(BoleroGame.getConfig().getMaps().getLayers().getPath());
 
     if (layer == null) {
       // There is no path layer in the map.

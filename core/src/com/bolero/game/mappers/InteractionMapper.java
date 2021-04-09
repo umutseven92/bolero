@@ -29,7 +29,7 @@ public class InteractionMapper extends AbstractMapper
   public Tuple<List<TransitionRectangle>, List<InspectRectangle>> map()
       throws MissingPropertyException, ConfigurationNotLoadedException, FileNotFoundException {
     val objects =
-        super.getLayer(BoleroGame.config.getConfig().getMaps().getLayers().getInteraction());
+        super.getLayer(BoleroGame.getConfig().getMaps().getLayers().getInteraction());
 
     val transitionRectangles = new ArrayList<TransitionRectangle>();
     val inspectRectangles = new ArrayList<InspectRectangle>();

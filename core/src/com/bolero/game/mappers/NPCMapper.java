@@ -38,7 +38,7 @@ public class NPCMapper extends AbstractMapper implements Mapper<List<NPC>> {
     val npcsDTO = npcLoader.load(file);
 
     val spawnObjects =
-        super.getLayer(BoleroGame.config.getConfig().getMaps().getLayers().getSpawn());
+        super.getLayer(BoleroGame.getConfig().getMaps().getLayers().getSpawn());
 
     val npcs = new ArrayList<NPC>();
 
@@ -61,7 +61,7 @@ public class NPCMapper extends AbstractMapper implements Mapper<List<NPC>> {
 
         if (npcDTO.isPresent()) {
           val scheduleObjects =
-              super.getLayer(BoleroGame.config.getConfig().getMaps().getLayers().getSchedule());
+              super.getLayer(BoleroGame.getConfig().getMaps().getLayers().getSchedule());
 
           val scheduleMap = new HashMap<String, Vector2>();
 

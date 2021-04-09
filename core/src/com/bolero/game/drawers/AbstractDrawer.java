@@ -26,7 +26,7 @@ public abstract class AbstractDrawer implements Disposable {
   public AbstractDrawer(boolean debug) throws ConfigurationNotLoadedException {
     this.debug = debug;
     this.activated = false;
-    keys = BoleroGame.config.getConfig().getKeys();
+    keys = BoleroGame.getConfig().getKeys();
     uiSkin = new Skin(Gdx.files.internal("ui/uiskin.json"));
   }
 

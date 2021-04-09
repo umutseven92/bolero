@@ -6,8 +6,6 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.maps.MapObject;
-import com.badlogic.gdx.maps.MapProperties;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.math.Vector2;
@@ -67,8 +65,7 @@ public class GameScreen implements Screen {
   private DialogDrawer dialogDrawer;
   private InspectDrawer inspectDrawer;
   private PauseDrawer pauseDrawer;
-  private Vector2 playerSpawnPosition;
-  private float accumulator = 0;
+  private float physicsAccumulator = 0;
 
   private NPCController npcController;
   private MapController mapController;
@@ -94,7 +91,7 @@ public class GameScreen implements Screen {
 
     this.mapPath = mapPath;
     this.spawnPos = spawnPos;
-    this.keys = BoleroGame.config.getConfig().getKeys();
+    this.keys = BoleroGame.getConfig().getKeys();
     this.paused = false;
     this.darken = false;
     darkenRenderer = new ShapeRenderer();
@@ -149,7 +146,7 @@ public class GameScreen implements Screen {
 
     rayHandler.setBlurNum(3);
 
-    sun = new Sun(rayHandler, game.clock, BoleroGame.config.getConfig().getSun());
+    sun = new Sun(rayHandler, game.getClock(), BoleroGame.getConfig().getSun());
     sun.update();
 
     lightController = new LightController(map, rayHandler, sun);
@@ -163,7 +160,7 @@ public class GameScreen implements Screen {
       throws FileNotFoundException, MissingPropertyException, ConfigurationNotLoadedException {
     Gdx.app.log(GameScreen.class.getName(), "Initializing NPCs..");
 
-    npcController = new NPCController(map, game.getBundleController(), pathNodes);
+    npcController = new NPCController(map, game.getBundleManager(), pathNodes);
     npcController.load(world);
   }
 
@@ -172,16 +169,14 @@ public class GameScreen implements Screen {
     Gdx.app.log(GameScreen.class.getName(), "Initializing camera..");
 
     gameCamera = new GameCamera();
-    gameCamera.updatePosition(player.getPosition(), mapValues);
+    gameCamera.updateCameraPosition(player.getPosition(), mapValues);
   }
 
   // Depends on initializeCollision, initializeMap
   private void initializePlayer() throws FileNotFoundException, ConfigurationNotLoadedException {
     Gdx.app.log(GameScreen.class.getName(), "Initializing player..");
 
-    setPlayerSpawnPoint(spawnPos);
-
-    val mapper = new PlayerMapper(map, world, playerSpawnPosition);
+    val mapper = new PlayerMapper(map, world, spawnPos);
     player = mapper.map();
 
     interactIcon = new InteractIcon(player);
@@ -192,9 +187,9 @@ public class GameScreen implements Screen {
     Gdx.app.log(GameScreen.class.getName(), "Initializing drawers..");
 
     debugDrawer = new DebugDrawer(gameCamera.getCamera());
-    inspectDrawer = new InspectDrawer(game.getBundleController());
-    dialogDrawer = new DialogDrawer(player, game.getBundleController());
-    pauseDrawer = new PauseDrawer(game.getBundleController());
+    inspectDrawer = new InspectDrawer(game.getBundleManager());
+    dialogDrawer = new DialogDrawer(player, game.getBundleManager());
+    pauseDrawer = new PauseDrawer(game.getBundleManager());
   }
 
   // Depends on initializeInteractions
@@ -216,6 +211,8 @@ public class GameScreen implements Screen {
   // TODO: Parallelize these- watch out for order
   private void initializeAll()
       throws FileNotFoundException, MissingPropertyException, ConfigurationNotLoadedException {
+    Gdx.app.log(GameScreen.class.getName(), String.format("Loading map %s..", this.name));
+
     initializeMap();
     initializeCollision();
     initializeInteractions();
@@ -226,6 +223,8 @@ public class GameScreen implements Screen {
     initializeCamera();
     initializeDrawers();
     initializeSpriteElements();
+
+    Gdx.app.log(GameScreen.class.getName(), String.format("Map %s loaded.", this.name));
   }
 
   private void reInitialize()
@@ -233,21 +232,6 @@ public class GameScreen implements Screen {
     initializeMap();
     initializeInteractions();
     initializeLights(true);
-  }
-
-  // TODO: Refactor this into MapController
-  private void setPlayerSpawnPoint(String name) throws ConfigurationNotLoadedException {
-    MapObject playerSpawnObject =
-        map.getLayers()
-            .get(BoleroGame.config.getConfig().getMaps().getLayers().getSpawn())
-            .getObjects()
-            .get(name);
-
-    final MapProperties props = playerSpawnObject.getProperties();
-
-    playerSpawnPosition =
-        new Vector2(
-            (float) props.get("x") / BoleroGame.UNIT, (float) props.get("y") / BoleroGame.UNIT);
   }
 
   private void draw(boolean canInteract, boolean inspecting, boolean talking) {
@@ -258,38 +242,38 @@ public class GameScreen implements Screen {
     mapController.setView(gameCamera.getCamera());
     mapController.drawBackground();
 
-    if (game.debugMode) {
+    if (game.getDebugMode()) {
       // 2. Draw debug shapes (if in debug mode)
       debugDrawer.drawDebugShapes(
           interactionController.getAllRectangles(), npcController.getNpcs(), pathNodes);
     }
 
-    game.batch.setProjectionMatrix(gameCamera.getCamera().combined);
-    game.batch.begin();
+    game.getBatch().setProjectionMatrix(gameCamera.getCamera().combined);
+    game.getBatch().begin();
 
     // 3. Draw sprite elements
     for (val element : spriteElements) {
-      element.draw(game.batch);
+      element.draw(game.getBatch());
     }
 
     // 4. Draw players
-    player.draw(game.batch);
+    player.draw(game.getBatch());
 
     // 5. Draw NPCs
-    npcController.drawNPCs(game.batch);
+    npcController.drawNPCs(game.getBatch());
 
     if (canInteract) {
       // 6. Draw interact button icon
-      interactIcon.draw(game.batch);
+      interactIcon.draw(game.getBatch());
     }
 
-    game.batch.end();
+    game.getBatch().end();
 
     // 7. Draw foreground
     mapController.drawForeground();
 
     // 8. Draw collision shapes (if in debug mode)
-    if (game.debugMode) {
+    if (game.getDebugMode()) {
       debugDrawer.drawBox2DBodies(world);
     }
 
@@ -302,10 +286,10 @@ public class GameScreen implements Screen {
       darkenScreen();
     }
 
-    if (game.debugMode) {
+    if (game.getDebugMode()) {
       // 11. Draw debug information (if in debug mode)
       debugDrawer.drawDebugInfo(
-          player, game.currentScreen.name, gameCamera.getCamera().zoom, game.clock);
+          player, game.getCurrentScreen().name, gameCamera.getCamera().zoom, game.getClock());
     }
 
     // 12. Draw inspect or dialog menus (if inspecting or talking)
@@ -356,7 +340,7 @@ public class GameScreen implements Screen {
 
   private void gameStep(float delta) {
     try {
-      npcController.checkSchedules(game.clock);
+      npcController.checkSchedules(game.getClock());
     } catch (Exception e) {
       Gdx.app.error(GameScreen.class.getName(), e.toString(), e);
       e.printStackTrace();
@@ -394,23 +378,23 @@ public class GameScreen implements Screen {
     // Fixed time step from https://gafferongames.com/post/fix_your_timestep/
     // Max frame time to avoid spiral of death on slow devices
     float frameTime = Math.min(deltaTime, 0.25f);
-    accumulator += frameTime;
+    physicsAccumulator += frameTime;
     float TIME_STEP = 1 / 16f;
-    while (accumulator >= TIME_STEP) {
+    while (physicsAccumulator >= TIME_STEP) {
       world.step(TIME_STEP, 6, 2);
-      game.clock.increment();
+      game.getClock().increment();
       sun.update();
       lightController.update();
-      accumulator -= TIME_STEP;
+      physicsAccumulator -= TIME_STEP;
     }
   }
 
   private void handleMiscInput() {
     if (Gdx.input.isKeyJustPressed(keys.getDebugInput())) {
-      game.debugMode = !game.debugMode;
+      game.setDebugMode(!game.getDebugMode());
     }
 
-    if (game.debugMode) {
+    if (game.getDebugMode()) {
       if (Gdx.input.isKeyJustPressed(keys.getReloadInput())) {
         reloadMap();
       }

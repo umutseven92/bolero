@@ -5,8 +5,11 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.bolero.game.data.MapValues;
+import com.bolero.game.mixins.SmoothMovement;
+import lombok.val;
 
-public class GameCamera {
+public class GameCamera implements SmoothMovement {
+  private static final float CAMERA_SPEED = 0.1f;
   private static final float ZOOM_SPEED = 0.8f;
   private final OrthographicCamera camera;
 
@@ -18,6 +21,7 @@ public class GameCamera {
     float width = Gdx.graphics.getWidth();
     float height = Gdx.graphics.getHeight();
 
+    // TODO: Calculate these magic numbers
     camera.setToOrtho(false, width / 28.6f, height / 32f);
 
     camera.update();
@@ -29,10 +33,13 @@ public class GameCamera {
     camera.viewportHeight = height / 32f;
   }
 
-  public void updatePosition(Vector2 position, MapValues mapValues) {
-    camera.position.x = position.x;
-    camera.position.y = position.y;
+  public void updateCameraPosition(Vector2 targetPos, MapValues mapValues) {
+    val newPos =
+        getSmoothMovement(
+            CAMERA_SPEED, targetPos, new Vector2(camera.position.x, camera.position.y));
+    camera.position.set(newPos.x);
 
+    // Prevent camera from going outside the screen
     float centerX = camera.viewportWidth / 2;
     float centerY = camera.viewportHeight / 2;
 
@@ -46,10 +53,7 @@ public class GameCamera {
     camera.update();
   }
 
-  public void update(Vector2 position, MapValues mapValues, float deltaTime) {
-
-    updatePosition(position, mapValues);
-
+  private void checkCameraZoom(float deltaTime) {
     if (camera.zoom != zoomTarget) {
       if (camera.zoom > zoomTarget) {
         camera.zoom -= deltaTime * ZOOM_SPEED;
@@ -63,6 +67,11 @@ public class GameCamera {
         }
       }
     }
+  }
+
+  public void update(Vector2 position, MapValues mapValues, float deltaTime) {
+    this.updateCameraPosition(position, mapValues);
+    this.checkCameraZoom(deltaTime);
   }
 
   public void zoomInInstant(float amount) {
