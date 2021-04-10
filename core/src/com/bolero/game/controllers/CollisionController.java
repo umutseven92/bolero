@@ -13,7 +13,7 @@ import com.bolero.game.exceptions.MissingPropertyException;
 import com.bolero.game.mappers.CollisionMapper;
 import lombok.val;
 
-public class CollisionController implements Disposable {
+public class CollisionController {
   private final World world;
 
   private final CollisionMapper mapper;
@@ -69,6 +69,4 @@ public class CollisionController implements Disposable {
     horizontalMapWall.dispose();
   }
 
-  @Override
-  public void dispose() {}
 }

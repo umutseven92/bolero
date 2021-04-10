@@ -45,7 +45,7 @@ import lombok.val;
 
 public class GameScreen implements Screen {
   private final BoleroGame game;
-  private final String name;
+  private final String mapName;
   private World world;
 
   private GameCamera gameCamera;
@@ -81,19 +81,21 @@ public class GameScreen implements Screen {
   private PathGraph pathNodes;
   private boolean paused;
   private boolean darken;
+  private final boolean muted;
 
   private List<AbstractSpriteElement> spriteElements;
 
-  public GameScreen(BoleroGame game, String name, String mapPath, String spawnPos)
+  public GameScreen(BoleroGame game, String mapName, String mapPath, String spawnPos)
       throws MapperException, FileNotFoundException, ConfigurationNotLoadedException {
     this.game = game;
-    this.name = name;
+    this.mapName = mapName;
 
     this.mapPath = mapPath;
     this.spawnPos = spawnPos;
     this.keys = BoleroGame.getConfig().getKeys();
     this.paused = false;
     this.darken = false;
+    this.muted = true;
     darkenRenderer = new ShapeRenderer();
     initializeAll();
     mapController.playMusic();
@@ -105,8 +107,9 @@ public class GameScreen implements Screen {
     map = new TmxMapLoader().load(mapPath);
     mapValues = new MapValues(map);
 
-    mapController = new MapController(map);
+    mapController = new MapController(map, mapName);
     mapController.load();
+    mapController.setMusicVolume(muted ? 0f : 1f);
   }
 
   // Depends on initializeMap
@@ -168,7 +171,7 @@ public class GameScreen implements Screen {
   private void initializeCamera() {
     Gdx.app.log(GameScreen.class.getName(), "Initializing camera..");
 
-    gameCamera = new GameCamera();
+    gameCamera = new GameCamera(player.getPosition());
     gameCamera.updateCameraPosition(player.getPosition(), mapValues);
   }
 
@@ -211,7 +214,7 @@ public class GameScreen implements Screen {
   // TODO: Parallelize these- watch out for order
   private void initializeAll()
       throws FileNotFoundException, MissingPropertyException, ConfigurationNotLoadedException {
-    Gdx.app.log(GameScreen.class.getName(), String.format("Loading map %s..", this.name));
+    Gdx.app.log(GameScreen.class.getName(), String.format("Loading map %s..", this.mapName));
 
     initializeMap();
     initializeCollision();
@@ -224,7 +227,7 @@ public class GameScreen implements Screen {
     initializeDrawers();
     initializeSpriteElements();
 
-    Gdx.app.log(GameScreen.class.getName(), String.format("Map %s loaded.", this.name));
+    Gdx.app.log(GameScreen.class.getName(), String.format("Map %s loaded.", this.mapName));
   }
 
   private void reInitialize()
@@ -288,8 +291,7 @@ public class GameScreen implements Screen {
 
     if (game.getDebugMode()) {
       // 11. Draw debug information (if in debug mode)
-      debugDrawer.drawDebugInfo(
-          player, game.getCurrentScreen().name, gameCamera.getCamera().zoom, game.getClock());
+      debugDrawer.drawDebugInfo(player, mapName, gameCamera.getCamera().zoom, game.getClock());
     }
 
     // 12. Draw inspect or dialog menus (if inspecting or talking)
@@ -550,18 +552,21 @@ public class GameScreen implements Screen {
 
   @Override
   public void dispose() {
+    Gdx.app.debug(GameScreen.class.getName(), String.format("Disposing map %s..", mapName));
+
     interactIcon.dispose();
     dialogDrawer.dispose();
     pauseDrawer.dispose();
     debugDrawer.dispose();
     inspectDrawer.dispose();
     interactionController.dispose();
-    collisionController.dispose();
     player.dispose();
     mapController.dispose();
     npcController.dispose();
     lightController.dispose();
     world.dispose();
     map.dispose();
+
+    Gdx.app.debug(GameScreen.class.getName(), String.format("Disposed map %s.", mapName));
   }
 }

@@ -21,11 +21,12 @@ import java.util.Optional;
 import lombok.val;
 
 public class MapController implements Disposable, FileLoader {
-  private final float TIME_BETWEEN_WALK_SOUND = 0.3f;
-  private final float MINIMUM_STEP_FOR_SOUND = 1f;
+  private static final float TIME_BETWEEN_WALK_SOUND = 0.3f;
+  private static final float MINIMUM_STEP_FOR_SOUND = 1f;
 
   private final OrthogonalTiledMapRenderer mapRenderer;
   private final TiledMap map;
+  private final String mapName;
   private int[] backgroundLayers;
   private int[] foregroundLayers;
   private List<Tuple<Integer, FileHandle>> backgroundLayersWithWalkSound;
@@ -34,8 +35,9 @@ public class MapController implements Disposable, FileLoader {
   private Vector2 lastPosition;
   private float elapsedTimeSinceLastWalk;
 
-  public MapController(TiledMap map) {
+  public MapController(TiledMap map, String mapName) {
     this.map = map;
+    this.mapName = mapName;
     this.mapRenderer = new OrthogonalTiledMapRenderer(map, 1 / BoleroGame.UNIT);
     this.elapsedTimeSinceLastWalk = 0f;
     this.lastPosition = Vector2.Zero;
@@ -84,6 +86,10 @@ public class MapController implements Disposable, FileLoader {
 
     if (songName == null) {
       // No song is defined in map.
+      Gdx.app.debug(
+          MapController.class.getName(),
+          String.format("No music defined for map %s.", this.mapName));
+
       return;
     }
 
@@ -124,6 +130,12 @@ public class MapController implements Disposable, FileLoader {
   public void pauseMusic() {
     if (music != null) {
       music.pause();
+    }
+  }
+
+  public void setMusicVolume(float volume) {
+    if (music != null) {
+      music.setVolume(volume);
     }
   }
 

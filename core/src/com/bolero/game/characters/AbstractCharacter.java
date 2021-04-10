@@ -66,7 +66,7 @@ public abstract class AbstractCharacter implements Disposable, FileLoader, Smoot
   }
 
   public AbstractCharacter(
-      Vector2 position,
+      Vector2 initialPosition,
       World box2DWorld,
       SizeDTO sizeDTO,
       MovementDTO movementDTO,
@@ -84,10 +84,12 @@ public abstract class AbstractCharacter implements Disposable, FileLoader, Smoot
     this.sprite = new Sprite();
     this.dialogSprite = new Sprite();
     sprite.setSize(size.getWidth(), sizeDTO.getHeight());
+    setSpritePosition(1.0f - SPRITE_SPEED, initialPosition);
+
     dialogSprite.setSize(
         size.getWidth() * DIALOG_SPRITE_SIZE_MULTIPLIER * BoleroGame.UNIT,
         size.getHeight() * DIALOG_SPRITE_SIZE_MULTIPLIER * BoleroGame.UNIT);
-    body = createBody(box2DWorld, bodyType, position);
+    body = createBody(box2DWorld, bodyType, initialPosition);
   }
 
   private void loadAnimationsFromSpiteSheet(SpriteSheetValuesDTO ssValues) {
@@ -138,13 +140,16 @@ public abstract class AbstractCharacter implements Disposable, FileLoader, Smoot
             this.body.getPosition(),
             new Vector2(this.sprite.getX(), this.sprite.getY()));
 
-    // Center the sprite inside the body.
-    val w = this.size.getWidth() / nextPosTuple.y;
-    val h = this.size.getHeight() / nextPosTuple.y;
-    this.sprite.setPosition(
-        nextPosTuple.x.x - (w / BoleroGame.UNIT), nextPosTuple.x.y - (h / BoleroGame.UNIT));
+    setSpritePosition(nextPosTuple.y, new Vector2(nextPosTuple.x.x, nextPosTuple.x.y));
 
     handleSchedule();
+  }
+
+  private void setSpritePosition(float ispeed, Vector2 position) {
+    // Center the sprite inside the body.
+    val w = this.size.getWidth() / ispeed;
+    val h = this.size.getHeight() / ispeed;
+    this.sprite.setPosition(position.x - (w / BoleroGame.UNIT), position.y - (h / BoleroGame.UNIT));
   }
 
   private void handleSchedule() {

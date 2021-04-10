@@ -3,7 +3,7 @@
 ## Features
 
 * Box2D physics
-* Load tiles maps
+* Load tiled maps
 * NPCs
 * NPC dialogue
 * NPC schedules
@@ -27,8 +27,7 @@
 
 ### Bugs
 
-* Characters & camera slide to target initially
-* House map bugs out in fullscreen when player is on the right side
+* Characters slide a little when spawning.
 
 ## Assets Used
 

@@ -10,7 +10,6 @@ import com.bolero.game.loaders.ConfigLoader;
 import com.bolero.game.managers.BundleManager;
 import com.bolero.game.screens.GameScreen;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,7 +20,6 @@ public class BoleroGame extends Game {
   public static final float TILE_SIZE = 32f;
   public static final String SPAWN_INITIAL_OBJ = "initial";
 
-  private ArrayList<GameScreen> screenPool;
   private HashMap<String, String> screens;
   @Getter private BundleManager bundleManager;
 
@@ -29,13 +27,14 @@ public class BoleroGame extends Game {
 
   @Getter private SpriteBatch batch;
 
-  @Getter private GameScreen currentScreen;
+  private GameScreen currentScreen;
 
   /* Thing that should be persistent across all screens;
    * 1) Clock
    * 2) NPC controllers (NPC's should continue their schedules off-screen)
    * 3) Player
    * 4) Debug mode
+   * 5) Pause menu
    */
   @Getter private Clock clock;
   @Getter @Setter private Boolean debugMode = false;
@@ -49,7 +48,6 @@ public class BoleroGame extends Game {
     batch = new SpriteBatch();
 
     screens = new HashMap<>();
-    screenPool = new ArrayList<>();
 
     try {
       config = loadConfig();
@@ -85,13 +83,12 @@ public class BoleroGame extends Game {
     GameScreen toLoad = null;
 
     try {
-      Gdx.app.log(GameScreen.class.getName(), String.format("Loading route %s", screenName));
-
       if (!screens.containsKey(screenName)) {
         throw new Exception(String.format("Screen %s does not exist in screens.", screenName));
       }
 
       val path = screens.get(screenName);
+      disposeCurrentScreen();
 
       toLoad = new GameScreen(this, screenName, path, spawnName);
     } catch (Exception e) {
@@ -100,23 +97,20 @@ public class BoleroGame extends Game {
       System.exit(1);
     }
 
-    screenPool.add(toLoad);
-    this.setScreen(toLoad);
-
     currentScreen = toLoad;
+
+    this.setScreen(toLoad);
   }
 
-  @Override
-  public void render() {
-    super.render();
+  private void disposeCurrentScreen() {
+    if (currentScreen != null) {
+      currentScreen.dispose();
+    }
   }
 
   @Override
   public void dispose() {
+    disposeCurrentScreen();
     batch.dispose();
-
-    for (GameScreen screen : screenPool) {
-      screen.dispose();
-    }
   }
 }
