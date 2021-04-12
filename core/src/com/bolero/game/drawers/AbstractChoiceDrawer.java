@@ -5,7 +5,8 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
-import com.bolero.game.exceptions.ConfigurationNotLoadedException;
+import com.bolero.game.BoleroGame;
+import com.bolero.game.dtos.KeysDTO;
 import java.util.function.Consumer;
 import lombok.Setter;
 import lombok.val;
@@ -14,15 +15,18 @@ public abstract class AbstractChoiceDrawer extends AbstractDrawer {
   private static final String CHOICE_PREFIX = "-> ";
   private int activeIndex;
   protected VerticalGroup choiceGroup;
+  protected final KeysDTO keys;
 
   @Setter Consumer<Integer> onSubmit;
 
-  public AbstractChoiceDrawer() throws ConfigurationNotLoadedException {
+  public AbstractChoiceDrawer() {
     this(false);
   }
 
-  public AbstractChoiceDrawer(boolean debug) throws ConfigurationNotLoadedException {
+  public AbstractChoiceDrawer(boolean debug) {
     super(debug);
+
+    keys = BoleroGame.getConfig().getKeys();
   }
 
   @Override

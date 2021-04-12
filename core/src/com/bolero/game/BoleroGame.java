@@ -3,31 +3,30 @@ package com.bolero.game;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.bolero.game.dtos.ConfigDTO;
 import com.bolero.game.exceptions.InvalidConfigurationException;
 import com.bolero.game.loaders.ConfigLoader;
 import com.bolero.game.managers.BundleManager;
+import com.bolero.game.mixins.FileLoader;
 import com.bolero.game.screens.GameScreen;
+import com.bolero.game.screens.LoadingScreen;
 import java.io.FileNotFoundException;
 import java.util.HashMap;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.val;
 
-public class BoleroGame extends Game {
+public class BoleroGame extends Game implements FileLoader {
   public static final float UNIT = 16f;
   public static final float TILE_SIZE = 32f;
   public static final String SPAWN_INITIAL_OBJ = "initial";
 
   private HashMap<String, String> screens;
-  @Getter private BundleManager bundleManager;
-
-  @Getter private static ConfigDTO config;
 
   @Getter private SpriteBatch batch;
-
-  private GameScreen currentScreen;
 
   /* Thing that should be persistent across all screens;
    * 1) Clock
@@ -35,9 +34,16 @@ public class BoleroGame extends Game {
    * 3) Player
    * 4) Debug mode
    * 5) Pause menu
+   * 6) Bundle manager
+   * 7) Config
+   * 8) Audio effects that need to persist between stages
    */
   @Getter private Clock clock;
   @Getter @Setter private Boolean debugMode = false;
+  @Getter private BundleManager bundleManager;
+  @Getter private Sound transitionSound;
+
+  @Getter private static ConfigDTO config;
 
   @Override
   public void create() {
@@ -49,17 +55,26 @@ public class BoleroGame extends Game {
 
     screens = new HashMap<>();
 
+    val soundPath = "sound_effects/door_open.ogg";
+    FileHandle soundFile;
+
     try {
+      soundFile = getFile(soundPath);
+
       config = loadConfig();
     } catch (FileNotFoundException | InvalidConfigurationException e) {
       Gdx.app.error(GameScreen.class.getName(), e.toString(), e);
       e.printStackTrace();
       System.exit(1);
+      return;
     }
 
     clock = new Clock(bundleManager, config.getClock());
     loadMaps(config.getMaps().getPath());
-    loadRoute(config.getMaps().getInitial(), SPAWN_INITIAL_OBJ);
+    loadRouteLoading(config.getMaps().getInitial(), SPAWN_INITIAL_OBJ);
+
+    // This is static for now- same sound effect for every transition.
+    transitionSound = Gdx.audio.newSound(soundFile);
   }
 
   private ConfigDTO loadConfig() throws FileNotFoundException, InvalidConfigurationException {
@@ -78,31 +93,31 @@ public class BoleroGame extends Game {
     }
   }
 
+  public void playTransitionSound() {
+    transitionSound.play();
+  }
+
   // TODO: Remember NPC positions during transition
-  public void loadRoute(String screenName, String spawnName) {
-    GameScreen toLoad = null;
+  // Load the screen with a loading screen before it.
+  public void loadRouteLoading(String screenName, String spawnName) {
 
     try {
       if (!screens.containsKey(screenName)) {
         throw new Exception(String.format("Screen %s does not exist in screens.", screenName));
       }
-
-      val path = screens.get(screenName);
-      disposeCurrentScreen();
-
-      toLoad = new GameScreen(this, screenName, path, spawnName);
     } catch (Exception e) {
       Gdx.app.error(GameScreen.class.getName(), e.toString(), e);
       e.printStackTrace();
       System.exit(1);
+      return;
     }
 
-    currentScreen = toLoad;
+    val path = screens.get(screenName);
 
-    this.setScreen(toLoad);
-  }
+    val loadingScreen = new LoadingScreen(this, screenName, path, spawnName);
+    val currentScreen = this.getScreen();
+    this.setScreen(loadingScreen);
 
-  private void disposeCurrentScreen() {
     if (currentScreen != null) {
       currentScreen.dispose();
     }
@@ -110,7 +125,7 @@ public class BoleroGame extends Game {
 
   @Override
   public void dispose() {
-    disposeCurrentScreen();
+    transitionSound.dispose();
     batch.dispose();
   }
 }

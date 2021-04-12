@@ -23,7 +23,6 @@ public class InteractionController implements Disposable, FileLoader {
 
   private final InteractionMapper mapper;
 
-  private final Sound transitionSound;
   private Sound inspectSound;
 
   public InteractionController(TiledMap map) throws FileNotFoundException {
@@ -31,15 +30,8 @@ public class InteractionController implements Disposable, FileLoader {
     inspectRectangles = new ArrayList<>();
     mapper = new InteractionMapper(map);
 
-    // This is static for now- same sound effect for every transition.
-    val soundPath = "sound_effects/door_open.ogg";
-    val file = getFile(soundPath);
-    transitionSound = Gdx.audio.newSound(file);
   }
 
-  public void playTransitionSound() {
-    transitionSound.play();
-  }
 
   public void playInspectSound(InspectRectangle inspectRectangle) {
     // Each inspection can have a different sound effect, so we load the sound effect each time.
@@ -89,7 +81,6 @@ public class InteractionController implements Disposable, FileLoader {
 
   @Override
   public void dispose() {
-    transitionSound.dispose();
     if (inspectSound != null) {
       inspectSound.dispose();
     }

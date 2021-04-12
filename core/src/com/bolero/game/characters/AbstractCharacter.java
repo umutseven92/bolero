@@ -243,7 +243,6 @@ public abstract class AbstractCharacter implements Disposable, FileLoader, Smoot
     // https://stackoverflow.com/a/937557/3894455
     fixtureDef.filter.groupIndex = -1;
     body.createFixture(fixtureDef);
-
     circle.dispose();
     return body;
   }

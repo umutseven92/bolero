@@ -5,28 +5,23 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Disposable;
-import com.bolero.game.BoleroGame;
-import com.bolero.game.dtos.KeysDTO;
-import com.bolero.game.exceptions.ConfigurationNotLoadedException;
 import lombok.Getter;
 
 public abstract class AbstractDrawer implements Disposable {
   private final boolean debug;
   protected final Skin uiSkin;
-  protected final KeysDTO keys;
 
   protected Stage stage;
   protected Table table;
   @Getter private boolean activated;
 
-  public AbstractDrawer() throws ConfigurationNotLoadedException {
+  public AbstractDrawer() {
     this(false);
   }
 
-  public AbstractDrawer(boolean debug) throws ConfigurationNotLoadedException {
+  public AbstractDrawer(boolean debug) {
     this.debug = debug;
     this.activated = false;
-    keys = BoleroGame.getConfig().getKeys();
     uiSkin = new Skin(Gdx.files.internal("ui/uiskin.json"));
   }
 

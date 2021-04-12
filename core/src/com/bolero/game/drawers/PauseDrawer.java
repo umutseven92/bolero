@@ -3,7 +3,6 @@ package com.bolero.game.drawers;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.Disposable;
-import com.bolero.game.exceptions.ConfigurationNotLoadedException;
 import com.bolero.game.icons.InteractButtonImage;
 import com.bolero.game.managers.BundleManager;
 import java.util.ArrayList;
@@ -13,7 +12,7 @@ public class PauseDrawer extends AbstractChoiceDrawer implements Disposable, Int
 
   private final ArrayList<Label> choices;
 
-  public PauseDrawer(BundleManager bundleManager) throws ConfigurationNotLoadedException {
+  public PauseDrawer(BundleManager bundleManager) {
     super(false);
     super.setOnSubmit(this::submit);
     val cont = new Label(bundleManager.getString("continue"), uiSkin);

@@ -32,7 +32,7 @@ public class DebugDrawer extends AbstractDrawer implements Disposable {
   private final Label clockLabel;
   private final Label zoomLevelLabel;
 
-  public DebugDrawer(Camera camera) throws ConfigurationNotLoadedException {
+  public DebugDrawer(Camera camera) {
     super();
     this.camera = camera;
 

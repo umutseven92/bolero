@@ -56,7 +56,6 @@ public class GameScreen implements Screen {
 
   private MapValues mapValues;
 
-  private CollisionController collisionController;
   private InteractionController interactionController;
   private LightController lightController;
 
@@ -83,6 +82,7 @@ public class GameScreen implements Screen {
   private boolean darken;
   private final boolean muted;
 
+  private boolean disposing;
   private List<AbstractSpriteElement> spriteElements;
 
   public GameScreen(BoleroGame game, String mapName, String mapPath, String spawnPos)
@@ -96,6 +96,7 @@ public class GameScreen implements Screen {
     this.paused = false;
     this.darken = false;
     this.muted = true;
+    this.disposing = false;
     darkenRenderer = new ShapeRenderer();
     initializeAll();
     mapController.playMusic();
@@ -119,7 +120,7 @@ public class GameScreen implements Screen {
 
     world = new World(Vector2.Zero, true);
 
-    collisionController = new CollisionController(world, map);
+    val collisionController = new CollisionController(world, map);
     collisionController.load(mapValues);
   }
 
@@ -307,8 +308,13 @@ public class GameScreen implements Screen {
     }
   }
 
+  //  Method called by the game loop from the application every time rendering should be performed.
+  // Game logic updates are usually also performed in this method.
   @Override
   public void render(float delta) {
+    if (disposing) {
+      return;
+    }
     val playerPosPixels = player.getPosition().cpy().scl(BoleroGame.UNIT);
     val transitionRectangle = interactionController.checkIfInInteractionRectangle(playerPosPixels);
     val inspectRectangle = interactionController.checkIfInInspectRectangle(playerPosPixels);
@@ -462,8 +468,12 @@ public class GameScreen implements Screen {
   }
 
   private void handleTransition(TransitionRectangle rectangle) {
-    interactionController.playTransitionSound();
-    game.loadRoute(rectangle.getMapName(), rectangle.getSpawnName());
+    game.playTransitionSound();
+    loadRoute(rectangle.getMapName(), rectangle.getSpawnName());
+  }
+
+  private void loadRoute(String mapName, String spawnName) {
+    game.loadRouteLoading(mapName, spawnName);
   }
 
   private void pauseGame() {
@@ -525,6 +535,9 @@ public class GameScreen implements Screen {
     }
   }
 
+  //  This method is called every time the game screen is re-sized and the game is not in the paused
+  // state. It is also called once just after the create() method.
+  //  The parameters are the new width and height the screen has been resized to in pixels.
   @Override
   public void resize(int width, int height) {
     gameCamera.setViewPort(width, height);
@@ -534,22 +547,27 @@ public class GameScreen implements Screen {
     pauseDrawer.init();
   }
 
+  // Called when this screen becomes the current screen for a Game.
   @Override
   public void show() {}
 
+  //  On Android this method is called when the Home button is pressed or an incoming call is
+  // received. On desktop this is called just before dispose() when exiting the application.
+  //  A good place to save the game state.
   @Override
   public void pause() {
-    pauseGame();
+    disposing = true;
   }
 
+  // This method is only called on Android, when the application resumes from a paused state.
   @Override
   public void resume() {}
 
+  // Called when this screen is no longer the current screen for a Game.
   @Override
-  public void hide() {
-    pauseGame();
-  }
+  public void hide() {}
 
+  // Called when the application is destroyed. It is preceded by a call to pause().
   @Override
   public void dispose() {
     Gdx.app.debug(GameScreen.class.getName(), String.format("Disposing map %s..", mapName));
