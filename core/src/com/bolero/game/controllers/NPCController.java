@@ -33,21 +33,51 @@ public class NPCController implements Disposable {
   private final BundleManager bundleManager;
   private final IndexedAStarPathFinder<PathNode> pathfinder;
   private final PathGraph graph;
+  private final Clock clock;
 
   @Getter private List<NPC> npcs;
 
-  public NPCController(TiledMap map, BundleManager bundleManager, PathGraph graph) {
+  public NPCController(TiledMap map, BundleManager bundleManager, PathGraph graph, Clock clock) {
     this.map = map;
     this.bundleManager = bundleManager;
-    npcs = new ArrayList<>();
     this.graph = graph;
+    this.clock = clock;
     pathfinder = new IndexedAStarPathFinder<>(graph);
+    npcs = new ArrayList<>();
   }
 
   public void load(World world)
       throws FileNotFoundException, MissingPropertyException, ConfigurationNotLoadedException {
     val mapper = new NPCMapper(map, world, bundleManager);
     npcs = mapper.map();
+    checkNPCPositions();
+  }
+
+  // Check the time & set NPC's to their correct positions based on their schedule.
+  // Teleport the NPC to the last position in the closest schedule that has passed.
+  private void checkNPCPositions() {
+    for (val npc : npcs) {
+      val schedules = npc.getScheduleList().getSchedules();
+      Vector2 toMove = null;
+
+      // Schedules are always ordered from oldest to newest ascending.
+      for (val schedule : schedules) {
+
+        // Check if we are past the schedule
+        if (clock.getCurrentHour() > schedule.getHour()
+            || (clock.getCurrentHour() == schedule.getHour()
+                && clock.getCurrentMinute() >= schedule.getMinute())) {
+          toMove = schedule.getPositions().get(schedule.getPositions().size() - 1);
+        }
+      }
+
+      if (toMove != null) {
+        Gdx.app.debug(
+            NPCController.class.getName(),
+            String.format("Moving NPC %s to %f, %f", npc.getName(), toMove.x, toMove.y));
+        npc.setPosition(toMove);
+      }
+    }
   }
 
   private boolean scheduleAlreadyTriggered(NPC npc, Schedule schedule) {
@@ -60,7 +90,7 @@ public class NPCController implements Disposable {
     return schedule.getHour() == goal.getHour() && schedule.getMinute() == goal.getMinute();
   }
 
-  public void checkSchedules(Clock clock) throws Exception {
+  public void checkSchedules() throws Exception {
     for (val npc : npcs) {
       for (val schedule : npc.getScheduleList().getSchedules()) {
         if (clock.getCurrentHour() == schedule.getHour()
@@ -109,7 +139,7 @@ public class NPCController implements Disposable {
 
   public void setPositions() {
     for (val npc : npcs) {
-      npc.setPosition();
+      npc.updatePosition();
     }
   }
 

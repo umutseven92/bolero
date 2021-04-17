@@ -2,6 +2,7 @@ package com.bolero.game.controllers;
 
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
@@ -11,16 +12,21 @@ import com.bolero.game.data.MapValues;
 import com.bolero.game.exceptions.ConfigurationNotLoadedException;
 import com.bolero.game.exceptions.MissingPropertyException;
 import com.bolero.game.mappers.CollisionMapper;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.val;
 
-public class CollisionController {
+public class CollisionController implements Disposable {
   private final World world;
-
   private final CollisionMapper mapper;
+  private final List<Body> wallBodies;
+  private List<Body> collisionBodies;
 
   public CollisionController(World world, TiledMap map) {
     this.world = world;
-    mapper = new CollisionMapper(map, world);
+    this.wallBodies = new ArrayList<>();
+    this.collisionBodies = new ArrayList<>();
+    this.mapper = new CollisionMapper(map, world);
   }
 
   public void load(MapValues mapValues)
@@ -31,7 +37,7 @@ public class CollisionController {
 
   private void createCollisionsFromMap()
       throws MissingPropertyException, ConfigurationNotLoadedException {
-    mapper.map();
+    collisionBodies = mapper.map();
   }
 
   private void createWalls(MapValues mapValues) {
@@ -60,13 +66,35 @@ public class CollisionController {
     val southWallDef = new BodyDef();
     southWallDef.position.set(mapValues.getMapWidthUnit(), -1);
 
-    world.createBody(eastWallDef).createFixture(verticalMapWall, 0.0f);
-    world.createBody(westWallDef).createFixture(verticalMapWall, 0.0f);
-    world.createBody(northWallDef).createFixture(horizontalMapWall, 0.0f);
-    world.createBody(southWallDef).createFixture(horizontalMapWall, 0.0f);
+    val eWall = world.createBody(eastWallDef);
+    eWall.createFixture(verticalMapWall, 0.0f);
+
+    val wWall = world.createBody(westWallDef);
+    wWall.createFixture(verticalMapWall, 0.0f);
+
+    val nWall = world.createBody(northWallDef);
+    nWall.createFixture(horizontalMapWall, 0.0f);
+
+    val sWall = world.createBody(southWallDef);
+    sWall.createFixture(horizontalMapWall, 0.0f);
+
+    wallBodies.add(eWall);
+    wallBodies.add(wWall);
+    wallBodies.add(nWall);
+    wallBodies.add(sWall);
 
     verticalMapWall.dispose();
     horizontalMapWall.dispose();
   }
 
+  @Override
+  public void dispose() {
+    for (val wall : wallBodies) {
+      world.destroyBody(wall);
+    }
+
+    for (val body : collisionBodies) {
+      world.destroyBody(body);
+    }
+  }
 }

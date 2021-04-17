@@ -17,7 +17,6 @@
 ### Features
 
 * Error handling & logs
-* Remember NPC position after transitions (e.g. persistent NPCs)
 * Documentation update
 * Shadow during the day (from the sun)
 * NPC transition through maps

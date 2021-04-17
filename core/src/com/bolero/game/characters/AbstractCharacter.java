@@ -10,6 +10,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.World;
@@ -48,8 +49,10 @@ public abstract class AbstractCharacter implements Disposable, FileLoader, Smoot
   private final Sprite sprite;
   private final Sprite dialogSprite;
 
-  protected final Body body;
+  protected Body body;
   private float animationTime;
+  private final BodyType bodyType;
+  private final World world;
 
   @Getter @Setter private Goal goal;
 
@@ -77,6 +80,9 @@ public abstract class AbstractCharacter implements Disposable, FileLoader, Smoot
     this.movement = movementDTO;
     this.direction = Direction.right;
     this.state = CharacterState.idle;
+    this.world = box2DWorld;
+    this.bodyType = bodyType;
+
     this.spriteSheet = new Texture(getFile(ssDTO.getPath()));
 
     loadAnimationsFromSpiteSheet(ssDTO.getValues());
@@ -132,7 +138,7 @@ public abstract class AbstractCharacter implements Disposable, FileLoader, Smoot
     this.state = CharacterState.idle;
   }
 
-  public void setPosition() {
+  public void updatePosition() {
     // Smoothly set the next position; good for movement.
     val nextPosTuple =
         getSmoothMovement(
@@ -143,6 +149,13 @@ public abstract class AbstractCharacter implements Disposable, FileLoader, Smoot
     setSpritePosition(nextPosTuple.y, new Vector2(nextPosTuple.x.x, nextPosTuple.x.y));
 
     handleSchedule();
+  }
+
+  public void setPosition(Vector2 position) {
+    // There is no easy way of moving the body, so we just destory & recreate it.
+    this.world.destroyBody(this.body);
+    this.body = createBody(world, bodyType, position);
+    setSpritePosition(1.0f - SPRITE_SPEED, position);
   }
 
   private void setSpritePosition(float ispeed, Vector2 position) {
@@ -347,6 +360,7 @@ public abstract class AbstractCharacter implements Disposable, FileLoader, Smoot
 
   @Override
   public void dispose() {
+    this.world.destroyBody(this.body);
     spriteSheet.dispose();
   }
 }

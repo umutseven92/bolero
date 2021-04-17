@@ -56,6 +56,7 @@ public class GameScreen implements Screen {
 
   private MapValues mapValues;
 
+  private CollisionController collisionController;
   private InteractionController interactionController;
   private LightController lightController;
 
@@ -120,7 +121,7 @@ public class GameScreen implements Screen {
 
     world = new World(Vector2.Zero, true);
 
-    val collisionController = new CollisionController(world, map);
+    collisionController = new CollisionController(world, map);
     collisionController.load(mapValues);
   }
 
@@ -164,7 +165,7 @@ public class GameScreen implements Screen {
       throws FileNotFoundException, MissingPropertyException, ConfigurationNotLoadedException {
     Gdx.app.log(GameScreen.class.getName(), "Initializing NPCs..");
 
-    npcController = new NPCController(map, game.getBundleManager(), pathNodes);
+    npcController = new NPCController(map, game.getBundleManager(), pathNodes, game.getClock());
     npcController.load(world);
   }
 
@@ -348,7 +349,7 @@ public class GameScreen implements Screen {
 
   private void gameStep(float delta) {
     try {
-      npcController.checkSchedules(game.getClock());
+      npcController.checkSchedules();
     } catch (Exception e) {
       Gdx.app.error(GameScreen.class.getName(), e.toString(), e);
       e.printStackTrace();
@@ -366,7 +367,7 @@ public class GameScreen implements Screen {
 
     handleMiscInput();
 
-    player.setPosition();
+    player.updatePosition();
     mapController.playWalkSound(player.getPosition(), delta);
     npcController.setPositions();
     gameCamera.update(player.getPosition(), mapValues, delta);
@@ -535,6 +536,8 @@ public class GameScreen implements Screen {
     }
   }
 
+  private void clearWorld() {}
+
   //  This method is called every time the game screen is re-sized and the game is not in the paused
   // state. It is also called once just after the create() method.
   //  The parameters are the new width and height the screen has been resized to in pixels.
@@ -552,7 +555,8 @@ public class GameScreen implements Screen {
   public void show() {}
 
   //  On Android this method is called when the Home button is pressed or an incoming call is
-  // received. On desktop this is called just before dispose() when exiting the application.
+  // received.
+  // On desktop this is called just before dispose() when exiting the application.
   //  A good place to save the game state.
   @Override
   public void pause() {
@@ -582,6 +586,7 @@ public class GameScreen implements Screen {
     mapController.dispose();
     npcController.dispose();
     lightController.dispose();
+    collisionController.dispose();
     world.dispose();
     map.dispose();
 

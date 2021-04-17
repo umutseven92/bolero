@@ -36,9 +36,9 @@ public class NPC extends AbstractCharacter {
   }
 
   @Override
-  public void setPosition() {
+  public void updatePosition() {
     talkCircle.setPosition(this.body.getPosition());
-    super.setPosition();
+    super.updatePosition();
   }
 
   public boolean hasDialog() {

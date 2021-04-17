@@ -97,7 +97,6 @@ public class BoleroGame extends Game implements FileLoader {
     transitionSound.play();
   }
 
-  // TODO: Remember NPC positions during transition
   // Load the screen with a loading screen before it.
   public void loadRouteLoading(String screenName, String spawnName) {
 

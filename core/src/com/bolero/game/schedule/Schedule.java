@@ -10,6 +10,7 @@ public class Schedule {
   private final int hour;
   private final int minute;
 
+
   public Schedule(List<Vector2> positions, int hour, int minute) {
     this.positions = positions;
     this.hour = hour;

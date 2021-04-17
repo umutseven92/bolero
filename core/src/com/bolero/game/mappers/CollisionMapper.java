@@ -4,6 +4,7 @@ import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.Shape;
@@ -11,9 +12,11 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.bolero.game.BoleroGame;
 import com.bolero.game.exceptions.ConfigurationNotLoadedException;
 import com.bolero.game.exceptions.MissingPropertyException;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.val;
 
-public class CollisionMapper extends AbstractMapper implements Mapper<Void> {
+public class CollisionMapper extends AbstractMapper implements Mapper<List<Body>> {
   private final World world;
 
   public CollisionMapper(TiledMap map, World world) {
@@ -22,10 +25,10 @@ public class CollisionMapper extends AbstractMapper implements Mapper<Void> {
   }
 
   @Override
-  public Void map() throws MissingPropertyException, ConfigurationNotLoadedException {
-    val objects =
-        super.getLayer(BoleroGame.getConfig().getMaps().getLayers().getCollision());
+  public List<Body> map() throws MissingPropertyException, ConfigurationNotLoadedException {
+    val objects = super.getLayer(BoleroGame.getConfig().getMaps().getLayers().getCollision());
 
+    val bodies = new ArrayList<Body>();
     for (val object : objects) {
       val rectangle = ((RectangleMapObject) object).getRectangle();
 
@@ -41,9 +44,10 @@ public class CollisionMapper extends AbstractMapper implements Mapper<Void> {
       body.setTransform(center, 0);
 
       shape.dispose();
+      bodies.add(body);
     }
 
-    return null; // Needed because of Void
+    return bodies;
   }
 
   private Shape getShapeFromRectangle(Rectangle rectangle) {
